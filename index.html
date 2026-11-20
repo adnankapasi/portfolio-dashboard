@@ -154,7 +154,7 @@ function cards(d, broker) {
         <div class="row"><span>RSI / ADX</span><span>${num(h.rsi, 1)} / ${num(h.adx, 1)}</span></div>
         <div class="lvl">${h.add_above ? `<span class="pill" style="color:#86efac">Add above ${num(h.add_above)}</span>` : ""}
           ${h.stop_below ? `<span class="pill" style="color:#fca5a5">Exit below ${num(h.stop_below)}</span>` : ""}</div>
-        <div class="note">${h.note}</div></div>`;
+        <div class="note">${h.auto ? "🤖 Auto levels · " : ""}${h.note}</div></div>`;
     }).join("") + `</div>`).join("");
 }
 </script>
