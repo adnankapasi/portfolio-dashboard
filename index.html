@@ -30,6 +30,8 @@
   svg { width:100%; height:44px; margin:8px 0 4px; }
   .lvl { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
   .pill { font-size:11px; border:1px solid var(--line); border-radius:6px; padding:3px 6px; }
+  .fbtn { padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--text); font-size:13px; cursor:pointer; }
+  .fbtn.on { background:#2563eb; border-color:#2563eb; }
   .err { color:var(--amber); font-size:12px; margin-top:16px; }
 </style>
 </head>
@@ -48,6 +50,8 @@
   </form>
   <div id="app" style="display:none">
   <div class="grid" id="summary"></div>
+  <div class="grid" id="brokers" style="margin-top:12px"></div>
+  <div id="filters" style="margin-top:16px;display:flex;gap:8px"></div>
   <h2>Global markers</h2>
   <div class="grid" id="macro"></div>
   <div id="groups"></div>
@@ -101,7 +105,9 @@ fetch("data.enc.json?" + Date.now()).then(r => { if (!r.ok) throw new Error(r.st
 
 function render(d) {
   const s = d.summary;
-  document.getElementById("upd").textContent = "Last updated: " + d.updated + " · prices as of " + (d.holdings[0]?.date || "–");
+  const src = d.sources || {};
+  document.getElementById("upd").textContent = "Last updated: " + d.updated + " · prices as of " + (d.holdings[0]?.date || "–") +
+    " · NSE file: " + (src.NSE || "not available") + (src.NSE ? "" : " · BSE file: " + (src.BSE || "not available"));
   document.getElementById("summary").innerHTML = [
     ["Invested", inr(s.invested), ""], ["Current value", inr(s.value), ""],
     ["Total P&L", inr(s.pnl) + " (" + pc(s.pnl_pct) + ")", cls(s.pnl)],
@@ -116,26 +122,40 @@ function render(d) {
       <span class="pill">Trend: ${m.st_dir === 1 ? "▲ up" : "▼ down"}</span></div></div>`;
   }).join("");
 
-  const groups = [...new Set(d.holdings.map(h => h.group))];
+  document.getElementById("brokers").innerHTML = Object.entries(d.brokers || {}).map(([b, x]) =>
+    `<div class="card"><div class="k">${b}</div><div class="v ${cls(x.pnl)}" style="font-size:18px">${inr(x.pnl)} (${pc(x.pnl_pct)})</div>
+     <div class="row"><span>Invested</span><span>${inr(x.invested)}</span></div><div class="row"><span>Value</span><span>${inr(x.value)}</span></div>
+     <div class="row"><span>Day</span><span class="${cls(x.day)}">${inr(x.day)}</span></div></div>`).join("");
+  const names = ["All", ...Object.keys(d.brokers || {})];
+  const fdiv = document.getElementById("filters");
+  fdiv.innerHTML = names.map(n => `<button class="fbtn${n === "All" ? " on" : ""}" data-b="${n}">${n}</button>`).join("");
+  fdiv.onclick = e => { const b = e.target.dataset.b; if (!b) return;
+    fdiv.querySelectorAll(".fbtn").forEach(x => x.classList.toggle("on", x.dataset.b === b)); cards(d, b); };
+  cards(d, "All");
+  if (d.errors?.length) document.getElementById("err").textContent = "Could not fetch: " + d.errors.join("; ");
+}
+
+function cards(d, broker) {
+  const list = d.holdings.filter(h => broker === "All" || (h.broker || "Kite") === broker)
+    .sort((a, b) => a.pnl_pct - b.pnl_pct);
+  const groups = [...new Set(list.map(h => h.group))];
   document.getElementById("groups").innerHTML = groups.map(g => `<h2>${g}</h2><div class="stocks">` +
-    d.holdings.filter(h => h.group === g).map(h => {
+    list.filter(h => h.group === g).map(h => {
       const ch = h.prev_close ? (h.close / h.prev_close - 1) * 100 : 0;
       return `<div class="card">
-        <div class="top"><div><div class="sym">${h.symbol}</div><div class="grp">${h.qty} @ ${num(h.avg)}</div></div>
+        <div class="top"><div><div class="sym">${h.symbol}</div><div class="grp">${h.broker || "Kite"} · ${h.qty} @ ${num(h.avg)}</div></div>
           <span class="badge b-${h.color}">${h.signal}</span></div>
         ${spark(h.spark, [h.add_above, h.stop_below])}
-        <div class="row"><span>LTP</span><span>${num(h.close)} <span class="${cls(ch)}">${pc(ch)}</span></span></div>
+        <div class="row"><span>Close <span style="font-size:10px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:${h.source === "Yahoo" ? "#f59e0b" : "#86efac"}">${h.source || ""}</span></span><span>${num(h.close)} <span class="${cls(ch)}">${pc(ch)}</span></span></div>
         <div class="row"><span>P&L</span><span class="${cls(h.pnl)}">${inr(h.pnl)} (${pc(h.pnl_pct)})</span></div>
         <div class="row"><span>Rise needed to break even</span><span>${h.breakeven_pct > 0 ? "+" + num(h.breakeven_pct, 1) + "%" : "In profit"}</span></div>
         <div class="row"><span>50-EMA / 200-SMA</span><span>${num(h.ema50)} / ${num(h.sma200)}</span></div>
-        <div class="row"><span>Supertrend</span><span>${h.st_dir === 1 ? "▲ up, support" : "▼ down, flips at"} ${num(h.st_level)}</span></div>
+        <div class="row"><span>Supertrend</span><span>${h.st_dir === 0 ? "–" : (h.st_dir === 1 ? "▲ up, support " : "▼ down, flips at ") + num(h.st_level)}</span></div>
         <div class="row"><span>RSI / ADX</span><span>${num(h.rsi, 1)} / ${num(h.adx, 1)}</span></div>
         <div class="lvl">${h.add_above ? `<span class="pill" style="color:#86efac">Add above ${num(h.add_above)}</span>` : ""}
           ${h.stop_below ? `<span class="pill" style="color:#fca5a5">Exit below ${num(h.stop_below)}</span>` : ""}</div>
         <div class="note">${h.note}</div></div>`;
     }).join("") + `</div>`).join("");
-
-  if (d.errors?.length) document.getElementById("err").textContent = "Could not fetch: " + d.errors.join("; ");
 }
 </script>
 </body>
