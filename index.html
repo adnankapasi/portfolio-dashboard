@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>My Portfolio Dashboard</title>
+<style>
+  :root { --bg:#0f1115; --card:#181b22; --line:#262a33; --text:#e7e9ee; --mute:#8b92a1;
+          --green:#22c55e; --red:#ef4444; --amber:#f59e0b; --grey:#6b7280; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
+  header { padding:20px 16px 4px; max-width:1200px; margin:auto; }
+  h1 { margin:0; font-size:22px; } .mute { color:var(--mute); font-size:13px; }
+  main { max-width:1200px; margin:auto; padding:12px 16px 40px; }
+  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
+  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
+  .k { color:var(--mute); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
+  .v { font-size:22px; font-weight:650; margin-top:4px; font-variant-numeric:tabular-nums; }
+  .pos { color:var(--green); } .neg { color:var(--red); }
+  h2 { font-size:15px; margin:26px 0 10px; color:var(--mute); font-weight:600; }
+  .stocks { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); }
+  .top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
+  .sym { font-weight:700; font-size:17px; } .grp { font-size:12px; color:var(--mute); }
+  .badge { font-size:11px; font-weight:700; padding:4px 8px; border-radius:999px; white-space:nowrap; }
+  .b-green{background:#14532d;color:#bbf7d0}.b-red{background:#7f1d1d;color:#fecaca}
+  .b-amber{background:#78350f;color:#fde68a}.b-grey{background:#374151;color:#e5e7eb}
+  .row { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; font-variant-numeric:tabular-nums; }
+  .row span:first-child { color:var(--mute); }
+  .note { font-size:12px; color:var(--mute); margin-top:8px; border-top:1px solid var(--line); padding-top:8px; }
+  svg { width:100%; height:44px; margin:8px 0 4px; }
+  .lvl { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
+  .pill { font-size:11px; border:1px solid var(--line); border-radius:6px; padding:3px 6px; }
+  .err { color:var(--amber); font-size:12px; margin-top:16px; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Portfolio Dashboard</h1>
+  <div class="mute" id="upd">Loading…</div>
+</header>
+<main>
+  <form id="lock" class="card" style="max-width:360px;margin:40px auto;text-align:center">
+    <div class="k" style="margin-bottom:10px">🔒 Enter password</div>
+    <input id="pw" type="password" autocomplete="current-password" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#0f1115;color:var(--text);font-size:16px">
+    <label class="mute" style="display:block;margin-top:8px"><input type="checkbox" id="rem"> Remember on this device</label>
+    <button style="margin-top:10px;width:100%;padding:10px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:600;font-size:15px">Unlock</button>
+    <div id="lockmsg" class="mute" style="margin-top:8px"></div>
+  </form>
+  <div id="app" style="display:none">
+  <div class="grid" id="summary"></div>
+  <h2>Global markers</h2>
+  <div class="grid" id="macro"></div>
+  <div id="groups"></div>
+  <div class="err" id="err"></div>
+  </div>
+  <p class="mute" style="margin-top:28px">Signals are rule-based reminders from your own trigger levels, not financial advice. Data: Yahoo Finance daily closes.</p>
+</main>
+<script>
+const inr = n => n == null ? "–" : "₹" + Math.round(n).toLocaleString("en-IN");
+const num = (n, d = 2) => n == null ? "–" : Number(n).toLocaleString("en-IN", {maximumFractionDigits: d, minimumFractionDigits: d});
+const pc = n => (n >= 0 ? "+" : "") + num(n) + "%";
+const cls = n => n >= 0 ? "pos" : "neg";
+
+function spark(vals, levels) {
+  const all = vals.concat(levels.filter(v => v != null));
+  const lo = Math.min(...all), hi = Math.max(...all), W = 300, H = 44;
+  const y = v => H - 3 - (v - lo) / ((hi - lo) || 1) * (H - 6);
+  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * W).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  const up = vals[vals.length - 1] >= vals[0];
+  const lines = levels.map((v, i) => v == null ? "" :
+    `<line x1="0" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${i ? '#ef4444' : '#22c55e'}" stroke-dasharray="4 4" stroke-width="1" opacity=".7"/>`).join("");
+  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${lines}<polyline fill="none" stroke="${up ? '#22c55e' : '#ef4444'}" stroke-width="2" points="${pts}"/></svg>`;
+}
+
+const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+async function decrypt(blob, pw) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  const key = await crypto.subtle.deriveKey({name: "PBKDF2", salt: b64(blob.salt), iterations: blob.iter, hash: "SHA-256"},
+    base, {name: "AES-GCM", length: 256}, false, ["decrypt"]);
+  const pt = await crypto.subtle.decrypt({name: "AES-GCM", iv: b64(blob.iv)}, key, b64(blob.ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+let BLOB = null;
+const store = { get: () => { try { return localStorage.getItem("dash_pw"); } catch { return null; } },
+  set: v => { try { localStorage.setItem("dash_pw", v); } catch {} } };
+async function unlock(pw, remember) {
+  try {
+    const d = await decrypt(BLOB, pw);
+    if (remember) store.set(pw);
+    document.getElementById("lock").style.display = "none";
+    document.getElementById("app").style.display = "block";
+    render(d);
+  } catch { document.getElementById("lockmsg").textContent = "Wrong password."; }
+}
+document.getElementById("lock").addEventListener("submit", e => { e.preventDefault();
+  unlock(document.getElementById("pw").value, document.getElementById("rem").checked); });
+fetch("data.enc.json?" + Date.now()).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(b => {
+  BLOB = b; document.getElementById("upd").textContent = "Locked";
+  const saved = store.get(); if (saved) unlock(saved, false);
+}).catch(e => { document.getElementById("upd").textContent = "No data yet — run the 'Update dashboard' workflow once. (" + e + ")"; });
+
+function render(d) {
+  const s = d.summary;
+  document.getElementById("upd").textContent = "Last updated: " + d.updated + " · prices as of " + (d.holdings[0]?.date || "–");
+  document.getElementById("summary").innerHTML = [
+    ["Invested", inr(s.invested), ""], ["Current value", inr(s.value), ""],
+    ["Total P&L", inr(s.pnl) + " (" + pc(s.pnl_pct) + ")", cls(s.pnl)],
+    ["Day change", inr(s.day), cls(s.day)],
+    ["Gold+Silver weight", num(s.metals_pct, 1) + "%", s.metals_pct > 30 ? "neg" : ""],
+  ].map(([k, v, c]) => `<div class="card"><div class="k">${k}</div><div class="v ${c}">${v}</div></div>`).join("");
+
+  document.getElementById("macro").innerHTML = d.macro.map(m => {
+    const ch = m.prev_close ? (m.close / m.prev_close - 1) * 100 : 0;
+    return `<div class="card"><div class="k">${m.name}</div><div class="v">${num(m.close)} <span class="${cls(ch)}" style="font-size:13px">${pc(ch)}</span></div>
+      <div class="lvl">${m.levels.map(l => `<span class="pill">${l.label}: ${num(l.value, 0)} ${m.close >= l.value ? "✅" : "⚠️"}</span>`).join("")}
+      <span class="pill">Trend: ${m.st_dir === 1 ? "▲ up" : "▼ down"}</span></div></div>`;
+  }).join("");
+
+  const groups = [...new Set(d.holdings.map(h => h.group))];
+  document.getElementById("groups").innerHTML = groups.map(g => `<h2>${g}</h2><div class="stocks">` +
+    d.holdings.filter(h => h.group === g).map(h => {
+      const ch = h.prev_close ? (h.close / h.prev_close - 1) * 100 : 0;
+      return `<div class="card">
+        <div class="top"><div><div class="sym">${h.symbol}</div><div class="grp">${h.qty} @ ${num(h.avg)}</div></div>
+          <span class="badge b-${h.color}">${h.signal}</span></div>
+        ${spark(h.spark, [h.add_above, h.stop_below])}
+        <div class="row"><span>LTP</span><span>${num(h.close)} <span class="${cls(ch)}">${pc(ch)}</span></span></div>
+        <div class="row"><span>P&L</span><span class="${cls(h.pnl)}">${inr(h.pnl)} (${pc(h.pnl_pct)})</span></div>
+        <div class="row"><span>Rise needed to break even</span><span>${h.breakeven_pct > 0 ? "+" + num(h.breakeven_pct, 1) + "%" : "In profit"}</span></div>
+        <div class="row"><span>50-EMA / 200-SMA</span><span>${num(h.ema50)} / ${num(h.sma200)}</span></div>
+        <div class="row"><span>Supertrend</span><span>${h.st_dir === 1 ? "▲ up, support" : "▼ down, flips at"} ${num(h.st_level)}</span></div>
+        <div class="row"><span>RSI / ADX</span><span>${num(h.rsi, 1)} / ${num(h.adx, 1)}</span></div>
+        <div class="lvl">${h.add_above ? `<span class="pill" style="color:#86efac">Add above ${num(h.add_above)}</span>` : ""}
+          ${h.stop_below ? `<span class="pill" style="color:#fca5a5">Exit below ${num(h.stop_below)}</span>` : ""}</div>
+        <div class="note">${h.note}</div></div>`;
+    }).join("") + `</div>`).join("");
+
+  if (d.errors?.length) document.getElementById("err").textContent = "Could not fetch: " + d.errors.join("; ");
+}
+</script>
+</body>
+</html>
