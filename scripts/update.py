@@ -87,7 +87,29 @@ def indicators(df):
     return out
 
 
+def auto_levels(h, ind):
+    """Same rules used for the Kite stocks, applied daily to holdings without custom levels."""
+    c, ema, st, d = ind["close"], ind["ema50"], ind["st_level"], ind["st_dir"]
+    if d == 0 or ema is None:
+        return h
+    h = {**h, "auto": True}
+    if d == -1:   # downtrend: don't add until the Supertrend flips
+        h["add_above"], h["stop_below"] = round(st, 2), None
+        h["note"] = f"Downtrend. Don't add until a close above {st:,.2f} (Supertrend flip)."
+    elif c < ema:  # trend turning up but still under the 50-EMA
+        h["add_above"], h["stop_below"] = round(ema, 2), round(st, 2)
+        h["note"] = f"Recovering. Add only after a close above the 50-EMA ({ema:,.2f}); exit below {st:,.2f}."
+    else:          # confirmed uptrend
+        h["add_above"], h["stop_below"] = None, round(st, 2)
+        h["note"] = f"Uptrend confirmed. Hold; trail the stop at the Supertrend ({st:,.2f})."
+    return h
+
+
 def signal(h, ind):
+    if h.get("auto") and ind["st_dir"] == 1 and h.get("add_above") is None and ind["close"] >= h["stop_below"]:
+        return "HOLD · uptrend", "green"
+    if h.get("auto") and ind["st_dir"] == -1:
+        return "DON'T ADD · downtrend", "grey"
     c = ind["close"]
     if h.get("stop_below") and c < h["stop_below"]:
         return "EXIT ALERT", "red"
@@ -217,6 +239,8 @@ def main():
         try:
             ind = indicators(hist)
             ind["source"] = source
+            if h.get("add_above") is None and h.get("stop_below") is None and h["group"] != "Gold / Silver":
+                h = auto_levels(h, ind)
         except Exception as e:  # keep going if one ticker fails
             errors.append(f"{h['symbol']}: {e}")
             continue
