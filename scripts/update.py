@@ -58,6 +58,12 @@ def supertrend(df, n=10, mult=3.0):
 
 def indicators(df):
     df = df.dropna(subset=["Close"])
+    # Yahoo quirks: drop repeated dates and empty placeholder rows (no trades, flat bar).
+    df.index = pd.to_datetime(df.index).normalize()
+    df = df[~df.index.duplicated(keep="last")]
+    if "Volume" in df:
+        flat = (df["Volume"].fillna(0) == 0) & (df["High"] == df["Low"])
+        df = df[~flat]
     c = df["Close"]
     d, lvl = supertrend(df)
     out = {
@@ -122,6 +128,7 @@ def main():
         invested = h["qty"] * h["avg"]
         value = h["qty"] * ind["close"]
         sig, color = signal(h, ind)
+        print(f"{h['symbol']:<11} {ind['date']} close={ind['close']:.2f} prev={ind['prev_close']:.2f}")
         rows.append({**h, **ind, "invested": invested, "value": value,
                      "pnl": value - invested, "pnl_pct": (value / invested - 1) * 100,
                      "breakeven_pct": (h["avg"] / ind["close"] - 1) * 100,
