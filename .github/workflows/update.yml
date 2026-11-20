@@ -17,7 +17,7 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: pip install yfinance pandas numpy cryptography
+      - run: pip install yfinance pandas numpy cryptography requests
       - run: python scripts/update.py
         env:
           HOLDINGS_JSON: ${{ secrets.HOLDINGS_JSON }}
