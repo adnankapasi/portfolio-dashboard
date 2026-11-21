@@ -52,6 +52,19 @@ nav button svg{width:22px;height:22px}nav button.on{color:var(--text)}
 table.t{width:100%;border-collapse:collapse;font-size:12.5px}table.t td{padding:6px 4px;border-top:1px solid var(--line)}
 .err{color:var(--amber);font-size:12px}
 .hidden{display:none}
+.tw{overflow-x:auto;border:1px solid var(--line);border-radius:12px;background:var(--card)}
+table.ht{border-collapse:separate;border-spacing:0;font-size:12.5px;white-space:nowrap;font-variant-numeric:tabular-nums;min-width:100%}
+table.ht th{background:var(--card2);color:var(--mute);font-weight:600;font-size:11.5px;padding:9px 10px;text-align:right;cursor:pointer;user-select:none;border-bottom:1px solid var(--line)}
+table.ht th.on{color:var(--text)}table.ht th.ref{background:#1a1d24}
+table.ht td{padding:9px 10px;text-align:right;border-bottom:1px solid var(--line);background:var(--card);cursor:pointer}
+table.ht tbody tr:active td{background:var(--card2)}
+table.ht tfoot td{font-weight:650;border-bottom:0;background:var(--card2)}
+table.ht th:first-child,table.ht td:first-child{position:sticky;left:0;text-align:left;z-index:1;border-right:1px solid var(--line)}
+table.ht th:first-child{z-index:2}
+table.ht .l{text-align:left}
+.b-near{background:var(--bbg);color:#bfdbfe}
+.wdot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--amber);margin-left:4px;vertical-align:1px}
+select.btn2{color:var(--text)}
 </style>
 </head>
 <body>
@@ -227,33 +240,93 @@ function renderHome() {
   $("tab-home").querySelectorAll("[data-b]").forEach(el => el.onclick = () => { BROKER = el.dataset.b; go("holdings"); });
 }
 
-const SORTS = [["pnl_pct", "P&L %", -1], ["pnl", "P&L ₹", -1], ["day_pct", "Day %", -1], ["value", "Value", -1],
-  ["w", "Weight", -1], ["breakeven_pct", "Break-even", 1], ["sig", "Signal", 1], ["symbol", "Name", 1]];
+// ---------- holdings: decision table + cards
+function act(h) { // plain-word action, trigger distances
+  const da = h.add_above ? (h.add_above / h.close - 1) * 100 : null, ds = h.stop_below ? (h.close / h.stop_below - 1) * 100 : null;
+  let t, c, dist;
+  if (h.sig === "exit") { t = `Exit · below ${num(h.stop_below)}`; c = "b-exit"; dist = -1; }
+  else if (h.sig === "add") { t = `Add now · above ${num(h.add_above)}`; c = "b-add"; dist = -0.5; }
+  else if (h.sig === "noadd") { t = h.add_above ? `Don't add until ${num(h.add_above)}` : "Don't add · downtrend"; c = "b-noadd"; dist = da ?? 99; }
+  else if (h.sig === "hold") { t = h.stop_below ? `Hold · stop ${num(h.stop_below)}` : "Hold"; c = "b-hold"; dist = ds ?? 99; }
+  else { t = h.add_above ? `Add above ${num(h.add_above)}` : "Wait"; c = da != null && da <= 2 ? "b-near" : "b-wait"; dist = Math.min(da ?? 99, ds ?? 99); }
+  return {t, c, dist, da, ds};
+}
+function trig(h) {
+  const {da, ds} = h.A;
+  if (h.sig === "exit") return `<span class="neg" style="font-size:11px">${Math.abs(ds).toFixed(1)}% below exit</span>`;
+  if (h.sig === "add") return `<span class="pos" style="font-size:11px">${Math.abs(da ?? 0).toFixed(1)}% above add</span>`;
+  if (da != null && ds != null) {
+    const p = Math.max(0, Math.min(100, (h.close - h.stop_below) / (h.add_above - h.stop_below) * 100));
+    return `<div style="width:108px"><div style="position:relative;height:6px;border-radius:3px;background:var(--card2);border-left:3px solid var(--red);border-right:3px solid var(--green)">
+      <div style="position:absolute;left:calc(${p}% - 5px);top:-3px;width:10px;height:12px;border-radius:3px;background:var(--text)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:3px"><span>${pc(-ds, 1)}</span><span style="${da <= 2 ? "color:#93c5fd" : ""}">${pc(da, 1)}</span></div></div>`;
+  }
+  if (da != null) return `<span class="faint">${da.toFixed(1)}% to ${num(h.add_above)}</span>`;
+  if (ds != null) return `<span class="faint">${ds.toFixed(1)}% above stop</span>`;
+  return `<span class="faint">–</span>`;
+}
+const COLS = [ // key, label, default sort dir, reference column?, cell, total
+  ["symbol", "Stock", 1, 0, h => `<div class="sym">${esc(h.symbol)}</div><div class="faint">${esc(h.broker)}</div>`, () => "Total"],
+  ["dist", "Action", 1, 0, h => `<span class="badge ${h.A.c}" style="border-radius:7px">${esc(h.A.t)}</span>`, () => ""],
+  ["trig", "Trigger", 1, 0, trig, () => ""],
+  ["day_pct", "Today %", -1, 0, h => `<span class="${cls(h.day_pct)}">${pc(h.day_pct)}</span>`, S => `<span class="${cls(S.day)}">${pc(S.val - S.day ? S.day / (S.val - S.day) * 100 : 0)}</span>`],
+  ["pnl_pct", "Total %", -1, 0, h => `<span class="${cls(h.pnl_pct)}">${pc(h.pnl_pct)}</span>${h.sma200 && h.close < h.sma200 ? ' <span class="neg" title="Below 200-day average">↘</span>' : ""}`, S => `<span class="${cls(S.pnl)}">${pc(S.inv ? S.pnl / S.inv * 100 : 0)}</span>`],
+  ["pnl", "P&L ₹", -1, 0, h => `<span class="${cls(h.pnl)}">${inr(h.pnl, 1)}</span>`, S => `<span class="${cls(S.pnl)}">${inr(S.pnl, 1)}</span>`],
+  ["day_pnl", "Today ₹", -1, 1, h => `<span class="${cls(h.day_pnl)}">${inr(h.day_pnl, 1)}</span>`, S => `<span class="${cls(S.day)}">${inr(S.day, 1)}</span>`],
+  ["w", "Weight", -1, 1, h => `${h.w.toFixed(1)}%${h.w > 10 ? '<span class="wdot" title="Over 10% of portfolio"></span>' : ""}`, S => `${S.w.toFixed(0)}%`],
+  ["value", "Value", -1, 1, h => inr(h.value), S => inr(S.val)],
+  ["invested", "Invested", -1, 1, h => inr(h.invested), S => inr(S.inv)],
+  ["close", "LTP", -1, 1, h => num(h.close), () => ""],
+  ["avg", "Avg", -1, 1, h => num(h.avg), () => ""],
+  ["qty", "Qty", -1, 1, h => h.qty, () => ""]];
+const QF = [["all", "All"], ["act", "Act today"], ["near", "Near trigger"], ["loss", "Losing >30%"], ["big", "Over 10%"]];
+let QFILTER = "all", COLPICK = false, VIEW = store.get("dash_view") || "table";
+let HIDDEN = new Set(JSON.parse(store.get("dash_hidden") || "[]"));
+function qpass(h, f) {
+  if (f === "act") return h.sig === "exit" || h.sig === "add";
+  if (f === "near") return h.sig !== "exit" && h.sig !== "add" && ((h.A.da != null && h.A.da > 0 && h.A.da <= 3) || (h.A.ds != null && h.A.ds <= 3));
+  if (f === "loss") return h.pnl_pct <= -30;
+  if (f === "big") return h.w > 10;
+  return true;
+}
 function renderHoldings() {
   const tv = D.summary.value, brokers = ["All", ...Object.keys(D.brokers)];
-  let L = D.holdings.map(h => ({...h, w: h.value / tv * 100}))
-    .filter(h => (BROKER === "All" || h.broker === BROKER) && (!Q || h.symbol.toLowerCase().includes(Q.toLowerCase()) || (h.fund?.name || "").toLowerCase().includes(Q.toLowerCase())));
+  const all = D.holdings.map(h => ({...h, w: h.value / tv * 100, A: act(h)})).map(h => ({...h, dist: h.A.dist, trig: h.A.dist}));
+  const base = all.filter(h => (BROKER === "All" || h.broker === BROKER) && (!Q || h.symbol.toLowerCase().includes(Q.toLowerCase()) || (h.fund?.name || "").toLowerCase().includes(Q.toLowerCase())));
+  const L = base.filter(h => qpass(h, QFILTER));
   const k = SORT.k, d = SORT.dir;
-  L.sort((a, b) => k === "symbol" ? d * a.symbol.localeCompare(b.symbol) : k === "sig" ? d * (SIG_ORDER[a.sig] - SIG_ORDER[b.sig]) : d * (a[k] - b[k]));
-  const inv = L.reduce((t, h) => t + h.invested, 0), val = L.reduce((t, h) => t + h.value, 0), day = L.reduce((t, h) => t + h.day_pnl, 0);
-  const sub = h => k === "w" ? `${h.w.toFixed(1)}% of portfolio` : k === "breakeven_pct" ? (h.breakeven_pct > 0 ? `needs ${pc(h.breakeven_pct, 1)} to break even` : "in profit")
-    : k === "value" ? `value ${inr(h.value)}` : k === "day_pct" ? `today ${inr(h.day_pnl, 1)}` : `${h.qty} @ ${num(h.avg)} · LTP ${num(h.close)}`;
-  $("tab-holdings").innerHTML = `
-  <div class="card" style="padding:10px 14px"><div class="g2" style="gap:6px">
-    <div><span class="mute">Invested</span><div>${inr(inv)}</div></div><div class="r"><span class="mute">Current</span><div>${inr(val)}</div></div>
-    <div><span class="mute">P&amp;L</span><div class="${cls(val - inv)}">${inr(val - inv, 1)} (${pc(inv ? (val / inv - 1) * 100 : 0)})</div></div>
-    <div class="r"><span class="mute">Today</span><div class="${cls(day)}">${inr(day, 1)}</div></div></div></div>
-  <div class="chips" id="bchips">${brokers.map(b => `<button class="chip ${b === BROKER ? "on" : ""}" data-b="${b}">${b}</button>`).join("")}</div>
-  <div style="margin:8px 0"><input type="search" id="q" placeholder="Search stock" value="${esc(Q)}"></div>
-  <div class="chips" id="schips">${SORTS.map(([key, lab]) => `<button class="chip ${key === k ? "on" : ""}" data-k="${key}">${lab}${key === k ? (d === 1 ? " ↑" : " ↓") : ""}</button>`).join("")}</div>
-  <div class="card" style="padding:4px 12px;margin-top:8px">${L.map(h => `<div class="row click" data-s="${esc(h.symbol)}">
+  L.sort((a, b) => k === "symbol" ? d * a.symbol.localeCompare(b.symbol) : d * ((a[k] ?? 1e9) - (b[k] ?? 1e9)));
+  const S = {inv: 0, val: 0, pnl: 0, day: 0, w: 0}; L.forEach(h => { S.inv += h.invested; S.val += h.value; S.pnl += h.pnl; S.day += h.day_pnl; S.w += h.w; });
+  const cols = COLS.filter(c => !HIDDEN.has(c[0]));
+  const table = `<div class="tw"><table class="ht"><thead><tr>${cols.map(([key, lab, , ref]) => `<th data-k="${key}" class="${(key === k || (key === "trig" && k === "dist")) ? "on" : ""} ${ref ? "ref" : ""} ${["dist", "trig"].includes(key) ? "l" : ""}">${lab}${key === k ? (d === 1 ? " ↑" : " ↓") : ""}</th>`).join("")}</tr></thead>
+    <tbody>${L.map(h => `<tr data-s="${esc(h.symbol)}">${cols.map(c => `<td class="${["dist", "trig"].includes(c[0]) ? "l" : ""}">${c[4](h)}</td>`).join("")}</tr>`).join("") || `<tr><td colspan="${cols.length}" class="mute" style="text-align:left">Nothing here today</td></tr>`}</tbody>
+    ${L.length ? `<tfoot><tr>${cols.map(c => `<td class="${["dist", "trig"].includes(c[0]) ? "l" : ""}">${c[5](S)}</td>`).join("")}</tr></tfoot>` : ""}</table></div>
+    <div class="faint" style="margin:6px 2px">Swipe for more columns · tap a header to sort · <span class="wdot" style="margin:0 3px 0 0"></span>over 10% · <span class="neg">↘</span> below 200-day average</div>`;
+  const cards = `<div class="card" style="padding:4px 12px">${L.map(h => `<div class="row click" data-s="${esc(h.symbol)}">
     <div style="min-width:0"><div><span class="sym">${esc(h.symbol)}</span><span class="tag">${h.broker}</span></div>
-      <div class="faint" style="margin-top:2px">${sub(h)}</div><div style="margin-top:4px">${badge(h)}</div></div>
+      <div class="faint" style="margin-top:2px">${h.qty} @ ${num(h.avg)} · LTP ${num(h.close)}</div><div style="margin-top:5px"><span class="badge ${h.A.c}" style="border-radius:7px">${esc(h.A.t)}</span></div></div>
     <div class="r"><div class="${cls(h.pnl)}">${inr(h.pnl, 1)}</div><div class="${cls(h.pnl)}" style="font-size:12px">${pc(h.pnl_pct)}</div>
-      <div class="${cls(h.day_pct)}" style="font-size:11px;margin-top:2px">day ${pc(h.day_pct)}</div></div></div>`).join("") || `<div class="mute" style="padding:12px">No holdings match.</div>`}</div>`;
+      <div class="${cls(h.day_pct)}" style="font-size:11px;margin-top:2px">today ${pc(h.day_pct)}</div></div></div>`).join("") || `<div class="mute" style="padding:12px">Nothing here today</div>`}</div>`;
+  $("tab-holdings").innerHTML = `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <div class="chips" id="bchips">${brokers.map(b => `<button class="chip ${b === BROKER ? "on" : ""}" data-b="${b}">${b}</button>`).join("")}</div>
+    <div class="seg" style="width:140px;flex:none" id="view"><button class="${VIEW === "table" ? "on" : ""}" data-v="table">Table</button><button class="${VIEW === "cards" ? "on" : ""}" data-v="cards">Cards</button></div></div>
+  <div class="chips" id="qchips">${QF.map(([key, lab]) => `<button class="chip ${key === QFILTER ? "on" : ""}" data-f="${key}">${lab}${key === "all" ? "" : " · " + base.filter(h => qpass(h, key)).length}</button>`).join("")}</div>
+  <div style="display:flex;gap:8px;margin:8px 0"><input type="search" id="q" placeholder="Search stock" value="${esc(Q)}" style="flex:1">
+    ${VIEW === "table" ? `<button class="btn2" id="colbtn">⚙ Columns</button>` : `<select id="csort" class="btn2">${COLS.filter(c => !["trig"].includes(c[0])).map(c => `<option value="${c[0]}" ${c[0] === k ? "selected" : ""}>Sort: ${c[1]}</option>`).join("")}</select>`}</div>
+  ${COLPICK && VIEW === "table" ? `<div class="card" id="colpick" style="display:grid;grid-template-columns:1fr 1fr;gap:4px 10px;font-size:13px">${COLS.map(c => `<label><input type="checkbox" data-c="${c[0]}" ${HIDDEN.has(c[0]) ? "" : "checked"} ${c[0] === "symbol" ? "disabled" : ""}> ${c[1]}</label>`).join("")}
+    <div class="faint" style="grid-column:1/-1">Saved on this device.</div></div>` : ""}
+  ${VIEW === "table" ? table : cards}`;
   $("bchips").onclick = e => { if (e.target.dataset.b) { BROKER = e.target.dataset.b; renderHoldings(); } };
-  $("schips").onclick = e => { const key = e.target.dataset.k; if (!key) return;
-    SORT = key === SORT.k ? {k: key, dir: -SORT.dir} : {k: key, dir: SORTS.find(s => s[0] === key)[2]}; renderHoldings(); };
+  $("qchips").onclick = e => { const f = e.target.closest("button")?.dataset.f; if (f) { QFILTER = f; renderHoldings(); } };
+  $("view").onclick = e => { const v = e.target.dataset.v; if (v) { VIEW = v; store.set("dash_view", v); renderHoldings(); } };
+  const th = $("tab-holdings").querySelector("thead");
+  if (th) th.onclick = e => { let key = e.target.closest("th")?.dataset.k; if (!key) return; if (key === "trig") key = "dist";
+    SORT = key === SORT.k ? {k: key, dir: -SORT.dir} : {k: key, dir: COLS.find(c => c[0] === key)[2]}; renderHoldings(); };
+  if ($("csort")) $("csort").onchange = e => { const key = e.target.value; SORT = {k: key, dir: COLS.find(c => c[0] === key)[2]}; renderHoldings(); };
+  if ($("colbtn")) $("colbtn").onclick = () => { COLPICK = !COLPICK; renderHoldings(); };
+  if ($("colpick")) $("colpick").onchange = e => { const c = e.target.dataset.c; if (!c) return;
+    e.target.checked ? HIDDEN.delete(c) : HIDDEN.add(c); store.set("dash_hidden", JSON.stringify([...HIDDEN])); renderHoldings(); };
   $("q").oninput = e => { Q = e.target.value; const pos = e.target.selectionStart; renderHoldings(); const q = $("q"); q.focus(); q.setSelectionRange(pos, pos); };
 }
 
@@ -345,6 +418,10 @@ function openDetail(sym) {
   <div style="margin:10px 0 4px"><span class="big">${num(h.close)}</span> <span class="${cls(h.day_pct)}">${pc(h.day_pct)} today</span></div>
   <div class="card" style="padding:8px">${ch ? candles(ch, levels) : ""}
     <div class="faint" style="display:flex;gap:12px;padding:4px"><span style="color:#8b7cf6">— 50-EMA ${num(h.ema50)}</span><span style="color:#f59e0b">— 200-SMA ${num(h.sma200)}</span><span>last ${ch ? ch.c.length : 0} days</span></div></div>
+  <div class="card"><div style="font-weight:600;margin-bottom:6px">Average-down calculator</div>
+    <label class="mute" for="amt">Amount to add (₹)</label>
+    <input type="text" inputmode="numeric" id="amt" value="10000" style="margin:4px 0 10px">
+    <div class="g2" id="calcres"></div></div>
   <div class="alert a-b"><span>💡</span><div>${esc(h.note || "")}${since ? ` <span class="faint">(signal since ${esc(since)})</span>` : ""}</div></div>
   <div class="g2" style="margin-top:8px">
     ${stat("Your P&L", `${inr(val - inv, 1)} (${pc((val / inv - 1) * 100, 1)})`, cls(val - inv))}
@@ -362,11 +439,19 @@ function openDetail(sym) {
     <div class="row"><span>Dividend yield</span><b>${f.div == null ? "–" : num(f.div, 2) + "%"}</b></div>
     <div class="row"><span>Sector</span><b>${esc(h.sector)}</b></div></div>
     <div class="faint">Fundamentals from Yahoo Finance, refreshed weekly.</div>` : ""}`;
-  $("detail").style.display = "block"; $("detail").scrollTop = 0;
+  const tvAll = D.summary.value, wNow = val;
+  const calc = () => { const v = parseFloat(($("amt").value || "0").replace(/[,₹\s]/g, "")) || 0, n = Math.floor(v / h.close), nq = qty + n,
+    na = (inv + n * h.close) / nq, nbe = (na / h.close - 1) * 100, nw = (wNow + n * h.close) / (tvAll + n * h.close) * 100;
+    $("calcres").innerHTML = stat("Shares you get", `${n} · ${inr(n * h.close)}`) + stat("New average", `${num(na)} <span class="faint">was ${num(avg)}</span>`)
+      + stat("Break-even needs", nbe > 0 ? `${pc(nbe, 1)} <span class="faint">was ${pc(be, 1)}</span>` : "In profit") + stat("New weight", `${nw.toFixed(1)}%`, nw > 10 ? "neg" : "")
+      + (["noadd", "exit"].includes(h.sig) ? `<div class="err" style="grid-column:1/-1">Signal says don't add right now: ${esc(act(h).t.toLowerCase())}.</div>` : "")
+      + (nw > 10 ? `<div class="err" style="grid-column:1/-1">This would make ${esc(sym)} over 10% of your portfolio.</div>` : ""); };
+  $("amt").oninput = calc; calc();
+  $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden";
   $("back").onclick = () => history.back();
   history.pushState({d: 1}, "");
 }
-window.onpopstate = () => { $("detail").style.display = "none"; $("import").style.display = "none"; };
+window.onpopstate = () => { $("detail").style.display = "none"; $("import").style.display = "none"; document.body.style.overflow = ""; };
 
 // ---------- import
 function repoInfo() {
@@ -471,7 +556,7 @@ function renderImport(msg = "") {
     };
   };
 }
-function openImport() { renderImport(); $("import").style.display = "block"; history.pushState({i: 1}, ""); }
+function openImport() { renderImport(); $("import").style.display = "block"; document.body.style.overflow = "hidden"; history.pushState({i: 1}, ""); }
 
 // ---------- shell
 function go(tab) {
