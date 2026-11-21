@@ -1,9 +1,17 @@
-"""Fetch daily prices, compute indicators and signals, write data.json."""
+"""Daily dashboard data builder.
+
+Reads holdings (encrypted holdings.enc.json, or the HOLDINGS_JSON secret on first run),
+fetches prices (NSE bhavcopy -> BSE bhavcopy -> Yahoo), computes indicators, signals,
+portfolio health and market data, keeps a daily history, and writes everything
+encrypted with DASHBOARD_PASSWORD.
+"""
 import base64
+import io
 import json
 import os
 import sys
-from datetime import datetime, timezone, timedelta
+import zipfile
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 import numpy as np
@@ -11,8 +19,56 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 IST = timezone(timedelta(hours=5, minutes=30))
+PBKDF2_ITERS = 310000
+
+MARKET = [  # (name, yahoo, kind)
+    ("Nifty 50", "^NSEI", "index"), ("Sensex", "^BSESN", "index"), ("Bank Nifty", "^NSEBANK", "index"),
+    ("India VIX", "^INDIAVIX", "index"), ("USD/INR", "INR=X", "fx"),
+    ("Gold $/oz", "GC=F", "metal"), ("Silver $/oz", "SI=F", "metal"),
+    ("Nifty IT", "^CNXIT", "sector"), ("Nifty Pharma", "^CNXPHARMA", "sector"),
+    ("Nifty Auto", "^CNXAUTO", "sector"), ("Nifty FMCG", "^CNXFMCG", "sector"),
+    ("Nifty Metal", "^CNXMETAL", "sector"), ("Nifty Energy", "^CNXENERGY", "sector"),
+    ("Nifty PSU Bank", "^CNXPSUBANK", "sector"), ("Nifty Realty", "^CNXREALTY", "sector"),
+    ("Nifty Infra", "^CNXINFRA", "sector"), ("Nifty Fin Service", "NIFTY_FIN_SERVICE.NS", "sector"),
+]
+METAL_LEVELS = {"GC=F": [("Support", 3690), ("Bullish above", 3948)], "SI=F": [("Key level", 40)]}
 
 
+# ---------------------------------------------------------------- crypto
+def _key(password, salt, iters):
+    from cryptography.hazmat.primitives import hashes
+    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
+    return PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=iters).derive(password.encode())
+
+
+def encrypt(text, password):
+    """AES-256-GCM, PBKDF2-SHA256 key. Matches the WebCrypto code in index.html."""
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    salt, iv = os.urandom(16), os.urandom(12)
+    ct = AESGCM(_key(password, salt, PBKDF2_ITERS)).encrypt(iv, text.encode(), None)
+    b64 = lambda b: base64.b64encode(b).decode()
+    return {"v": 1, "iter": PBKDF2_ITERS, "salt": b64(salt), "iv": b64(iv), "ct": b64(ct)}
+
+
+def decrypt(blob, password):
+    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
+    d = lambda s: base64.b64decode(s)
+    key = _key(password, d(blob["salt"]), blob["iter"])
+    return AESGCM(key).decrypt(d(blob["iv"]), d(blob["ct"]), None).decode()
+
+
+def read_enc(name, password, default=None):
+    p = ROOT / name
+    if not p.exists():
+        return default
+    return json.loads(decrypt(json.loads(p.read_text()), password))
+
+
+def write_enc(name, obj, password):
+    (ROOT / name).write_text(json.dumps(encrypt(json.dumps(obj, default=float, separators=(",", ":")), password)))
+
+
+# ---------------------------------------------------------------- indicators
 def rsi(close, n=14):
     d = close.diff()
     up = d.clip(lower=0).ewm(alpha=1 / n, adjust=False).mean()
@@ -29,11 +85,11 @@ def atr(df, n):
 def adx(df, n=14):
     h, l = df["High"], df["Low"]
     upm, dnm = h.diff(), -l.diff()
-    pdm = np.where((upm > dnm) & (upm > 0), upm, 0.0)
-    ndm = np.where((dnm > upm) & (dnm > 0), dnm, 0.0)
+    pdm = pd.Series(np.where((upm > dnm) & (upm > 0), upm, 0.0), index=df.index)
+    ndm = pd.Series(np.where((dnm > upm) & (dnm > 0), dnm, 0.0), index=df.index)
     a = atr(df, n)
-    pdi = 100 * pd.Series(pdm, index=df.index).ewm(alpha=1 / n, adjust=False).mean() / a
-    ndi = 100 * pd.Series(ndm, index=df.index).ewm(alpha=1 / n, adjust=False).mean() / a
+    pdi = 100 * pdm.ewm(alpha=1 / n, adjust=False).mean() / a
+    ndi = 100 * ndm.ewm(alpha=1 / n, adjust=False).mean() / a
     dx = 100 * (pdi - ndi).abs() / (pdi + ndi)
     return dx.ewm(alpha=1 / n, adjust=False).mean()
 
@@ -52,88 +108,87 @@ def supertrend(df, n=10, mult=3.0):
             direction[i] = -1 if c[i] < fl[i] else 1
         else:
             direction[i] = 1 if c[i] > fu[i] else -1
-    level = np.where(direction == 1, fl, fu)
-    return int(direction[-1]), float(level[-1])
+    return int(direction[-1]), float(np.where(direction == 1, fl, fu)[-1])
 
 
-def indicators(df):
-    if df is None or df.dropna(subset=["Close"]).empty:
-        raise ValueError("no price data from NSE, BSE or Yahoo")
-    df = df.dropna(subset=["Close"])
-    # Yahoo quirks: drop repeated dates and empty placeholder rows (no trades, flat bar).
-    df.index = pd.to_datetime(df.index).normalize()
+def clean(df):
+    if df is None:
+        return None
+    df = df.dropna(subset=["Close"]).copy()
+    if df.empty:
+        return None
+    df.index = pd.to_datetime(df.index).tz_localize(None).normalize()
     df = df[~df.index.duplicated(keep="last")]
     if "Volume" in df:
         flat = (df["Volume"].fillna(0) == 0) & (df["High"] == df["Low"])
-        df = df[~flat]
+        if (~flat).sum() > 1:
+            df = df[~flat]
+    return df
+
+
+def r2(x):
+    return None if x is None or (isinstance(x, float) and np.isnan(x)) else round(float(x), 2)
+
+
+def indicators(df, chart_days=100):
+    df = clean(df)
+    if df is None:
+        raise ValueError("no price data from NSE, BSE or Yahoo")
     c = df["Close"]
-    if len(c) < 15:  # too little history for indicators (e.g. new listing)
-        return {"close": float(c.iloc[-1]), "prev_close": float(c.iloc[-2]) if len(c) > 1 else None,
-                "date": df.index[-1].strftime("%Y-%m-%d"), "ema50": None, "sma200": None, "rsi": None,
-                "adx": None, "st_dir": 0, "st_level": None, "spark": [round(float(x), 2) for x in c.tail(60)]}
-    d, lvl = supertrend(df)
-    out = {
-        "close": float(c.iloc[-1]),
-        "prev_close": float(c.iloc[-2]) if len(c) > 1 else None,
-        "date": df.index[-1].strftime("%Y-%m-%d"),
-        "ema50": float(c.ewm(span=50, adjust=False).mean().iloc[-1]),
-        "sma200": float(c.rolling(200).mean().iloc[-1]) if len(c) >= 200 else None,
-        "rsi": float(rsi(c).iloc[-1]),
-        "adx": float(adx(df).iloc[-1]),
-        "st_dir": d,
-        "st_level": lvl,
-        "spark": [round(float(x), 2) for x in c.tail(60)],
-    }
+    out = {"close": float(c.iloc[-1]), "prev_close": float(c.iloc[-2]) if len(c) > 1 else None,
+           "date": df.index[-1].strftime("%Y-%m-%d"),
+           "high52": r2(df["High"].tail(250).max()), "low52": r2(df["Low"].tail(250).min()),
+           "ema50": None, "sma200": None, "rsi": None, "adx": None, "st_dir": 0, "st_level": None}
+    out["day_pct"] = (out["close"] / out["prev_close"] - 1) * 100 if out["prev_close"] else 0.0
+    ema = c.ewm(span=50, adjust=False).mean()
+    sma = c.rolling(200).mean()
+    if len(c) >= 15:
+        d, lvl = supertrend(df)
+        out.update({"ema50": r2(ema.iloc[-1]), "sma200": r2(sma.iloc[-1]) if len(c) >= 200 else None,
+                    "rsi": r2(rsi(c).iloc[-1]), "adx": r2(adx(df).iloc[-1]), "st_dir": d, "st_level": r2(lvl)})
+    t = df.tail(chart_days)
+    out["chart"] = {"d": [x.strftime("%Y-%m-%d") for x in t.index],
+                    "o": [r2(x) for x in t["Open"]], "h": [r2(x) for x in t["High"]],
+                    "l": [r2(x) for x in t["Low"]], "c": [r2(x) for x in t["Close"]],
+                    "ema": [r2(x) for x in ema.tail(chart_days)],
+                    "sma": [r2(x) for x in sma.tail(chart_days)]}
     return out
 
 
+# ---------------------------------------------------------------- signals
+SIGNALS = {"add": "Add zone", "hold": "Hold · uptrend", "wait": "Wait", "noadd": "Don't add", "exit": "Exit alert"}
+
+
 def auto_levels(h, ind):
-    """Same rules used for the Kite stocks, applied daily to holdings without custom levels."""
+    """Rules used for holdings without hand-set levels; recalculated daily."""
     c, ema, st, d = ind["close"], ind["ema50"], ind["st_level"], ind["st_dir"]
     if d == 0 or ema is None:
-        return h
+        return {**h, "auto": True, "note": "Not enough price history for levels yet."}
     h = {**h, "auto": True}
-    if d == -1:   # downtrend: don't add until the Supertrend flips
-        h["add_above"], h["stop_below"] = round(st, 2), None
-        h["note"] = f"Downtrend. Don't add until a close above {st:,.2f} (Supertrend flip)."
-    elif c < ema:  # trend turning up but still under the 50-EMA
-        h["add_above"], h["stop_below"] = round(ema, 2), round(st, 2)
-        h["note"] = f"Recovering. Add only after a close above the 50-EMA ({ema:,.2f}); exit below {st:,.2f}."
-    else:          # confirmed uptrend
-        h["add_above"], h["stop_below"] = None, round(st, 2)
-        h["note"] = f"Uptrend confirmed. Hold; trail the stop at the Supertrend ({st:,.2f})."
+    if d == -1:
+        h.update(add_above=st, stop_below=None, note=f"Downtrend. Don't add until a close above {st:,.2f}.")
+    elif c < ema:
+        h.update(add_above=ema, stop_below=st,
+                 note=f"Recovering. Add only after a close above the 50-EMA ({ema:,.2f}); exit below {st:,.2f}.")
+    else:
+        h.update(add_above=None, stop_below=st, note=f"Uptrend confirmed. Hold; trail the stop at {st:,.2f}.")
     return h
 
 
 def signal(h, ind):
-    if h.get("auto") and ind["st_dir"] == 1 and h.get("add_above") is None and ind["close"] >= h["stop_below"]:
-        return "HOLD · uptrend", "green"
-    if h.get("auto") and ind["st_dir"] == -1:
-        return "DON'T ADD · downtrend", "grey"
     c = ind["close"]
     if h.get("stop_below") and c < h["stop_below"]:
-        return "EXIT ALERT", "red"
+        return "exit"
     if h.get("add_above") and c > h["add_above"]:
-        return "TRIGGER HIT", "green"
-    if ind["st_dir"] == 0:
-        return "WAIT · no trend data", "grey"
-    if ind["st_dir"] == 1:
-        return "WAIT · trend up", "amber"
-    return "WAIT · trend down", "grey"
+        return "add"
+    if ind["st_dir"] == -1:
+        return "noadd"
+    if ind["st_dir"] == 1 and not h.get("add_above"):
+        return "hold"
+    return "wait"
 
 
-def encrypt(text, password):
-    """AES-256-GCM with a PBKDF2-SHA256 key; matches the WebCrypto code in index.html."""
-    from cryptography.hazmat.primitives.ciphers.aead import AESGCM
-    from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
-    from cryptography.hazmat.primitives import hashes
-    salt, iv, iters = os.urandom(16), os.urandom(12), 310000
-    key = PBKDF2HMAC(algorithm=hashes.SHA256(), length=32, salt=salt, iterations=iters).derive(password.encode())
-    ct = AESGCM(key).encrypt(iv, text.encode(), None)
-    b64 = lambda b: base64.b64encode(b).decode()
-    return {"v": 1, "iter": iters, "salt": b64(salt), "iv": b64(iv), "ct": b64(ct)}
-
-
+# ---------------------------------------------------------------- data sources
 HEADERS = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 "
            "(KHTML, like Gecko) Chrome/124.0 Safari/537.36", "Accept": "*/*",
            "Accept-Language": "en-US,en;q=0.9"}
@@ -147,15 +202,13 @@ SERIES_PREF = ["EQ", "BE", "BZ", "SM", "ST", "A", "B", "T", "X", "M", "MT", "XT"
 
 
 def fetch_bhavcopy(exchange, max_back=7):
-    """Official end-of-day file (UDiFF format). Returns (date, {symbol: row}) or (None, {})."""
-    import io
-    import zipfile
+    """Official end-of-day file (UDiFF). Returns (date, {symbol: row}, {isin: symbol}, raw df)."""
     import requests
     home, url = BHAV_URLS[exchange]
     sess = requests.Session()
     sess.headers.update({**HEADERS, "Referer": home})
     try:
-        sess.get(home, timeout=15)  # pick up cookies
+        sess.get(home, timeout=15)
     except Exception:
         pass
     today = datetime.now(IST).date()
@@ -177,32 +230,29 @@ def fetch_bhavcopy(exchange, max_back=7):
                 body = z.read(z.namelist()[0])
         df = pd.read_csv(io.BytesIO(body))
         df.columns = [c.strip() for c in df.columns]
-        rows = {}
-        for _, r_ in df.iterrows():
-            sym = str(r_.get("TckrSymb", "")).strip()
-            ser = str(r_.get("SctySrs", "")).strip()
-            rank = SERIES_PREF.index(ser) if ser in SERIES_PREF else 99
-            if sym and (sym not in rows or rank < rows[sym]["_rank"]):
-                rows[sym] = {"_rank": rank, "open": float(r_["OpnPric"]), "high": float(r_["HghPric"]),
-                             "low": float(r_["LwPric"]), "close": float(r_["ClsPric"]),
-                             "prev": float(r_["PrvsClsgPric"])}
+        df["TckrSymb"] = df["TckrSymb"].astype(str).str.strip()
+        df["SctySrs"] = df["SctySrs"].astype(str).str.strip()
+        df["_rank"] = df["SctySrs"].map(lambda s: SERIES_PREF.index(s) if s in SERIES_PREF else 99)
+        best = df.sort_values("_rank").drop_duplicates("TckrSymb")
+        rows = {r_.TckrSymb: {"open": float(r_.OpnPric), "high": float(r_.HghPric), "low": float(r_.LwPric),
+                              "close": float(r_.ClsPric), "prev": float(r_.PrvsClsgPric)}
+                for r_ in best.itertuples()}
+        isin = {str(r_.ISIN).strip(): r_.TckrSymb for r_ in best.itertuples() if isinstance(r_.ISIN, str)}
         print(f"{exchange} bhavcopy {day}: {len(rows)} symbols")
-        return pd.Timestamp(day), rows
-    return None, {}
+        return pd.Timestamp(day), rows, isin, df
+    return None, {}, {}, None
 
 
 def merge_official(hist, date, row):
-    """Put the exchange's official OHLC for `date` onto the Yahoo history."""
     new = pd.DataFrame({"Open": [row["open"]], "High": [row["high"]], "Low": [row["low"]],
                         "Close": [row["close"]], "Volume": [1.0]}, index=[date])
-    if hist is None or hist.dropna(subset=["Close"]).empty:
+    hist = clean(hist)
+    if hist is None:
         prev = pd.DataFrame({"Open": [row["prev"]], "High": [row["prev"]], "Low": [row["prev"]],
                              "Close": [row["prev"]], "Volume": [1.0]}, index=[date - pd.Timedelta(days=1)])
         return pd.concat([prev, new])
-    hist = hist.dropna(subset=["Close"]).copy()
-    hist.index = pd.to_datetime(hist.index).normalize()
     hist = hist[hist.index < date]
-    if len(hist):  # make yesterday match the exchange's official previous close
+    if len(hist):
         hist.iloc[-1, hist.columns.get_loc("Close")] = row["prev"]
     return pd.concat([hist[["Open", "High", "Low", "Close", "Volume"]], new])
 
@@ -214,80 +264,164 @@ def fetch(tickers):
     return {t: raw[t] for t in tickers if t in raw.columns.get_level_values(0)}
 
 
+def fetch_fundamentals(ticker):
+    import yfinance as yf
+    i = yf.Ticker(ticker).info or {}
+    dy = i.get("dividendYield")
+    return {"pe": r2(i.get("trailingPE")), "pb": r2(i.get("priceToBook")),
+            "roe": r2(i["returnOnEquity"] * 100) if i.get("returnOnEquity") is not None else None,
+            "de": r2(i["debtToEquity"] / 100) if i.get("debtToEquity") is not None else None,
+            "div": r2(dy if dy and dy > 1 else (dy or 0) * 100) if dy is not None else None,
+            "mcap_cr": r2(i["marketCap"] / 1e7) if i.get("marketCap") else None,
+            "sector": i.get("sector"), "industry": i.get("industry"), "name": i.get("longName") or i.get("shortName")}
+
+
+def cap_bucket(mcap_cr):
+    if not mcap_cr:
+        return None
+    return "Large" if mcap_cr >= 100000 else "Mid" if mcap_cr >= 33000 else "Small"
+
+
+# ---------------------------------------------------------------- main
+def load_holdings(password):
+    cfg = read_enc("holdings.enc.json", password)
+    if cfg is None:
+        raw = os.environ.get("HOLDINGS_JSON")
+        if not raw and (ROOT / "holdings.json").exists():
+            raw = (ROOT / "holdings.json").read_text()
+        if not raw:
+            sys.exit("No holdings found (holdings.enc.json or HOLDINGS_JSON secret).")
+        cfg = json.loads(raw)
+        write_enc("holdings.enc.json", cfg, password)  # first run only; afterwards the page owns this file
+        print("Created holdings.enc.json from the HOLDINGS_JSON secret.")
+    return cfg
+
+
 def main():
-    # Holdings come from the HOLDINGS_JSON secret on GitHub; local file only for testing.
-    raw_cfg = os.environ.get("HOLDINGS_JSON") or (ROOT / "holdings.json").read_text()
-    cfg = json.loads(raw_cfg)
-    tickers = [h["yahoo"] for h in cfg["holdings"]] + [m["yahoo"] for m in cfg["macro"]]
+    password = os.environ.get("DASHBOARD_PASSWORD")
+    if not password:
+        sys.exit("DASHBOARD_PASSWORD is not set - refusing to publish unencrypted data.")
+    cfg = load_holdings(password)
+    state = read_enc("state.enc.json", password, {}) or {}
+    state.setdefault("history", []); state.setdefault("signals", {})
+    state.setdefault("events", []); state.setdefault("fund", {})
+
+    bhav = {ex: fetch_bhavcopy(ex) for ex in ("NSE", "BSE")}
+    isin_map = {**bhav["BSE"][2], **bhav["NSE"][2]}
+    if bhav["NSE"][2]:
+        (ROOT / "isin.json").write_text(json.dumps(bhav["NSE"][2], separators=(",", ":")))
+
+    holdings = []
+    for h in cfg["holdings"]:
+        h = dict(h)
+        if not h.get("symbol") and h.get("isin") in isin_map:
+            h["symbol"] = isin_map[h["isin"]]
+        if not h.get("symbol"):
+            print(f"Could not resolve {h}")
+            continue
+        h.setdefault("yahoo", h["symbol"] + ".NS")
+        h.setdefault("group", "Gold / Silver" if any(k in h["symbol"] for k in ("GOLD", "SILVER")) else "Stock")
+        holdings.append(h)
+
+    tickers = sorted({h["yahoo"] for h in holdings} | {m[1] for m in MARKET})
     try:
         data = fetch(tickers)
     except Exception as e:
         print(f"Yahoo failed: {e}")
         data = {}
-    bhav = {ex: fetch_bhavcopy(ex) for ex in ("NSE", "BSE")}
 
-    rows, errors = [], []
-    for h in cfg["holdings"]:
-        sym = h.get("nse", h["symbol"])
+    today = datetime.now(IST).strftime("%Y-%m-%d")
+    rows, errors, charts = [], [], {}
+    for h in holdings:
         hist, source = data.get(h["yahoo"]), "Yahoo"
         for ex in ("NSE", "BSE"):
-            bdate, brows = bhav[ex]
-            key = sym if ex == "NSE" else h.get("bse", sym)
+            bdate, brows = bhav[ex][0], bhav[ex][1]
+            key = h["symbol"] if ex == "NSE" else h.get("bse", h["symbol"])
             if bdate is not None and key in brows:
                 hist, source = merge_official(hist, bdate, brows[key]), ex
                 break
         try:
             ind = indicators(hist)
-            ind["source"] = source
-            if h.get("add_above") is None and h.get("stop_below") is None and h["group"] != "Gold / Silver":
-                h = auto_levels(h, ind)
-        except Exception as e:  # keep going if one ticker fails
+        except Exception as e:
             errors.append(f"{h['symbol']}: {e}")
             continue
-        invested = h["qty"] * h["avg"]
-        value = h["qty"] * ind["close"]
-        sig, color = signal(h, ind)
-        print(f"{h['symbol']:<11} {ind['date']} close={ind['close']:.2f} prev={ind['prev_close']} [{source}]")
-        rows.append({**h, **ind, "invested": invested, "value": value,
+        charts[h["symbol"]] = ind.pop("chart")
+        if h.get("add_above") is None and h.get("stop_below") is None and h["group"] != "Gold / Silver":
+            h = auto_levels(h, ind)
+        sig = signal(h, ind)
+        f = state["fund"].get(h["symbol"])
+        if h["group"] != "Gold / Silver" and (not f or f.get("t", "") < (datetime.now(IST) - timedelta(days=7)).strftime("%Y-%m-%d")):
+            try:
+                f = {**fetch_fundamentals(h["yahoo"]), "t": today}
+                state["fund"][h["symbol"]] = f
+            except Exception as e:
+                print(f"fundamentals {h['symbol']}: {e}")
+        f = f or {}
+        invested, value = h["qty"] * h["avg"], h["qty"] * ind["close"]
+        sector = "Gold and silver" if h["group"] == "Gold / Silver" else (f.get("sector") or "Other")
+        rows.append({**h, **ind, "source": source, "invested": invested, "value": value,
                      "pnl": value - invested, "pnl_pct": (value / invested - 1) * 100,
+                     "day_pnl": h["qty"] * (ind["close"] - ind["prev_close"]) if ind["prev_close"] else 0.0,
                      "breakeven_pct": (h["avg"] / ind["close"] - 1) * 100,
-                     "signal": sig, "color": color})
+                     "sig": sig, "signal": SIGNALS[sig], "sector": sector,
+                     "cap": None if h["group"] == "Gold / Silver" else cap_bucket(f.get("mcap_cr")),
+                     "fund": {k: v for k, v in f.items() if k != "t"}})
+        print(f"{h['symbol']:<11} {ind['date']} close={ind['close']:.2f} prev={ind['prev_close']} [{source}] {sig}")
 
-    macro = []
-    for m in cfg["macro"]:
+        key = f"{h.get('broker', 'Kite')}:{h['symbol']}"
+        old = state["signals"].get(key)
+        if old and old["sig"] != sig:
+            state["events"].insert(0, {"date": ind["date"], "symbol": h["symbol"], "broker": h.get("broker", "Kite"),
+                                       "from": old["sig"], "to": sig, "price": ind["close"]})
+        state["signals"][key] = {"sig": sig, "since": old["since"] if old and old["sig"] == sig else ind["date"]}
+    state["events"] = state["events"][:60]
+
+    # market
+    market = []
+    for name, yt, kind in MARKET:
         try:
-            ind = indicators(data.get(m["yahoo"]))
-            macro.append({**m, **ind})
+            ind = indicators(data.get(yt), chart_days=60)
+            market.append({"name": name, "kind": kind, "close": ind["close"], "day_pct": ind["day_pct"],
+                           "st_dir": ind["st_dir"], "spark": ind["chart"]["c"],
+                           "levels": [{"label": l, "value": v} for l, v in METAL_LEVELS.get(yt, [])]})
         except Exception as e:
-            errors.append(f"{m['name']}: {e}")
+            errors.append(f"{name}: {e}")
+    breadth, movers = None, None
+    raw = bhav["NSE"][3]
+    if raw is not None:
+        eq = raw[raw["SctySrs"] == "EQ"].copy()
+        eq["chg"] = (eq["ClsPric"] / eq["PrvsClsgPric"] - 1) * 100
+        breadth = {"up": int((eq["chg"] > 0).sum()), "down": int((eq["chg"] < 0).sum()),
+                   "flat": int((eq["chg"] == 0).sum())}
+        liq = eq[(eq["ClsPric"] >= 20) & (eq.get("TtlTrfVal", 0) >= 1e8)]
+        pick = lambda d: [{"symbol": r_.TckrSymb, "close": float(r_.ClsPric), "chg": float(r_.chg)} for r_ in d.itertuples()]
+        movers = {"gainers": pick(liq.nlargest(5, "chg")), "losers": pick(liq.nsmallest(5, "chg"))}
 
-    inv = sum(r["invested"] for r in rows)
-    val = sum(r["value"] for r in rows)
-    day = sum(r["qty"] * (r["close"] - r["prev_close"]) for r in rows if r["prev_close"])
-    metals = sum(r["value"] for r in rows if r["group"] == "Gold / Silver")
-    brokers = {}
-    for r in rows:
-        b = brokers.setdefault(r.get("broker", "Kite"), {"invested": 0, "value": 0, "day": 0})
-        b["invested"] += r["invested"]; b["value"] += r["value"]
-        if r["prev_close"]:
-            b["day"] += r["qty"] * (r["close"] - r["prev_close"])
-    for b in brokers.values():
-        b["pnl"] = b["value"] - b["invested"]
-        b["pnl_pct"] = (b["value"] / b["invested"] - 1) * 100 if b["invested"] else 0
-    out = {
-        "sources": {ex: (bhav[ex][0].strftime("%Y-%m-%d") if bhav[ex][0] is not None else None) for ex in bhav},
-        "brokers": brokers,
-        "updated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"),
-        "summary": {"invested": inv, "value": val, "pnl": val - inv,
-                    "pnl_pct": (val / inv - 1) * 100 if inv else 0, "day": day,
-                    "metals_pct": metals / val * 100 if val else 0},
-        "holdings": rows, "macro": macro, "errors": errors,
-    }
-    password = os.environ.get("DASHBOARD_PASSWORD")
-    if not password:
-        sys.exit("DASHBOARD_PASSWORD is not set - refusing to publish unencrypted data.")
-    (ROOT / "data.enc.json").write_text(json.dumps(encrypt(json.dumps(out, default=float), password)))
-    print(f"Wrote {len(rows)} holdings, {len(macro)} macro; errors: {errors}")
+    # summary, brokers, history
+    def agg(rs):
+        inv, val = sum(r["invested"] for r in rs), sum(r["value"] for r in rs)
+        day = sum(r["day_pnl"] for r in rs)
+        prev = val - day
+        return {"invested": inv, "value": val, "pnl": val - inv, "pnl_pct": (val / inv - 1) * 100 if inv else 0,
+                "day": day, "day_pct": day / prev * 100 if prev else 0}
+    summary = agg(rows)
+    brokers = {b: agg([r for r in rows if r.get("broker", "Kite") == b])
+               for b in sorted({r.get("broker", "Kite") for r in rows})}
+    price_date = max((r["date"] for r in rows), default=today)
+    hist = [x for x in state["history"] if x["d"] != price_date]
+    hist.append({"d": price_date, "v": round(summary["value"]), "i": round(summary["invested"]),
+                 **{b: round(x["value"]) for b, x in brokers.items()}})
+    state["history"] = sorted(hist, key=lambda x: x["d"])[-1500:]
+
+    out = {"updated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "price_date": price_date,
+           "sources": {ex: (bhav[ex][0].strftime("%Y-%m-%d") if bhav[ex][0] is not None else None) for ex in bhav},
+           "summary": summary, "brokers": brokers, "holdings": rows, "charts": charts,
+           "market": market, "breadth": breadth, "movers": movers,
+           "history": state["history"], "events": state["events"],
+           "since": {k: v["since"] for k, v in state["signals"].items()}, "errors": errors}
+    write_enc("data.enc.json", out, password)
+    write_enc("state.enc.json", state, password)
+    print(f"Wrote {len(rows)} holdings, {len(market)} market items; errors: {errors}")
     if not rows:
         sys.exit(1)
 
