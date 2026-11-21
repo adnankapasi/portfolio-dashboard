@@ -50,7 +50,7 @@ input[type=text],input[type=password],input[type=search]{width:100%;padding:10px
 .btn2{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card2);cursor:pointer;font-size:13px}
 nav{position:fixed;bottom:0;left:0;right:0;z-index:10;background:var(--navbg);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 0 calc(6px + env(safe-area-inset-bottom));backdrop-filter:blur(8px)}
 nav div{display:flex;max-width:760px;width:100%;justify-content:space-around}
-nav button{background:none;border:0;color:var(--faint);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px}
+nav button{background:none;border:0;color:var(--faint);font-size:10.5px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px}
 nav button svg{width:22px;height:22px}nav button.on{color:var(--text)}
 .sheet{position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:20;display:none}
 .sheet .wrap{padding-bottom:40px}
@@ -92,6 +92,7 @@ select.btn2{color:var(--text)}
       <div style="display:flex;gap:6px"><button class="btn2" id="themeBtn" title="Change theme">☀</button><button class="btn2" id="importBtn" title="Import holdings">⇪ Import</button></div></div>
     <section id="tab-home"></section>
     <section id="tab-holdings" class="hidden"></section>
+    <section id="tab-scanner" class="hidden"></section>
     <section id="tab-signals" class="hidden"></section>
     <section id="tab-health" class="hidden"></section>
     <section id="tab-market" class="hidden"></section>
@@ -121,6 +122,7 @@ const ICONS = {
   holdings: '<path d="M4 6h16M4 12h16M4 18h16"/>',
   signals: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
   health: '<path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',
+  scanner: '<circle cx="11" cy="11" r="7"/><path d="M20 20l-4-4M8 11h6M11 8v6"/>',
   market: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'};
 
 // ---------- crypto (matches scripts/update.py)
@@ -181,7 +183,7 @@ function donut(parts) {
 
 // ---------- state
 let D = null, PW = null, TAB = "home", BROKER = "All", SORT = {k: "pnl_pct", dir: -1}, Q = "", RANGE = "1M";
-const TABS = [["home", "Home"], ["holdings", "Holdings"], ["signals", "Signals"], ["health", "Health"], ["market", "Market"]];
+const TABS = [["home", "Home"], ["holdings", "Holdings"], ["scanner", "Scanner"], ["signals", "Signals"], ["health", "Health"], ["market", "Market"]];
 
 function combined() { // positions merged across brokers, for weights and concentration
   const m = {};
@@ -191,7 +193,10 @@ function combined() { // positions merged across brokers, for weights and concen
 }
 function attention() {
   const A = [], tv = D.summary.value;
+  D.holdings.filter(isSwing).forEach(h => { const a = act(h);
+    if (["b-add", "b-exit", "b-wait", "b-near"].includes(a.c)) A.push({p: a.c === "b-exit" ? 0 : 1, c: {"b-add": "a-g", "b-exit": "a-r", "b-wait": "a-a", "b-near": "a-b"}[a.c], i: "⇄", t: `<b>${esc(h.symbol)}</b> swing: ${esc(a.t)}`, s: h.symbol}); });
   D.holdings.forEach(h => {
+    if (isSwing(h)) return;
     const tag = `<b>${esc(h.symbol)}</b>${D.holdings.filter(x => x.symbol === h.symbol).length > 1 ? ` <span class="tag">${h.broker}</span>` : ""}`;
     if (h.sig === "exit") A.push({p: 0, c: "a-r", i: "⛔", t: `${tag} closed ${num(h.close)}, below exit ${num(h.stop_below)}`, s: h.symbol});
     else if (h.sig === "add") A.push({p: 1, c: "a-g", i: "🎯", t: `${tag} closed above ${num(h.add_above)}: add zone`, s: h.symbol});
@@ -248,7 +253,26 @@ function renderHome() {
 }
 
 // ---------- holdings: decision table + cards
+// ---------- swing trades (tag kept on this device)
+const SET = () => ({capital: +(store.get("dash_capital") || 250000), risk: +(store.get("dash_risk") || 1), mode: store.get("dash_mode") || "paper",
+  start: store.get("dash_paper_start") || (store.set("dash_paper_start", new Date().toISOString().slice(0, 10)), new Date().toISOString().slice(0, 10))});
+let SWING = new Set(JSON.parse(store.get("dash_swing") || "[]"));
+const skey = h => `${h.broker}:${h.symbol}`;
+const isSwing = h => SWING.has(skey(h));
+const bdays = (a, b) => { let n = 0, d = new Date(a); const e = new Date(b); while (d < e) { d.setDate(d.getDate() + 1); if (d.getDay() % 6) n++; } return n; };
+function swingPlan(h) {
+  const atrPct = h.atr ? h.atr / h.avg : 0.02, risk = Math.min(Math.max(2 * atrPct, 0.02), 0.10);
+  return {stop: h.avg * (1 - risk), target: h.avg * 1.075, be: h.avg * 1.04, days: h.first_seen ? bdays(h.first_seen, h.date) : 0, risk};
+}
 function act(h) { // plain-word action, trigger distances
+  if (isSwing(h)) {
+    const p = swingPlan(h), da = (p.target / h.close - 1) * 100, ds = (h.close / p.stop - 1) * 100, sw = p;
+    if (h.close >= p.target) return {t: "Book profit · +7.5% reached", c: "b-add", dist: -2, da, ds, sw};
+    if (h.close <= p.stop) return {t: `Exit · swing stop ${num(p.stop)} hit`, c: "b-exit", dist: -1, da, ds, sw};
+    if (p.days >= 15 && h.pnl_pct < 4) return {t: `Time's up · ${p.days} trading days`, c: "b-wait", dist: -0.4, da, ds, sw};
+    if (h.close >= p.be) return {t: `Move stop to cost ${num(h.avg)}`, c: "b-near", dist: -0.3, da, ds, sw};
+    return {t: `Swing · stop ${num(p.stop)} · target ${num(p.target)}`, c: "b-hold", dist: Math.min(da, ds), da, ds, sw};
+  }
   const da = h.add_above ? (h.add_above / h.close - 1) * 100 : null, ds = h.stop_below ? (h.close / h.stop_below - 1) * 100 : null;
   let t, c, dist;
   if (h.sig === "exit") { t = `Exit · below ${num(h.stop_below)}`; c = "b-exit"; dist = -1; }
@@ -259,7 +283,13 @@ function act(h) { // plain-word action, trigger distances
   return {t, c, dist, da, ds};
 }
 function trig(h) {
-  const {da, ds} = h.A;
+  const {da, ds, sw} = h.A;
+  if (sw) {
+    const p = Math.max(0, Math.min(100, (h.close - sw.stop) / (sw.target - sw.stop) * 100));
+    return `<div style="width:108px"><div style="position:relative;height:6px;border-radius:3px;background:var(--card2);border-left:3px solid var(--red);border-right:3px solid var(--green)">
+      <div style="position:absolute;left:calc(${p}% - 5px);top:-3px;width:10px;height:12px;border-radius:3px;background:var(--text)"></div></div>
+      <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:3px"><span>stop ${pc(-ds, 1)}</span><span>target ${pc(da, 1)}</span></div></div>`;
+  }
   if (h.sig === "exit") return `<span class="neg" style="font-size:11px">${Math.abs(ds).toFixed(1)}% below exit</span>`;
   if (h.sig === "add") return `<span class="pos" style="font-size:11px">${Math.abs(da ?? 0).toFixed(1)}% above add</span>`;
   if (da != null && ds != null) {
@@ -273,7 +303,7 @@ function trig(h) {
   return `<span class="faint">–</span>`;
 }
 const COLS = [ // key, label, default sort dir, reference column?, cell, total
-  ["symbol", "Stock", 1, 0, h => `<div class="sym">${esc(h.symbol)}</div><div class="faint">${esc(h.broker)}</div>`, () => "Total"],
+  ["symbol", "Stock", 1, 0, h => `<div class="sym">${esc(h.symbol)}</div><div class="faint">${esc(h.broker)}${isSwing(h) ? ' · <span style="color:var(--blue)">Swing</span>' : ""}</div>`, () => "Total"],
   ["dist", "Action", 1, 0, h => `<span class="badge ${h.A.c}" style="border-radius:7px">${esc(h.A.t)}</span>`, () => ""],
   ["trig", "Trigger", 1, 0, trig, () => ""],
   ["day_pct", "Today %", -1, 0, h => `<span class="${cls(h.day_pct)}">${pc(h.day_pct)}</span>`, S => `<span class="${cls(S.day)}">${pc(S.val - S.day ? S.day / (S.val - S.day) * 100 : 0)}</span>`],
@@ -408,8 +438,141 @@ function renderMarket() {
   <h2>Gold and silver</h2><div class="g2">${by("metal").map(card).join("")}</div>`;
 }
 
+// ---------- scanner
+let SCAP = "All", SSUB = "setups", SCHIP = "all", SSORT = {k: "score", dir: -1}, SCFG = false;
+const MOODC = {Uptrend: "a-g", Choppy: "a-a", Downtrend: "a-r"};
+const MOODT = {Uptrend: "New trades allowed.", Choppy: "Breakouts fail more often: take only the best setups, size smaller.",
+  Downtrend: "Most setups fail in falling markets: consider no new trades."};
+const range52 = r => { const p = Math.max(0, Math.min(100, (r.close - r.lo52) / ((r.hi52 - r.lo52) || 1) * 100));
+  return `<div style="width:84px"><div style="position:relative;height:5px;border-radius:3px;background:var(--card2)"><div style="position:absolute;left:calc(${p}% - 4px);top:-3px;width:8px;height:11px;border-radius:2px;background:var(--text)"></div></div>
+  <div style="display:flex;justify-content:space-between;font-size:10px;color:var(--faint);margin-top:2px"><span>${num(r.lo52, 0)}</span><span>${num(r.hi52, 0)}</span></div></div>`; };
+const SETC = s => s.startsWith("Breakout") || s.startsWith("52") ? "b-add" : s === "Pullback" ? "b-near" : "b-wait";
+function swingsOpen() { return D.holdings.filter(isSwing); }
+function sizing(plan) {
+  const c = SET(), riskAmt = c.capital * c.risk / 100, per = plan.trigger - plan.stop;
+  const qty = Math.max(0, Math.floor(Math.min(riskAmt / per, c.capital * 0.25 / plan.trigger)));
+  const amt = qty * plan.trigger;
+  return {qty, amt, loss: qty * per, net: qty * (plan.target - plan.trigger) - amt * 0.003, riskAmt};
+}
+function renderScanner() {
+  const S = D.scanner, el = $("tab-scanner");
+  if (!S || S.error || !S.rows) { el.innerHTML = `<div class="alert a-a"><span>⚠</span><div>${esc(S?.error || "Scanner data appears after the next daily update.")}</div></div>`; return; }
+  const c = SET(), held = new Set(D.holdings.map(h => h.symbol)), sw = swingsOpen();
+  const week = Math.floor((Date.now() - new Date(c.start)) / 6048e5) + 1;
+  const rows = S.rows.filter(r => SCAP === "All" || r.cap === SCAP);
+  const setups = rows.filter(r => r.setup && !r.avoid.length), watch = rows.filter(r => r.watch), avoided = rows.filter(r => r.setup && r.avoid.length);
+  const m = S.mood, T = S.tracker || {};
+  const chips = [["all", "All"], ["brk", "Breakouts"], ["pb", "Pullback"], ["os", "Oversold"], ["near", "Near 52w high"], ["vol", "Volume surge"]];
+  const cpass = (r, k) => k === "all" || (k === "brk" && /Breakout|52/.test(r.setup || "")) || (k === "pb" && r.setup === "Pullback")
+    || (k === "os" && r.setup === "Oversold bounce") || (k === "near" && r.close >= r.hi52 * 0.95) || (k === "vol" && r.vol_x >= 1.5);
+  const sortRows = L => { const k = SSORT.k, d = SSORT.dir; return [...L].sort((a, b) => {
+    const v = r => k === "trigger" ? r.plan?.trigger : k === "rr" ? r.plan?.rr : k === "dist" ? (r.plan ? r.plan.trigger / r.close - 1 : 9) : r[k];
+    return typeof v(a) === "string" ? d * v(a).localeCompare(v(b)) : d * ((v(a) ?? -1e9) - (v(b) ?? -1e9)); }); };
+  const th = (k, l, cl = "") => `<th data-k="${k}" class="${SSORT.k === k ? "on" : ""} ${cl}">${l}${SSORT.k === k ? (SSORT.dir === 1 ? " ↑" : " ↓") : ""}</th>`;
+  const stock = r => `<div class="sym">${esc(r.symbol)}${held.has(r.symbol) ? ' <span title="You hold this" style="color:var(--amber)">★</span>' : ""}</div>
+    <div class="faint">${r.results_days != null && r.results_days >= 0 && r.results_days <= 20 ? `<span class="neg">results in ${r.results_days}d</span>` : `${r.cap} · ${num(r.close)}`}</div>`;
+  let body = "";
+  if (SSUB === "setups") {
+    const L = sortRows(setups.filter(r => cpass(r, SCHIP)));
+    body = `<div class="chips" id="schip" style="margin:8px 0">${chips.map(([k, l]) => `<button class="chip ${k === SCHIP ? "on" : ""}" data-f="${k}">${l} · ${setups.filter(r => cpass(r, k)).length}</button>`).join("")}</div>
+    <div class="tw"><table class="ht"><thead id="sth"><tr>${th("symbol", "Stock")}${th("setup", "Setup", "l")}${th("score", "Score")}${th("day_pct", "Today")}${th("close", "52w range", "l")}
+      ${th("trigger", "Buy above")}<th>Stop</th><th>Target</th>${th("rr", "R:R")}${th("vol_x", "Vol ×")}${th("rsi", "RSI")}${th("deliv", "Deliv %")}</tr></thead>
+    <tbody>${L.map(r => `<tr data-x="${esc(r.symbol)}"><td>${stock(r)}</td><td class="l"><span class="badge ${SETC(r.setup)}" style="border-radius:7px">${esc(r.setup)}</span></td>
+      <td><b class="${r.score >= 75 ? "pos" : ""}">${r.score}</b></td><td class="${cls(r.day_pct)}">${pc(r.day_pct)}</td><td class="l">${range52(r)}</td>
+      <td>${num(r.plan.trigger)}</td><td class="neg">${num(r.plan.stop)}</td><td class="pos">${num(r.plan.target)}</td><td>${r.plan.rr.toFixed(1)}</td>
+      <td class="${r.vol_x >= 1.5 ? "pos" : ""}">${num(r.vol_x, 1)}×</td><td>${num(r.rsi, 0)}</td><td>${r.deliv == null ? "–" : num(r.deliv, 0)}</td></tr>`).join("")
+      || `<tr><td colspan="12" class="mute" style="text-align:left">No setups today. That's normal; good setups are rare.</td></tr>`}</tbody></table></div>
+    <div class="faint" style="margin:6px 2px">Buy only if tomorrow's price trades above "Buy above". Stop = 2× the stock's daily range. Tap a row for the trade plan.</div>`;
+  } else if (SSUB === "watch") {
+    const L = sortRows(watch);
+    body = `<div class="faint" style="margin:8px 2px">Strong uptrends within 3% of a 20-day breakout. Not a buy yet.</div>
+    <div class="tw"><table class="ht"><thead id="sth"><tr>${th("symbol", "Stock")}${th("score", "Score")}${th("day_pct", "Today")}${th("dist", "To trigger")}${th("trigger", "Breaks above")}${th("close", "52w range", "l")}${th("rs", "Strength")}${th("rsi", "RSI")}</tr></thead>
+    <tbody>${L.map(r => `<tr data-x="${esc(r.symbol)}"><td>${stock(r)}</td><td><b>${r.score}</b></td><td class="${cls(r.day_pct)}">${pc(r.day_pct)}</td>
+      <td>${((r.plan.trigger / r.close - 1) * 100).toFixed(1)}%</td><td>${num(r.plan.trigger)}</td><td class="l">${range52(r)}</td><td>${num(r.rs, 0)}</td><td>${num(r.rsi, 0)}</td></tr>`).join("")
+      || `<tr><td colspan="8" class="mute" style="text-align:left">Nothing on watch today.</td></tr>`}</tbody></table></div>`;
+  } else if (SSUB === "avoided") {
+    body = `<div class="faint" style="margin:8px 2px">Had a setup today but failed a safety rule:</div><div class="card" style="padding:4px 12px">${avoided.map(r => `<div class="row click" data-x="${esc(r.symbol)}">
+      <div><span class="sym">${esc(r.symbol)}</span><span class="tag">${esc(r.setup)}</span><div class="faint">${r.cap} · ${num(r.close)} · ${pc(r.day_pct)}</div></div>
+      <div class="r neg" style="font-size:12px">${r.avoid.map(esc).join("<br>")}</div></div>`).join("") || `<div class="mute" style="padding:10px 0">None today.</div>`}</div>`;
+  } else {
+    const o = T.overall || {}, st = x => x?.trades ? `${x.trades} · ${x.win_pct}% · <span class="${cls(x.avg_r)}">${x.avg_r > 0 ? "+" : ""}${x.avg_r}R</span>` : "–";
+    body = `<div class="alert a-b" style="margin-top:8px"><span>ⓘ</span><div>Every setup is followed automatically from the day it appears: next-day confirmation, then target (+7.5%), stop, stop-to-cost at +4%, or the 15-day limit. Tracking since ${esc(T.since || "today")}.</div></div>
+    <div class="g2" style="grid-template-columns:repeat(3,1fr)"><div class="mini"><span class="mute">Closed</span><b>${o.trades || 0}</b></div><div class="mini"><span class="mute">Win rate</span><b>${o.trades ? o.win_pct + "%" : "–"}</b></div>
+      <div class="mini"><span class="mute">Avg per trade</span><b class="${cls(o.avg_r)}">${o.trades ? (o.avg_r > 0 ? "+" : "") + o.avg_r + "R" : "–"}</b></div></div>
+    <div class="faint" style="margin:6px 2px">R = your risk per trade (₹${Math.round(c.capital * c.risk / 100).toLocaleString("en-IN")}). Judge after 30–40 closed trades. ${T.expired || 0} signals expired without confirmation.</div>
+    <h2>By setup</h2><div class="card" style="padding:4px 14px">${Object.entries(T.by_setup || {}).map(([k, v]) => `<div class="row"><span>${esc(k)}</span><span>${st(v)}</span></div>`).join("") || `<div class="mute" style="padding:10px 0">No closed trades yet.</div>`}</div>
+    <h2>By size</h2><div class="card" style="padding:4px 14px">${Object.entries(T.by_cap || {}).map(([k, v]) => `<div class="row"><span>${k} cap</span><span>${st(v)}</span></div>`).join("")}</div>
+    <h2>Tracked signals still open · ${(T.open || []).length}</h2><div class="card" style="padding:4px 14px">${(T.open || []).map(t => { const p = t.last ? (t.last / t.entry - 1) * 100 : 0;
+      return `<div class="row"><div><span class="sym">${esc(t.symbol)}</span><span class="tag">${esc(t.setup)}</span><div class="faint">in ${esc(t.entry_date)} at ${num(t.entry)} · day ${t.days} · stop ${num(t.cur_stop)}</div></div><span class="${cls(p)}">${pc(p, 1)}</span></div>`; }).join("") || `<div class="mute" style="padding:10px 0">None</div>`}</div>
+    <h2>Recently closed</h2><div class="card" style="padding:4px 14px">${(T.recent || []).map(t => `<div class="row"><div><span class="sym">${esc(t.symbol)}</span><span class="tag">${esc(t.setup)}</span>
+      <div class="faint">${esc(t.entry_date)} → ${esc(t.exit_date)} · ${esc({target: "target hit", stop: "stopped out", breakeven: "exit at cost", time: "15-day limit"}[t.how] || t.how)}</div></div>
+      <span class="${cls(t.ret_pct)}">${pc(t.ret_pct, 1)}</span></div>`).join("") || `<div class="mute" style="padding:10px 0">None yet</div>`}</div>`;
+  }
+  el.innerHTML = `
+  <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+    <span class="badge ${c.mode === "paper" ? "b-wait" : "b-add"}">${c.mode === "paper" ? `Paper trading · week ${week}` : "Live trading"}</span>
+    <button class="btn2" id="scfg">⚙ Settings</button></div>
+  ${SCFG ? `<div class="card" id="scfgbox"><div class="g2">
+    <label class="mute">Swing capital (₹)<input type="text" inputmode="numeric" id="s_cap" value="${c.capital}"></label>
+    <label class="mute">Risk per trade (%)<input type="text" inputmode="decimal" id="s_risk" value="${c.risk}"></label></div>
+    <div class="chips" style="margin-top:10px" id="s_mode"><button class="chip ${c.mode === "paper" ? "on" : ""}" data-m="paper">Paper trading</button><button class="chip ${c.mode === "live" ? "on" : ""}" data-m="live">Live</button></div>
+    <button class="btn" id="s_save" style="margin-top:10px">Save</button><div class="faint" style="margin-top:6px">Saved only on this device.</div></div>` : ""}
+  <div class="alert ${MOODC[m.state]}"><span>${m.state === "Uptrend" ? "▲" : m.state === "Downtrend" ? "▼" : "◆"}</span><div><b>Market: ${m.state.toLowerCase()}.</b>
+    Nifty ${m.above_sma200 ? "above" : "below"} its 200-day and ${m.above_ema50 ? "above" : "below"} its 50-day average · ${m.pct_above_ema50}% of these stocks above their 50-day · ${m.up} up / ${m.down} down today. ${MOODT[m.state]}</div></div>
+  <div class="g2" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px">
+    <div class="mini"><span class="mute">Capital</span><b>${inr(c.capital)}</b></div><div class="mini"><span class="mute">Risk / trade</span><b>${inr(c.capital * c.risk / 100)}</b></div>
+    <div class="mini"><span class="mute">Open swings</span><b class="${sw.length >= 4 ? "neg" : ""}">${sw.length} of 4</b></div></div>
+  <div class="seg" id="scap" style="margin-bottom:8px">${["All", "Large", "Mid", "Small"].map(x => `<button class="${x === SCAP ? "on" : ""}" data-c="${x}">${x === "All" ? "All" : x + " cap"}</button>`).join("")}</div>
+  <div class="chips" id="ssub">${[["setups", `Setups · ${setups.length}`], ["watch", `Watch · ${watch.length}`], ["avoided", `Avoided · ${avoided.length}`], ["track", "Track record"]]
+    .map(([k, l]) => `<button class="chip ${k === SSUB ? "on" : ""}" data-t="${k}">${l}</button>`).join("")}</div>
+  ${body}
+  <div class="faint" style="margin-top:8px">Scan of ${S.rows.length} Nifty 100 / Midcap 150 / Smallcap 250 stocks at the ${esc(S.date)} close.${S.has?.results ? "" : " Results dates unavailable today."}${S.has?.delivery ? "" : " Delivery % unavailable today."} These rules were near breakeven in the 2024–26 backtest: treat setups as ideas to check, not predictions.</div>`;
+  $("scap").onclick = e => { const x = e.target.dataset.c; if (x) { SCAP = x; renderScanner(); } };
+  $("ssub").onclick = e => { const x = e.target.dataset.t; if (x) { SSUB = x; SSORT = {k: x === "watch" ? "dist" : "score", dir: x === "watch" ? 1 : -1}; renderScanner(); } };
+  if ($("schip")) $("schip").onclick = e => { const x = e.target.closest("button")?.dataset.f; if (x) { SCHIP = x; renderScanner(); } };
+  if ($("sth")) $("sth").onclick = e => { const k = e.target.closest("th")?.dataset.k; if (!k) return;
+    SSORT = k === SSORT.k ? {k, dir: -SSORT.dir} : {k, dir: ["symbol", "setup", "dist"].includes(k) ? 1 : -1}; renderScanner(); };
+  $("scfg").onclick = () => { SCFG = !SCFG; renderScanner(); };
+  if ($("s_mode")) $("s_mode").onclick = e => { const x = e.target.dataset.m; if (x) $("s_mode").querySelectorAll(".chip").forEach(b => b.classList.toggle("on", b.dataset.m === x)); };
+  if ($("s_save")) $("s_save").onclick = () => { const cap = parseFloat($("s_cap").value.replace(/[,₹\s]/g, "")), rk = parseFloat($("s_risk").value);
+    if (!(cap > 0) || !(rk > 0 && rk <= 5)) { alertMsg("Enter a capital above 0 and a risk between 0.1 and 5%."); return; }
+    const md = $("s_mode").querySelector(".chip.on").dataset.m; store.set("dash_capital", cap); store.set("dash_risk", rk);
+    if (md === "paper" && c.mode !== "paper") store.set("dash_paper_start", new Date().toISOString().slice(0, 10)); store.set("dash_mode", md); SCFG = false; renderScanner(); };
+  el.querySelectorAll("[data-x]").forEach(r => r.onclick = () => openScan(r.dataset.x));
+}
+function alertMsg(t) { const b = $("scfgbox"); if (b) { let e = b.querySelector(".err"); if (!e) { e = document.createElement("div"); e.className = "err"; b.appendChild(e); } e.textContent = t; } }
+function openScan(sym) {
+  const r = D.scanner.rows.find(x => x.symbol === sym); if (!r) return;
+  const c = SET(), z = r.plan ? sizing(r.plan) : null, sw = swingsOpen(), mine = D.holdings.filter(h => h.symbol === sym);
+  const warn = [];
+  if (r.avoid.length) warn.push(...r.avoid);
+  if (r.results_days != null && r.results_days >= 0 && r.results_days <= 20 && !r.avoid.some(a => a.startsWith("Results"))) warn.push(`Results in ${r.results_days} days (${r.results})`);
+  if (r.setup && sw.length >= 4) warn.push("You already have 4 swing trades open: close one first");
+  if (D.scanner.mood.state === "Downtrend") warn.push("Market is in a downtrend");
+  if (mine.length) warn.push(`You already hold ${mine.reduce((t, h) => t + h.qty, 0)} shares`);
+  const levels = r.plan ? [{v: r.plan.trigger, c: "var(--blue)"}, {v: r.plan.stop, c: "var(--dn)"}, {v: r.plan.target, c: "var(--up)"}] : [];
+  const stat = (k, v, cl = "") => `<div class="mini"><span class="mute">${k}</span><b class="${cl}">${v}</b></div>`;
+  $("detailBody").innerHTML = `
+  <div class="top"><button class="btn2" id="back">← Back</button>${r.setup ? `<span class="badge ${SETC(r.setup)}">${esc(r.setup)}</span>` : r.watch ? `<span class="badge b-wait">Watch</span>` : ""}</div>
+  <div style="font-size:20px;font-weight:700">${esc(sym)}</div><div class="mute">${esc(r.industry)} · ${r.cap} cap · score ${r.score}</div>
+  <div style="margin:8px 0"><span class="big">${num(r.close)}</span> <span class="${cls(r.day_pct)}">${pc(r.day_pct)} today</span></div>
+  ${r.spark ? `<div class="card" style="padding:8px">${line(r.spark, {h: 110, levels})}<div class="faint" style="display:flex;gap:12px;padding:4px"><span style="color:var(--blue)">— buy above</span><span style="color:var(--dn)">— stop</span><span style="color:var(--up)">— target</span><span>last 60 days</span></div></div>` : ""}
+  ${warn.length ? warn.map(w => `<div class="alert a-r"><span>⚠</span><div>${esc(w)}</div></div>`).join("") : ""}
+  ${r.plan && z ? `<h2>${r.setup ? "Trade plan" : "If it breaks out"} · risk ${inr(z.riskAmt)} (${c.risk}%)</h2>
+  <div class="g2" style="grid-template-columns:repeat(3,1fr)">${stat("Buy above", num(r.plan.trigger))}${stat("Quantity", z.qty)}${stat("Amount", inr(z.amt))}
+    ${stat("Stop-loss", num(r.plan.stop), "neg")}${stat("Target +7.5%", num(r.plan.target), "pos")}${stat("Reward : risk", r.plan.rr.toFixed(1) + " : 1")}
+    ${stat("Max loss", inr(z.loss), "neg")}${stat("Net at target", inr(z.net), "pos")}${stat("Stop distance", r.plan.risk_pct.toFixed(1) + "%")}</div>
+  <div class="faint" style="margin:6px 2px">Enter only if tomorrow's price trades above ${num(r.plan.trigger)}. Move stop to your cost at +4%. Exit after 15 trading days without a result. Net includes about 0.3% costs. Position capped at 25% of capital.</div>` : ""}
+  <h2>Checklist</h2><div class="card" style="padding:6px 14px">${Object.entries(r.checks).map(([k, v]) => `<div class="row"><span>${esc(k)}</span><b class="${v ? "pos" : "neg"}">${v ? "✓" : "✗"}</b></div>`).join("")}</div>
+  <div class="g2" style="margin-top:4px">${stat("52-week range", `${num(r.lo52, 0)} – ${num(r.hi52, 0)}`)}${stat("From 52w high", pc((r.close / r.hi52 - 1) * 100, 1))}
+    ${stat("RSI", num(r.rsi, 1))}${stat("Volume vs average", num(r.vol_x, 1) + "×")}${stat("Strength vs Nifty", num(r.rs, 0) + " / 100")}${stat("Delivery", r.deliv == null ? "–" : num(r.deliv, 0) + "%")}</div>
+  <div class="faint" style="margin-top:10px">After you buy, import your holdings and tick "Swing trade" on the stock to get book-profit and exit signals.</div>`;
+  $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden";
+  $("back").onclick = () => history.back(); history.pushState({d: 1}, "");
+}
+
 // ---------- detail
-function openDetail(sym) {
+function openDetail(sym, push = true) {
   const P = D.holdings.filter(h => h.symbol === sym); if (!P.length) return;
   const h = P[0], ch = D.charts[sym], f = h.fund || {};
   const qty = P.reduce((t, x) => t + x.qty, 0), inv = P.reduce((t, x) => t + x.invested, 0), val = P.reduce((t, x) => t + x.value, 0);
@@ -425,6 +588,9 @@ function openDetail(sym) {
   <div style="margin:10px 0 4px"><span class="big">${num(h.close)}</span> <span class="${cls(h.day_pct)}">${pc(h.day_pct)} today</span></div>
   <div class="card" style="padding:8px">${ch ? candles(ch, levels) : ""}
     <div class="faint" style="display:flex;gap:12px;padding:4px"><span style="color:#8b7cf6">— 50-EMA ${num(h.ema50)}</span><span style="color:#f59e0b">— 200-SMA ${num(h.sma200)}</span><span>last ${ch ? ch.c.length : 0} days</span></div></div>
+  <div class="card">${P.map(x => `<label style="display:flex;gap:8px;align-items:center;padding:3px 0"><input type="checkbox" class="swtog" data-k="${esc(skey(x))}" ${isSwing(x) ? "checked" : ""}>
+      <span><b>Swing trade</b>${P.length > 1 ? ` (${x.broker})` : ""}: exit at +7.5%, stop ${num(swingPlan(x).stop)} (2× daily range), stop to cost at +4%, 15-day limit</span></label>`).join("")}
+    <div class="faint">Untick for long-term holdings. Saved on this device.</div></div>
   <div class="card"><div style="font-weight:600;margin-bottom:6px">Average-down calculator</div>
     <label class="mute" for="amt">Amount to add (₹)</label>
     <input type="text" inputmode="numeric" id="amt" value="10000" style="margin:4px 0 10px">
@@ -454,9 +620,11 @@ function openDetail(sym) {
       + (["noadd", "exit"].includes(h.sig) ? `<div class="err" style="grid-column:1/-1">Signal says don't add right now: ${esc(act(h).t.toLowerCase())}.</div>` : "")
       + (nw > 10 ? `<div class="err" style="grid-column:1/-1">This would make ${esc(sym)} over 10% of your portfolio.</div>` : ""); };
   $("amt").oninput = calc; calc();
+  $("detailBody").querySelectorAll(".swtog").forEach(el => el.onchange = () => { el.checked ? SWING.add(el.dataset.k) : SWING.delete(el.dataset.k);
+    store.set("dash_swing", JSON.stringify([...SWING])); const y = $("detail").scrollTop; go(TAB); openDetail(sym, false); $("detail").scrollTop = y; });
   $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden";
   $("back").onclick = () => history.back();
-  history.pushState({d: 1}, "");
+  if (push) history.pushState({d: 1}, "");
 }
 window.onpopstate = () => { $("detail").style.display = "none"; $("import").style.display = "none"; document.body.style.overflow = ""; };
 
@@ -570,7 +738,7 @@ function go(tab) {
   TAB = tab; TABS.forEach(([k, l]) => $("tab-" + k).classList.toggle("hidden", k !== tab));
   $("title").textContent = TABS.find(t => t[0] === tab)[1];
   $("nav").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
-  ({home: renderHome, holdings: renderHoldings, signals: renderSignals, health: renderHealth, market: renderMarket})[tab]();
+  ({home: renderHome, holdings: renderHoldings, scanner: renderScanner, signals: renderSignals, health: renderHealth, market: renderMarket})[tab]();
   window.scrollTo(0, 0);
 }
 function start(d) {
