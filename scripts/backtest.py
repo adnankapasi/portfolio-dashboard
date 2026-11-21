@@ -1,4 +1,14 @@
-"""Swing-setup backtest for Nifty 100 / Midcap 150 / Smallcap 250 stocks.
+"""Swing-setup backtest for Nifty 100 / Midcap 150 / Smallcap 250 stocks  (round 2).
+
+Round 1 (fixed 4% max stop, +7.5% target, 15 days) lost money on every setup: stops were hit by
+normal noise. Round 2 tests a grid of variants and picks them on 2020-2023 only, then checks the
+winners on 2024-2026 data they never saw (out-of-sample). Variants:
+  entries : 20-day breakout, 50-day breakout, 52-week-high breakout, pullback to 50-EMA, oversold bounce
+  filters : basic (liquidity + Nifty above 200-day avg) or full (+ weekly uptrend, RS top 30%, avoid list)
+  stops   : 1.5x or 2x the 14-day average true range below entry (max 10%); size keeps Rs risk fixed
+  exits   : +7.5% target | 2R target | trailing (close below 20-EMA); breakeven at +1R; time limit
+Round-1 notes kept below for reference.
+
 
 Rules (same as the planned scanner):
   setups   : breakout (20-day high on 1.5x volume from a tight base), pullback (bounce off the
@@ -24,7 +34,8 @@ import pandas as pd
 
 ROOT = Path(__file__).resolve().parent.parent
 IST = timezone(timedelta(hours=5, minutes=30))
-P = dict(target=0.075, max_risk=0.04, min_risk=0.02, be_at=0.04, max_days=15, cost=0.003,
+SPLIT = "2024-01-01"   # signals before this date choose the rules; after it they only test them
+P = dict(target=0.075, max_risk=0.10, min_risk=0.02, be_at=0.04, max_days=25, trail_days=40, cost=0.003,
          capital=250000, risk=0.01, max_open=4, max_sector=2, month_stop=-0.06, pos_cap=0.25,
          min_turnover=5e7, min_price=20, rs_min=70)
 LISTS = {"Large": "ind_nifty100list.csv", "Mid": "ind_niftymidcap150list.csv", "Small": "ind_niftysmallcap250list.csv"}
@@ -100,101 +111,90 @@ def rsi(c, n=14):
 
 
 # ------------------------------------------------------------------ signals
-def build_signals(px, nifty, sector_close, uni):
-    """All frames are dates x symbols. Everything uses data up to and including the signal day."""
+def build(px, nifty):
     C, O, H, L, V = px["Close"], px["Open"], px["High"], px["Low"], px["Volume"]
     ema20, ema50 = C.ewm(span=20, adjust=False).mean(), C.ewm(span=50, adjust=False).mean()
     sma200 = C.rolling(200).mean()
     R = rsi(C)
-    avgvol = V.rolling(20).mean().shift(1)
+    pc = C.shift(1)
+    tr = np.maximum(np.maximum(H - L, (H - pc).abs()), (L - pc).abs())
+    atr = tr.ewm(alpha=1 / 14, adjust=False).mean()
+    vr = V / V.rolling(20).mean().shift(1)
     turnover = (C * V).rolling(20).mean()
-    hh20 = H.rolling(20).max().shift(1)
     base = (H.rolling(15).max() - L.rolling(15).min()).shift(1) / C.shift(1)
     high252 = H.rolling(252, min_periods=120).max()
 
-    # weekly trend from the last COMPLETED week
     W = C.resample("W-FRI").last()
     wup = ((W > W.rolling(30).mean()) & (W.rolling(10).mean() > W.rolling(30).mean())).shift(1)
     wup = wup.reindex(C.index, method="ffill").fillna(False).astype(bool)
-
     n = nifty.reindex(C.index).ffill()
     rel = lambda k: (C / C.shift(k) - 1).sub(n / n.shift(k) - 1, axis=0)
-    rs = ((rel(63).rank(axis=1, pct=True) + rel(126).rank(axis=1, pct=True)) / 2 * 100)
+    rs = (rel(63).rank(axis=1, pct=True) + rel(126).rank(axis=1, pct=True)) / 2 * 100
 
-    sec_up = pd.DataFrame(True, index=C.index, columns=C.columns)
-    for sym in C.columns:
-        ind = uni.loc[sym, "industry"] if sym in uni.index else None
-        sc = sector_close.get(SECTOR_INDEX.get(ind))
-        if sc is not None:
-            s = sc.reindex(C.index).ffill()
-            sec_up[sym] = (s > s.ewm(span=50, adjust=False).mean()).fillna(True)
+    full = lambda f: pd.DataFrame(np.repeat(f.fillna(False).values[:, None], C.shape[1], axis=1), index=C.index, columns=C.columns)
+    regime = full(n > n.rolling(200).mean())
+    liquid = ((turnover >= P["min_turnover"]) & (C >= P["min_price"])).fillna(False)
+    gap = (O / C.shift(1) - 1 > 0.04).fillna(False)
+    avoid = gap | (C / ema20 - 1 > 0.08).fillna(False) | (R > 75).fillna(False)
+    quality = wup & (rs >= P["rs_min"]).fillna(False)
+    trend = (C > ema50) & (ema50 > sma200)
 
-    breadth = (C > ema50).sum(axis=1) / C.notna().sum(axis=1)
-    regime = (n > n.ewm(span=50, adjust=False).mean()) & (breadth >= 0.5)
-
-    liquid = (turnover >= P["min_turnover"]) & (C >= P["min_price"])
-    gap = O / C.shift(1) - 1 > 0.04
-    avoid = gap | (C / ema20 - 1 > 0.08) | (R > 75)
-    quality = wup & (rs >= P["rs_min"]) & sec_up
-    vr = V / avgvol
-
-    setups = {
-        "Breakout": ((C > hh20) & (vr >= 1.5) & (base <= 0.15) & (C > ema50), L.rolling(5).min()),
-        "Pullback": ((C > ema50) & (ema50 > sma200) & (ema50 > ema50.shift(5)) & (L.rolling(3).min() <= ema50 * 1.015)
-                     & (C > H.shift(1)) & (R >= 40) & (R <= 65), L.rolling(3).min() * 0.995),
-        "Oversold bounce": ((R.shift(1) < 30) & (R > R.shift(1)) & (C > O) & (C > sma200), L * 0.995),
+    entries = {
+        "Breakout 20d": (C > H.rolling(20).max().shift(1)) & (vr >= 1.5) & (C > ema50),
+        "Breakout 50d": (C > H.rolling(50).max().shift(1)) & (vr >= 1.5) & trend,
+        "52-week high": (C > H.rolling(252, min_periods=200).max().shift(1)) & (vr >= 1.5),
+        "Pullback": trend & (ema50 > ema50.shift(5)) & (L.rolling(3).min() <= ema50 * 1.015) & (C > H.shift(1)) & (R >= 40) & (R <= 65),
+        "Oversold bounce": (R.shift(1) < 30) & (R > R.shift(1)) & (C > O) & (C > sma200),
     }
     score = (rs.fillna(0) * 0.30 + (vr.clip(upper=3) / 3).fillna(0) * 20 + (1 - base.clip(upper=0.15) / 0.15).fillna(0) * 15
              + ((ema50 / sma200 - 1).clip(0, 0.2) / 0.2).fillna(0) * 15 + (C / high252).fillna(0) * 20)
-    reg = pd.DataFrame(np.repeat(regime.fillna(False).values[:, None], C.shape[1], axis=1), index=C.index, columns=C.columns)
-    out = {}
-    for name, (raw, struct) in setups.items():
-        raw = raw.fillna(False).astype(bool) & liquid.fillna(False)
-        if name == "Oversold bounce":  # mean reversion: trend/RS filters don't apply; keep gap rule + regime
-            filt = raw & ~gap.fillna(False) & reg
-        else:
-            filt = raw & quality.fillna(False).astype(bool) & ~avoid.fillna(False) & reg
-        out[name] = {"raw": raw, "filtered": filt, "struct": struct}
-    return out, score, regime
+    sigs = {}
+    for name, e in entries.items():
+        e = e.fillna(False).astype(bool) & liquid & regime
+        sigs[(name, "basic")] = e & ~gap
+        sigs[(name, "full")] = e & ~gap if name == "Oversold bounce" else e & quality & ~avoid
+    return sigs, score, atr, ema20
 
 
 # ------------------------------------------------------------------ trade simulation
-def simulate(sig, struct, px, score, caps, industries):
-    """Next-day confirmation entry, then exits. Returns a list of trades."""
-    C, O, H, L = (px[k].values for k in ("Close", "Open", "High", "Low"))
+def simulate(sig, atr, k_atr, exit_mode, px, ema20, score, caps, industries):
+    """Next-day confirmation entry (above signal-day high), ATR stop, chosen exit."""
+    C, O, H, L = (px[f].values for f in ("Close", "Open", "High", "Low"))
+    A, E20, SC = atr.values, ema20.values, score.values
     dates, syms = px["Close"].index, px["Close"].columns
-    S, ST, SC = sig.values, struct.values, score.values
+    S = sig.values
+    max_days = P["trail_days"] if exit_mode == "trail" else P["max_days"]
     trades = []
     for i, j in zip(*np.nonzero(S[:-1])):
-        trig = H[i, j] * 1.001
-        e = i + 1
-        if not (H[e, j] >= trig) or np.isnan(O[e, j]):
-            continue  # confirmation failed
-        entry = max(O[e, j], trig)
-        stop = ST[i, j]
-        if np.isnan(stop):
+        trig, e = H[i, j] * 1.001, i + 1
+        if np.isnan(O[e, j]) or not (H[e, j] >= trig) or np.isnan(A[i, j]):
             continue
-        risk = (entry - stop) / entry
+        entry = max(O[e, j], trig)
+        risk = k_atr * A[i, j] / entry
         if risk > P["max_risk"]:
             continue
-        if risk < P["min_risk"]:
-            stop, risk = entry * (1 - P["min_risk"]), P["min_risk"]
-        target, cur_stop, how, k = entry * (1 + P["target"]), stop, None, e
-        for k in range(e, min(e + P["max_days"], len(dates))):
+        risk = max(risk, P["min_risk"])
+        stop = entry * (1 - risk)
+        target = entry * (1 + P["target"]) if exit_mode == "t75" else entry * (1 + 2 * risk) if exit_mode == "2r" else np.inf
+        be_level = entry * (1 + risk)  # breakeven after +1R
+        cur, how, k = stop, None, e
+        for k in range(e, min(e + max_days, len(dates))):
             o, h, l, c = O[k, j], H[k, j], L[k, j], C[k, j]
             if np.isnan(c):
                 continue
-            if k > e and o <= cur_stop:
-                px_out, how = o, "stop" if cur_stop < entry else "breakeven"; break
-            if l <= cur_stop:
-                px_out, how = cur_stop, "stop" if cur_stop < entry else "breakeven"; break
+            if k > e and o <= cur:
+                px_out, how = o, "stop" if cur < entry else "breakeven"; break
+            if l <= cur:
+                px_out, how = cur, "stop" if cur < entry else "breakeven"; break
             if h >= target:
                 px_out, how = (o if k > e and o > target else target), "target"; break
-            if h >= entry * (1 + P["be_at"]):
-                cur_stop = max(cur_stop, entry)
+            if exit_mode == "trail" and k > e and c < E20[k, j]:
+                px_out, how = c, "trail"; break
+            if h >= be_level:
+                cur = max(cur, entry)
         if how is None:
-            if k - e + 1 < P["max_days"] and k == len(dates) - 1:
-                continue  # still open at the end of data
+            if k == len(dates) - 1 and k - e + 1 < max_days:
+                continue
             px_out, how = C[k, j], "time"
         ret = px_out / entry - 1 - P["cost"]
         trades.append({"date": dates[e].strftime("%Y-%m-%d"), "exit": dates[k].strftime("%Y-%m-%d"), "symbol": syms[j],
@@ -260,35 +260,49 @@ def portfolio(trades):
 
 
 # ------------------------------------------------------------------ main
+EXITS = {"t75": "+7.5% target", "2r": "2R target", "trail": "Trailing 20-EMA"}
+
+
 def main():
     uni = load_universe().set_index("symbol")
     tickers = [s + ".NS" for s in uni.index]
-    extra = sorted(set(SECTOR_INDEX.values()) | {"^NSEI"})
-    data = download(tickers + extra)
+    data = download(tickers + ["^NSEI"])
     nifty = data["^NSEI"]["Close"]
     idx = nifty.index
-    sector_close = {t: data[t]["Close"] for t in extra if t in data}
     stocks = {t[:-3]: d for t, d in data.items() if t.endswith(".NS") and t[:-3] in uni.index}
     print(f"Stocks with enough history: {len(stocks)}")
     px = {f: wide(stocks, f, idx) for f in ("Open", "High", "Low", "Close", "Volume")}
-    sigs, score, regime = build_signals(px, nifty, sector_close, uni)
+    sigs, score, atr, ema20 = build(px, nifty)
     caps, inds = uni["cap"].to_dict(), uni["industry"].to_dict()
 
-    result = {"generated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "params": P,
+    variants = []
+    for (entry, filt), sig in sigs.items():
+        for k_atr in (1.5, 2.0):
+            for ex in EXITS:
+                tr = simulate(sig, atr, k_atr, ex, px, ema20, score, caps, inds)
+                ins, oos = [t for t in tr if t["date"] < SPLIT], [t for t in tr if t["date"] >= SPLIT]
+                v = {"name": f"{entry} · {filt} filters · {k_atr}x ATR stop · {EXITS[ex]}", "entry": entry, "filters": filt,
+                     "atr": k_atr, "exit": ex, "in_sample": stats(ins), "out_of_sample": stats(oos), "all": stats(tr),
+                     "by_cap_oos": {c: stats([t for t in oos if t["cap"] == c]) for c in ("Large", "Mid", "Small")}, "_trades": tr}
+                variants.append(v)
+                print(f"{v['name']:<72} in {v['in_sample'].get('avg_r', '-')}R/{len(ins)}  out {v['out_of_sample'].get('avg_r', '-')}R/{len(oos)}")
+
+    # choose on in-sample only: enough trades and positive edge, ranked by edge x sqrt(trades)
+    cand = [v for v in variants if v["in_sample"].get("trades", 0) >= 30 and v["in_sample"]["avg_r"] > 0.1]
+    cand.sort(key=lambda v: -v["in_sample"]["avg_r"] * np.sqrt(v["in_sample"]["trades"]))
+    picked = cand[:5]
+    passed = [v for v in picked if v["out_of_sample"].get("trades", 0) >= 20 and v["out_of_sample"]["avg_r"] > 0.1]
+
+    result = {"generated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "params": P, "split": SPLIT,
               "period": [idx[0].strftime("%Y-%m-%d"), idx[-1].strftime("%Y-%m-%d")], "stocks": len(stocks),
-              "regime_up_pct": round(regime.mean() * 100, 1), "setups": {}}
-    all_filtered = []
-    for name, s in sigs.items():
-        raw = simulate(s["raw"], s["struct"], px, score, caps, inds)
-        flt = simulate(s["filtered"], s["struct"], px, score, caps, inds)
-        all_filtered += [{**t, "setup": name} for t in flt]
-        by = lambda key: {k: stats([t for t in flt if t[key] == k]) for k in sorted({t[key] for t in flt})}
-        result["setups"][name] = {"no_filters": stats(raw), "with_filters": stats(flt), "by_cap": by("cap"),
-                                  "by_year": {y: stats([t for t in flt if t["date"][:4] == y]) for y in sorted({t["date"][:4] for t in flt})}}
-        print(f"{name}: raw {stats(raw).get('avg_r')}R over {len(raw)} | filtered {stats(flt).get('avg_r')}R over {len(flt)}")
-    good = [n for n, v in result["setups"].items() if v["with_filters"].get("trades", 0) >= 30 and v["with_filters"]["avg_r"] > 0.1]
-    result["enabled"] = good
-    result["portfolio"] = portfolio(sorted([t for t in all_filtered if t["setup"] in good], key=lambda t: t["date"]))
+              "variants_tested": len(variants), "picked_in_sample": [v["name"] for v in picked], "passed": [v["name"] for v in passed]}
+    if passed:
+        best = passed[0]
+        result["best"] = {k: v for k, v in best.items() if k != "_trades"}
+        result["portfolio_all"] = portfolio(sorted(best["_trades"], key=lambda t: t["date"]))
+        result["portfolio_oos"] = portfolio(sorted([t for t in best["_trades"] if t["date"] >= SPLIT], key=lambda t: t["date"]))
+    result["variants"] = sorted([{k: v for k, v in x.items() if k != "_trades"} for x in variants],
+                                key=lambda v: -(v["in_sample"].get("avg_r") or -9))
     (ROOT / "backtest.json").write_text(json.dumps(result, default=float, indent=1))
     md = summary(result)
     (ROOT / "backtest_summary.md").write_text(md)
@@ -299,20 +313,20 @@ def main():
 
 
 def summary(r):
-    L = [f"# Swing backtest · {r['period'][0]} to {r['period'][1]} · {r['stocks']} stocks\n",
-         "| Setup | Filters | Trades | Win % | Avg win | Avg loss | Avg per trade | Worst streak |", "|---|---|---|---|---|---|---|---|"]
-    for n, v in r["setups"].items():
-        for k, lab in (("no_filters", "none"), ("with_filters", "all")):
-            s = v[k]
-            if s.get("trades"):
-                L.append(f"| {n} | {lab} | {s['trades']} | {s['win_pct']}% | {s['avg_win_pct']}% | {s['avg_loss_pct']}% | {s['avg_r']}R ({s['avg_ret_pct']}%) | {s['worst_streak']} |")
-    p = r["portfolio"]
-    L.append(f"\n**Enabled setups:** {', '.join(r['enabled']) or 'none'}\n")
-    if p.get("trades"):
-        L.append(f"**Portfolio (Rs 2.5L, 1% risk, max 4 open):** {p['trades']} trades, win {p['win_pct']}%, "
-                 f"total {p['total_pct']}%, CAGR {p['cagr_pct']}%, max drawdown {p['max_dd_pct']}%")
-        L.append("\n| Year | Return |\n|---|---|\n" + "\n".join(f"| {y} | {v}% |" for y, v in p["by_year_pct"].items()))
-    L.append("\n_Costs 0.3% per trade included. Uses today's index members (survivorship bias: past results look somewhat better than reality). Delivery %, results dates and ASM lists are not in the backtest._\n")
+    f = lambda s: f"{s['trades']} · {s['win_pct']}% · {s['avg_r']}R" if s.get("trades") else "–"
+    L = [f"# Swing backtest round 2 · {r['period'][0]} to {r['period'][1]} · {r['stocks']} stocks · {r['variants_tested']} variants\n",
+         f"Rules chosen on signals before {r['split']}; checked on {r['split']} onwards (unseen).\n",
+         "## Top 15 variants by 2020–23 results\n", "| Variant | 2020–23 (trades · win · avg) | 2024–26 unseen | Exits 2024–26 |", "|---|---|---|---|"]
+    for v in r["variants"][:15]:
+        ex = ", ".join(f"{k} {x}%" for k, x in v["out_of_sample"].get("exits_pct", {}).items())
+        L.append(f"| {v['name']} | {f(v['in_sample'])} | {f(v['out_of_sample'])} | {ex} |")
+    L.append(f"\n**Picked on 2020–23:** {len(r['picked_in_sample'])} · **Passed on unseen 2024–26:** {', '.join(r['passed']) or 'none'}\n")
+    for key, lab in (("portfolio_all", "Portfolio 2020–26"), ("portfolio_oos", "Portfolio 2024–26 only (unseen)")):
+        p = r.get(key)
+        if p and p.get("trades"):
+            L.append(f"**{lab} (Rs 2.5L, 1% risk, max 4 open):** {p['trades']} trades, win {p['win_pct']}%, total {p['total_pct']}%, "
+                     f"CAGR {p['cagr_pct']}%, max drawdown {p['max_dd_pct']}% · by year: " + ", ".join(f"{y} {x}%" for y, x in p["by_year_pct"].items()))
+    L.append("\n_Costs 0.3% per trade included. Today's index members (survivorship bias). Delivery %, results dates and ASM lists not tested._\n")
     return "\n".join(L)
 
 
