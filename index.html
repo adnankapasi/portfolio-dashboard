@@ -422,13 +422,14 @@ function renderHealth() {
 }
 
 function renderMarket() {
+  setTimeout(() => $("tab-market").querySelectorAll("[data-metal]").forEach(el => el.onclick = () => openMetals(el.dataset.metal)), 0);
   const M = D.market || [], by = k => M.filter(m => m.kind === k);
   const card = m => `<div class="mini"><span class="mute">${esc(m.name)}</span><b>${num(m.close)} <span class="${cls(m.day_pct)}" style="font-size:12px">${pc(m.day_pct)}</span></b>
     ${line(m.spark || [], {h: 30})}${(m.levels || []).map(l => `<div class="faint">${esc(l.label)} ${num(l.value, 0)} ${m.close >= l.value ? "✅" : "⚠️"}</div>`).join("")}</div>`;
   const b = D.breadth, mv = D.movers;
   const mrow = x => `<div class="row"><span>${esc(x.symbol)}</span><span>${num(x.close)} <span class="${cls(x.chg)}">${pc(x.chg)}</span></span></div>`;
-  $("tab-market").innerHTML = `
-  <div class="g2">${[...by("index"), ...by("fx")].map(card).join("")}</div>
+  $("tab-market").innerHTML = `${metalsCard()}
+  <h2>Indices</h2><div class="g2">${[...by("index"), ...by("fx")].map(card).join("")}</div>
   ${b ? `<h2>NSE breadth</h2><div class="card"><div class="bar"><div style="width:${b.up / (b.up + b.down + b.flat) * 100}%;background:var(--up)"></div><div style="width:${b.down / (b.up + b.down + b.flat) * 100}%;background:var(--dn)"></div></div>
     <div style="display:flex;justify-content:space-between;margin-top:6px" class="mute"><span class="pos">${b.up.toLocaleString("en-IN")} up</span><span>${b.flat} flat</span><span class="neg">${b.down.toLocaleString("en-IN")} down</span></div></div>` : ""}
   ${mv ? `<div class="g2"><div class="card" style="margin:0"><div class="mute">NSE top gainers</div>${mv.gainers.map(mrow).join("")}</div>
@@ -571,6 +572,81 @@ function openScan(sym) {
   $("back").onclick = () => history.back(); history.pushState({d: 1}, "");
 }
 
+// ---------- gold & silver outlook
+let MET = "gold";
+const LABC = {Positive: "a-g", Favourable: "a-g", Negative: "a-r", Unfavourable: "a-r", Neutral: "a-n", "No data": "a-n"};
+const EFF = {help: ["Helping", "b-add"], hurt: ["Hurting", "b-exit"], neutral: ["Neutral", "b-noadd"]};
+function metalsCard() {
+  const X = D.metals;
+  if (!X || X.error) return `<div class="alert a-a"><span>⚠</span><div>${esc(X?.error || "Gold and silver outlook appears after the next daily update.")}</div></div>`;
+  const s = m => { const h = X[m].horizons; return `<div class="mini click" data-metal="${m}"><span class="mute">${m === "gold" ? "Gold" : "Silver"} · $${num(X[m].price_usd)}</span>
+    <div style="font-size:12px;margin-top:4px">${h.slice(0, 2).map(x => `<div>${x.horizon}: <b class="${{Positive: "pos", Negative: "neg"}[x.label] || ""}">${x.label}</b></div>`).join("")}</div></div>`; };
+  return `<h2>Gold &amp; silver outlook <span class="faint">· tap for details</span></h2><div class="g2">${s("gold")}${s("silver")}</div>`;
+}
+function openMetals(metal) {
+  MET = metal || MET; renderMetals();
+  $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden"; history.pushState({d: 1}, "");
+}
+function renderMetals() {
+  const X = D.metals, m = X[MET], A = X.advice || {}, nm = MET === "gold" ? "Gold" : "Silver";
+  const help = m.drivers.filter(d => d.effect === "help").length, hurt = m.drivers.filter(d => d.effect === "hurt").length;
+  const tr = (h, t) => { if (!t) return ""; const months = h === "1–3 months" ? 3 : 12, ind = Math.round(t.months / months);
+    const box = (k, lab) => { const v = t[k]; return `<div class="alert ${LABC[k] || "a-n"}" style="display:block;text-align:center;margin:0;padding:8px 4px"><div style="font-size:11px">${lab}</div>
+      <b>${v && v.avg_pct != null ? pc(v.avg_pct, 1) : "–"}</b><div style="font-size:10.5px">${v ? v.n : 0} months · up ${v && v.up_pct != null ? v.up_pct + "%" : "–"}</div></div>`; };
+    return `<div style="margin-bottom:12px"><div class="mute" style="margin-bottom:4px">${h} outlook → ${nm.toLowerCase()} return over the next ${h === "1–3 months" ? "3" : "12"} months · ${t.from}–${t.to}</div>
+    <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${box("Positive", "After Positive")}${box("Neutral", "After Neutral")}${box("Negative", "After Negative")}
+    <div class="alert a-b" style="display:block;text-align:center;margin:0;padding:8px 4px"><div style="font-size:11px">All months</div><b>${pc(t.all.avg_pct, 1)}</b><div style="font-size:10.5px">up ${t.all.up_pct}%</div></div></div>
+    <div class="faint" style="margin-top:4px">About ${ind} independent ${months}-month periods: gaps of a few % can be luck. The signal is useful only if "After Positive" is clearly above "After Negative".</div></div>`; };
+  const hold = (A.holdings || []).filter(h => h.metal === MET);
+  $("detailBody").innerHTML = `
+  <div class="top"><button class="btn2" id="back">← Back</button><span class="faint">${esc(X.date)} close</span></div>
+  <div class="seg" id="metseg" style="margin-bottom:10px">${["gold", "silver"].map(k => `<button class="${k === MET ? "on" : ""}" data-m="${k}">${k === "gold" ? "Gold" : "Silver"}</button>`).join("")}</div>
+  <div class="card"><div style="display:flex;justify-content:space-between;align-items:center;gap:10px"><div>
+    <div class="big">$${num(m.price_usd)}<span class="mute" style="font-size:13px"> /oz</span></div>
+    <div class="mute">${m.price_inr ? `≈ ${inr(m.price_inr)} per ${m.inr_unit} (before duty and GST)` : ""}</div>
+    <div style="font-size:12.5px;margin-top:2px"><span class="${cls(m.day_pct)}">${pc(m.day_pct)} today</span> · <span class="${cls(m.chg_1m)}">${pc(m.chg_1m, 1)} 1 month</span> · <span class="${cls(m.chg_1y)}">${pc(m.chg_1y, 1)} 1 year</span></div>
+    <div class="faint">1-year range $${num(m.low_1y, 0)} – $${num(m.high_1y, 0)} · gold/silver ratio ${X.ratio}</div></div>
+    <div style="width:120px;flex:none">${line(m.spark, {h: 50})}</div></div></div>
+  <h2>Outlook</h2>
+  <div class="g2">${m.horizons.map(h => `<div class="alert ${LABC[h.label]}" style="display:block;margin:0"><div style="font-size:11.5px;opacity:.85">${h.horizon}</div>
+    <div style="font-size:16px;font-weight:700">${h.label}</div><div style="font-size:11px;opacity:.85">Confidence: ${h.confidence}${h.score != null ? ` · score ${h.score > 0 ? "+" : ""}${h.score}` : ""}</div></div>`).join("")}</div>
+  <div class="faint" style="margin:6px 2px">Each outlook combines the drivers that matter for that horizon (score −1 to +1). 1–2 and 3–5 year views can't be tested on history: treat them as background, not forecasts.</div>
+  <h2>Drivers · ${help} helping, ${hurt} hurting <span class="faint">(tap for why)</span></h2>
+  <div class="card" style="padding:4px 14px">${m.drivers.map((d, i) => `<div class="row click" data-dr="${i}"><div><div style="font-weight:600">${esc(d.name)}</div><div class="faint">${esc(d.value)}</div>
+    <div class="faint hidden" id="why${i}" style="margin-top:4px;color:var(--mute)">${esc(d.why)}</div></div><span class="badge ${EFF[d.effect][1]}">${EFF[d.effect][0]}</span></div>`).join("")}</div>
+  <h2>What it means for you</h2>
+  <div class="card">${hold.length ? hold.map(h => `<div class="row"><span><b>${esc(h.symbol)}</b> <span class="tag">${h.broker}</span> ${h.qty} units</span><span class="${cls(h.pnl_pct)}">${pc(h.pnl_pct, 1)}</span></div>`).join("") : `<div class="mute">You don't hold ${nm.toLowerCase()} right now.</div>`}
+    ${A.weight_pct != null ? `<div class="faint" style="margin-top:6px">Gold + silver is <b>${A.weight_pct}%</b> of your total portfolio (guideline 10–15%).</div>` : ""}
+    <div class="alert a-b" style="margin-top:8px"><span>💡</span><div>${esc(A[MET] || "")}</div></div></div>
+  <h2>News</h2><div class="card" style="padding:4px 14px">${(X.news || []).filter(n => n.metal === MET || n.metal === "both").slice(0, 10).map(n => `<div class="row" style="display:block">
+    ${n.tags.map(t => `<span class="tag" style="margin:0 4px 0 0">${esc(t)}</span>`).join("")}<a href="${esc(n.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none">${esc(n.title)}</a>
+    <span class="faint"> · ${esc(n.date)}</span></div>`).join("") || `<div class="mute" style="padding:10px 0">No headlines today.</div>`}</div>
+  <div class="faint" style="margin:4px 2px">Headlines are for context: they don't change the outlook automatically.</div>
+  ${MET === "gold" ? `<h2>Central bank buying (update quarterly)</h2><div class="card">
+    <div class="mute">${X.manual?.cb_tonnes ? `Last entry: ${X.manual.cb_tonnes} t in ${esc(X.manual.cb_quarter || "")}, ${X.manual.cb_yoy > 0 ? "+" : ""}${X.manual.cb_yoy}% vs a year ago (updated ${esc(X.manual.cb_date || "")})` : "Not entered yet. Find it in the World Gold Council's quarterly Gold Demand Trends report."}</div>
+    <div class="g2" style="margin-top:8px"><label class="mute">Tonnes bought<input type="text" inputmode="decimal" id="cb_t" placeholder="321"></label>
+      <label class="mute">Change vs a year ago (%)<input type="text" inputmode="decimal" id="cb_y" placeholder="42"></label></div>
+    <label class="mute" style="display:block;margin-top:8px">Quarter<input type="text" id="cb_q" placeholder="Jul–Sep 2026"></label>
+    <button class="btn" id="cb_save" style="margin-top:10px">Save</button><div id="cb_msg" class="mute" style="margin-top:6px"></div></div>` : ""}
+  <h2>Did the outlook work in the past?</h2><div class="card">${Object.entries(m.track || {}).map(([h, t]) => tr(h, t)).join("") || `<div class="mute">Not enough history yet.</div>`}</div>
+  <div class="faint" style="margin:6px 2px">Driver weights were set from economic reasoning before testing, not tuned to fit history. Sources: Yahoo, US Federal Reserve (FRED), CFTC, SPDR, Google News. Not financial advice.</div>`;
+  $("back").onclick = () => history.back();
+  $("metseg").onclick = e => { const k = e.target.dataset.m; if (k) { MET = k; renderMetals(); } };
+  $("detailBody").querySelectorAll("[data-dr]").forEach(r => r.onclick = () => $("why" + r.dataset.dr).classList.toggle("hidden"));
+  if ($("cb_save")) $("cb_save").onclick = async () => {
+    const t = parseFloat($("cb_t").value), y = parseFloat($("cb_y").value), q = $("cb_q").value.trim();
+    if (!(t >= 0) || isNaN(y) || !q) { $("cb_msg").innerHTML = `<span class="err">Fill in tonnes, change % and quarter.</span>`; return; }
+    if (!store.get("dash_token")) { $("cb_msg").innerHTML = `<span class="err">Saving needs your GitHub token: add it once in Import (top right).</span>`; return; }
+    try {
+      $("cb_msg").textContent = "Saving…";
+      const file = await gh("contents/holdings.enc.json"), cfg = await decrypt(JSON.parse(atob(file.content.replace(/\n/g, ""))), PW);
+      cfg.metals = {cb_tonnes: t, cb_yoy: y, cb_quarter: q, cb_date: new Date().toISOString().slice(0, 10), cb_signal: y > 10 ? 1 : y < -10 ? -1 : 0};
+      await gh("contents/holdings.enc.json", {method: "PUT", body: JSON.stringify({message: "Update central bank buying", sha: file.sha, content: btoa(JSON.stringify(await encrypt(cfg, PW)))})});
+      $("cb_msg").innerHTML = `<span class="pos">Saved. The outlook updates in about 2 minutes.</span>`;
+    } catch (err) { $("cb_msg").innerHTML = `<span class="err">${esc(err.message)}</span>`; }
+  };
+}
+
 // ---------- detail
 function openDetail(sym, push = true) {
   const P = D.holdings.filter(h => h.symbol === sym); if (!P.length) return;
@@ -604,6 +680,7 @@ function openDetail(sym, push = true) {
     ${stat("52-week range", `${num(h.low52, 0)} – ${num(h.high52, 0)}`)}${stat("From 52w high", pc((h.close / h.high52 - 1) * 100, 1), "neg")}
     ${stat("RSI · ADX", `${num(h.rsi, 1)} · ${num(h.adx, 1)}`)}${stat("Supertrend", h.st_dir === 1 ? `▲ ${num(h.st_level)}` : h.st_dir === -1 ? `▼ ${num(h.st_level)}` : "–")}
   </div>
+  ${h.group === "Gold / Silver" && D.metals && !D.metals.error ? `<button class="btn2" id="metlink" style="width:100%;margin-top:6px">See the ${/SILVER/.test(sym) ? "silver" : "gold"} outlook →</button>` : ""}
   ${h.group !== "Gold / Silver" ? `<h2>Fundamentals</h2><div class="card" style="padding:4px 14px">
     <div class="row"><span>Market cap</span><b>${f.mcap_cr ? "₹" + Math.round(f.mcap_cr).toLocaleString("en-IN") + " cr" : "–"} ${h.cap ? `<span class="tag">${h.cap}</span>` : ""}</b></div>
     <div class="row"><span>P/E</span><b>${num(f.pe, 1)}</b></div><div class="row"><span>P/B</span><b>${num(f.pb, 1)}</b></div>
@@ -620,6 +697,7 @@ function openDetail(sym, push = true) {
       + (["noadd", "exit"].includes(h.sig) ? `<div class="err" style="grid-column:1/-1">Signal says don't add right now: ${esc(act(h).t.toLowerCase())}.</div>` : "")
       + (nw > 10 ? `<div class="err" style="grid-column:1/-1">This would make ${esc(sym)} over 10% of your portfolio.</div>` : ""); };
   $("amt").oninput = calc; calc();
+  if ($("metlink")) $("metlink").onclick = () => { MET = /SILVER/.test(sym) ? "silver" : "gold"; renderMetals(); $("detail").scrollTop = 0; };
   $("detailBody").querySelectorAll(".swtog").forEach(el => el.onchange = () => { el.checked ? SWING.add(el.dataset.k) : SWING.delete(el.dataset.k);
     store.set("dash_swing", JSON.stringify([...SWING])); const y = $("detail").scrollTop; go(TAB); openDetail(sym, false); $("detail").scrollTop = y; });
   $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden";
