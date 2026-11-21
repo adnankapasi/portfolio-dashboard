@@ -1,0 +1,35 @@
+name: Swing backtest
+
+on:
+  workflow_dispatch: {}
+  schedule:
+    # 1st of every month, 6:00 AM IST: refresh results with the latest data
+    - cron: "30 0 1 * *"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: dashboard-update
+  cancel-in-progress: false
+
+jobs:
+  backtest:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install yfinance pandas numpy requests
+      - run: python scripts/backtest.py
+      - name: Commit results
+        run: |
+          git config user.name "dashboard-bot"
+          git config user.email "dashboard-bot@users.noreply.github.com"
+          git add backtest.json backtest_summary.md scripts/universe_cache.csv
+          git diff --cached --quiet && exit 0
+          git commit -m "Backtest results"
+          git pull --rebase -X theirs || true
+          git push
