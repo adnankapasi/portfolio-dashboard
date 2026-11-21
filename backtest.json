@@ -1,11 +1,12 @@
 {
- "generated": "21 Nov 2026, 02:34 PM IST",
+ "generated": "21 Nov 2026, 03:38 PM IST",
  "params": {
   "target": 0.075,
-  "max_risk": 0.04,
+  "max_risk": 0.1,
   "min_risk": 0.02,
   "be_at": 0.04,
-  "max_days": 15,
+  "max_days": 25,
+  "trail_days": 40,
   "cost": 0.003,
   "capital": 250000,
   "risk": 0.01,
@@ -17,555 +18,6652 @@
   "min_price": 20,
   "rs_min": 70
  },
+ "split": "2024-01-01",
  "period": [
   "2020-11-20",
   "2026-11-20"
  ],
  "stocks": 481,
- "regime_up_pct": 58.8,
- "setups": {
-  "Breakout": {
-   "no_filters": {
-    "trades": 135,
-    "win_pct": 40.0,
-    "avg_win_pct": 4.1,
-    "avg_loss_pct": -2.82,
-    "avg_ret_pct": -0.05,
-    "avg_r": -0.03,
-    "profit_factor": 0.97,
+ "variants_tested": 60,
+ "picked_in_sample": [
+  "Breakout 20d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+  "Breakout 50d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+  "Breakout 20d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+  "Pullback \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+  "Pullback \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA"
+ ],
+ "passed": [],
+ "variants": [
+  {
+   "name": "Breakout 50d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 50d",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 2810,
+    "win_pct": 27.6,
+    "avg_win_pct": 18.25,
+    "avg_loss_pct": -4.17,
+    "avg_ret_pct": 2.01,
+    "avg_r": 0.32,
+    "profit_factor": 1.67,
     "median_days": 11,
-    "worst_streak": 7,
+    "worst_streak": 108,
     "exits_pct": {
-     "stop": 40.7,
-     "time": 34.8,
-     "target": 14.8,
-     "breakeven": 9.6
+     "stop": 38.3,
+     "trail": 30.5,
+     "breakeven": 23.8,
+     "time": 7.4
     }
    },
-   "with_filters": {
-    "trades": 14,
-    "win_pct": 35.7,
-    "avg_win_pct": 2.15,
-    "avg_loss_pct": -2.23,
-    "avg_ret_pct": -0.66,
-    "avg_r": -0.22,
-    "profit_factor": 0.54,
+   "out_of_sample": {
+    "trades": 2099,
+    "win_pct": 25.8,
+    "avg_win_pct": 12.63,
+    "avg_loss_pct": -4.26,
+    "avg_ret_pct": 0.1,
+    "avg_r": 0.02,
+    "profit_factor": 1.03,
     "median_days": 10,
-    "worst_streak": 4,
+    "worst_streak": 110,
     "exits_pct": {
-     "stop": 35.7,
-     "time": 35.7,
-     "breakeven": 21.4,
-     "target": 7.1
+     "stop": 37.4,
+     "trail": 34.5,
+     "breakeven": 23.4,
+     "time": 4.7
     }
    },
-   "by_cap": {
+   "all": {
+    "trades": 4909,
+    "win_pct": 26.8,
+    "avg_win_pct": 15.94,
+    "avg_loss_pct": -4.21,
+    "avg_ret_pct": 1.2,
+    "avg_r": 0.19,
+    "profit_factor": 1.39,
+    "median_days": 11,
+    "worst_streak": 108,
+    "exits_pct": {
+     "stop": 37.9,
+     "trail": 32.2,
+     "breakeven": 23.7,
+     "time": 6.3
+    }
+   },
+   "by_cap_oos": {
     "Large": {
-     "trades": 8,
-     "win_pct": 50.0,
-     "avg_win_pct": 0.89,
-     "avg_loss_pct": -2.83,
-     "avg_ret_pct": -0.97,
-     "avg_r": -0.33,
-     "profit_factor": 0.31,
-     "median_days": 15,
-     "worst_streak": 3,
+     "trades": 526,
+     "win_pct": 26.2,
+     "avg_win_pct": 10.94,
+     "avg_loss_pct": -3.46,
+     "avg_ret_pct": 0.32,
+     "avg_r": 0.06,
+     "profit_factor": 1.13,
+     "median_days": 12,
+     "worst_streak": 47,
      "exits_pct": {
-      "time": 62.5,
-      "stop": 37.5
+      "stop": 36.1,
+      "trail": 34.0,
+      "breakeven": 23.8,
+      "time": 6.1
      }
     },
     "Mid": {
-     "trades": 4,
-     "win_pct": 25.0,
-     "avg_win_pct": 7.2,
-     "avg_loss_pct": -2.71,
-     "avg_ret_pct": -0.23,
-     "avg_r": -0.05,
-     "profit_factor": 0.89,
+     "trades": 698,
+     "win_pct": 27.4,
+     "avg_win_pct": 12.54,
+     "avg_loss_pct": -4.16,
+     "avg_ret_pct": 0.41,
+     "avg_r": 0.08,
+     "profit_factor": 1.14,
      "median_days": 10,
-     "worst_streak": 2,
+     "worst_streak": 46,
+     "exits_pct": {
+      "stop": 37.5,
+      "trail": 35.8,
+      "breakeven": 21.6,
+      "time": 5.0
+     }
+    },
+    "Small": {
+     "trades": 875,
+     "win_pct": 24.3,
+     "avg_win_pct": 13.81,
+     "avg_loss_pct": -4.8,
+     "avg_ret_pct": -0.27,
+     "avg_r": -0.06,
+     "profit_factor": 0.93,
+     "median_days": 10,
+     "worst_streak": 48,
+     "exits_pct": {
+      "stop": 38.1,
+      "trail": 33.8,
+      "breakeven": 24.6,
+      "time": 3.5
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "52-week high",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 2004,
+    "win_pct": 27.6,
+    "avg_win_pct": 18.17,
+    "avg_loss_pct": -4.23,
+    "avg_ret_pct": 1.96,
+    "avg_r": 0.3,
+    "profit_factor": 1.64,
+    "median_days": 11,
+    "worst_streak": 71,
+    "exits_pct": {
+     "stop": 38.2,
+     "trail": 29.6,
+     "breakeven": 24.5,
+     "time": 7.7
+    }
+   },
+   "out_of_sample": {
+    "trades": 1567,
+    "win_pct": 26.2,
+    "avg_win_pct": 12.9,
+    "avg_loss_pct": -4.38,
+    "avg_ret_pct": 0.15,
+    "avg_r": 0.03,
+    "profit_factor": 1.05,
+    "median_days": 10,
+    "worst_streak": 94,
+    "exits_pct": {
+     "stop": 37.7,
+     "trail": 34.8,
+     "breakeven": 22.9,
+     "time": 4.5
+    }
+   },
+   "all": {
+    "trades": 3571,
+    "win_pct": 27.0,
+    "avg_win_pct": 15.92,
+    "avg_loss_pct": -4.29,
+    "avg_ret_pct": 1.17,
+    "avg_r": 0.19,
+    "profit_factor": 1.37,
+    "median_days": 11,
+    "worst_streak": 71,
+    "exits_pct": {
+     "stop": 38.0,
+     "trail": 31.9,
+     "breakeven": 23.8,
+     "time": 6.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 425,
+     "win_pct": 28.5,
+     "avg_win_pct": 10.58,
+     "avg_loss_pct": -3.6,
+     "avg_ret_pct": 0.44,
+     "avg_r": 0.09,
+     "profit_factor": 1.17,
+     "median_days": 12,
+     "worst_streak": 45,
+     "exits_pct": {
+      "trail": 36.2,
+      "stop": 35.8,
+      "breakeven": 22.8,
+      "time": 5.2
+     }
+    },
+    "Mid": {
+     "trades": 525,
+     "win_pct": 26.9,
+     "avg_win_pct": 13.46,
+     "avg_loss_pct": -4.25,
+     "avg_ret_pct": 0.51,
+     "avg_r": 0.1,
+     "profit_factor": 1.16,
+     "median_days": 10,
+     "worst_streak": 42,
+     "exits_pct": {
+      "stop": 37.9,
+      "trail": 35.2,
+      "breakeven": 21.9,
+      "time": 5.0
+     }
+    },
+    "Small": {
+     "trades": 617,
+     "win_pct": 24.1,
+     "avg_win_pct": 14.25,
+     "avg_loss_pct": -4.99,
+     "avg_ret_pct": -0.34,
+     "avg_r": -0.07,
+     "profit_factor": 0.91,
+     "median_days": 10,
+     "worst_streak": 38,
+     "exits_pct": {
+      "stop": 38.9,
+      "trail": 33.5,
+      "breakeven": 23.8,
+      "time": 3.7
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Oversold bounce",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 211,
+    "win_pct": 48.8,
+    "avg_win_pct": 8.68,
+    "avg_loss_pct": -4.84,
+    "avg_ret_pct": 1.76,
+    "avg_r": 0.29,
+    "profit_factor": 1.71,
+    "median_days": 17,
+    "worst_streak": 10,
+    "exits_pct": {
+     "stop": 32.7,
+     "time": 29.4,
+     "target": 23.7,
+     "breakeven": 14.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 297,
+    "win_pct": 31.6,
+    "avg_win_pct": 9.38,
+    "avg_loss_pct": -4.96,
+    "avg_ret_pct": -0.42,
+    "avg_r": -0.07,
+    "profit_factor": 0.88,
+    "median_days": 15,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 43.8,
+     "time": 24.6,
+     "breakeven": 16.2,
+     "target": 15.5
+    }
+   },
+   "all": {
+    "trades": 508,
+    "win_pct": 38.8,
+    "avg_win_pct": 9.01,
+    "avg_loss_pct": -4.92,
+    "avg_ret_pct": 0.48,
+    "avg_r": 0.08,
+    "profit_factor": 1.16,
+    "median_days": 15,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 39.2,
+     "time": 26.6,
+     "target": 18.9,
+     "breakeven": 15.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 67,
+     "win_pct": 29.9,
+     "avg_win_pct": 7.46,
+     "avg_loss_pct": -3.78,
+     "avg_ret_pct": -0.42,
+     "avg_r": -0.08,
+     "profit_factor": 0.84,
+     "median_days": 14,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 38.8,
+      "time": 22.4,
+      "breakeven": 22.4,
+      "target": 16.4
+     }
+    },
+    "Mid": {
+     "trades": 101,
+     "win_pct": 32.7,
+     "avg_win_pct": 9.28,
+     "avg_loss_pct": -5.17,
+     "avg_ret_pct": -0.45,
+     "avg_r": -0.06,
+     "profit_factor": 0.87,
+     "median_days": 17,
+     "worst_streak": 11,
+     "exits_pct": {
+      "stop": 45.5,
+      "time": 24.8,
+      "breakeven": 15.8,
+      "target": 13.9
+     }
+    },
+    "Small": {
+     "trades": 129,
+     "win_pct": 31.8,
+     "avg_win_pct": 10.39,
+     "avg_loss_pct": -5.43,
+     "avg_ret_pct": -0.4,
+     "avg_r": -0.07,
+     "profit_factor": 0.89,
+     "median_days": 15,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 45.0,
+      "time": 25.6,
+      "target": 16.3,
+      "breakeven": 13.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Oversold bounce",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 211,
+    "win_pct": 48.8,
+    "avg_win_pct": 8.68,
+    "avg_loss_pct": -4.84,
+    "avg_ret_pct": 1.76,
+    "avg_r": 0.29,
+    "profit_factor": 1.71,
+    "median_days": 17,
+    "worst_streak": 10,
+    "exits_pct": {
+     "stop": 32.7,
+     "time": 29.4,
+     "target": 23.7,
+     "breakeven": 14.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 297,
+    "win_pct": 31.6,
+    "avg_win_pct": 9.38,
+    "avg_loss_pct": -4.96,
+    "avg_ret_pct": -0.42,
+    "avg_r": -0.07,
+    "profit_factor": 0.88,
+    "median_days": 15,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 43.8,
+     "time": 24.6,
+     "breakeven": 16.2,
+     "target": 15.5
+    }
+   },
+   "all": {
+    "trades": 508,
+    "win_pct": 38.8,
+    "avg_win_pct": 9.01,
+    "avg_loss_pct": -4.92,
+    "avg_ret_pct": 0.48,
+    "avg_r": 0.08,
+    "profit_factor": 1.16,
+    "median_days": 15,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 39.2,
+     "time": 26.6,
+     "target": 18.9,
+     "breakeven": 15.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 67,
+     "win_pct": 29.9,
+     "avg_win_pct": 7.46,
+     "avg_loss_pct": -3.78,
+     "avg_ret_pct": -0.42,
+     "avg_r": -0.08,
+     "profit_factor": 0.84,
+     "median_days": 14,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 38.8,
+      "time": 22.4,
+      "breakeven": 22.4,
+      "target": 16.4
+     }
+    },
+    "Mid": {
+     "trades": 101,
+     "win_pct": 32.7,
+     "avg_win_pct": 9.28,
+     "avg_loss_pct": -5.17,
+     "avg_ret_pct": -0.45,
+     "avg_r": -0.06,
+     "profit_factor": 0.87,
+     "median_days": 17,
+     "worst_streak": 11,
+     "exits_pct": {
+      "stop": 45.5,
+      "time": 24.8,
+      "breakeven": 15.8,
+      "target": 13.9
+     }
+    },
+    "Small": {
+     "trades": 129,
+     "win_pct": 31.8,
+     "avg_win_pct": 10.39,
+     "avg_loss_pct": -5.43,
+     "avg_ret_pct": -0.4,
+     "avg_r": -0.07,
+     "profit_factor": 0.89,
+     "median_days": 15,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 45.0,
+      "time": 25.6,
+      "target": 16.3,
+      "breakeven": 13.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 20d",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 4802,
+    "win_pct": 27.8,
+    "avg_win_pct": 16.15,
+    "avg_loss_pct": -4.04,
+    "avg_ret_pct": 1.56,
+    "avg_r": 0.28,
+    "profit_factor": 1.54,
+    "median_days": 11,
+    "worst_streak": 176,
+    "exits_pct": {
+     "stop": 35.9,
+     "trail": 33.9,
+     "breakeven": 23.2,
+     "time": 7.0
+    }
+   },
+   "out_of_sample": {
+    "trades": 3824,
+    "win_pct": 24.8,
+    "avg_win_pct": 12.12,
+    "avg_loss_pct": -4.29,
+    "avg_ret_pct": -0.21,
+    "avg_r": -0.05,
+    "profit_factor": 0.93,
+    "median_days": 10,
+    "worst_streak": 94,
+    "exits_pct": {
+     "trail": 37.3,
+     "stop": 37.0,
+     "breakeven": 21.3,
+     "time": 4.4
+    }
+   },
+   "all": {
+    "trades": 8626,
+    "win_pct": 26.5,
+    "avg_win_pct": 14.48,
+    "avg_loss_pct": -4.15,
+    "avg_ret_pct": 0.78,
+    "avg_r": 0.14,
+    "profit_factor": 1.25,
+    "median_days": 10,
+    "worst_streak": 176,
+    "exits_pct": {
+     "stop": 36.4,
+     "trail": 35.4,
+     "breakeven": 22.3,
+     "time": 5.9
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 812,
+     "win_pct": 26.1,
+     "avg_win_pct": 10.45,
+     "avg_loss_pct": -3.36,
+     "avg_ret_pct": 0.25,
+     "avg_r": 0.05,
+     "profit_factor": 1.1,
+     "median_days": 12,
+     "worst_streak": 53,
+     "exits_pct": {
+      "trail": 37.6,
+      "stop": 34.2,
+      "breakeven": 22.3,
+      "time": 5.9
+     }
+    },
+    "Mid": {
+     "trades": 1237,
+     "win_pct": 24.2,
+     "avg_win_pct": 11.12,
+     "avg_loss_pct": -4.22,
+     "avg_ret_pct": -0.51,
+     "avg_r": -0.09,
+     "profit_factor": 0.84,
+     "median_days": 9,
+     "worst_streak": 62,
+     "exits_pct": {
+      "stop": 38.3,
+      "trail": 38.2,
+      "breakeven": 19.6,
+      "time": 3.9
+     }
+    },
+    "Small": {
+     "trades": 1775,
+     "win_pct": 24.7,
+     "avg_win_pct": 13.61,
+     "avg_loss_pct": -4.75,
+     "avg_ret_pct": -0.22,
+     "avg_r": -0.06,
+     "profit_factor": 0.94,
+     "median_days": 9,
+     "worst_streak": 40,
+     "exits_pct": {
+      "stop": 37.4,
+      "trail": 36.5,
+      "breakeven": 22.0,
+      "time": 4.1
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 50d",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 2914,
+    "win_pct": 20.4,
+    "avg_win_pct": 18.56,
+    "avg_loss_pct": -3.35,
+    "avg_ret_pct": 1.12,
+    "avg_r": 0.25,
+    "profit_factor": 1.42,
+    "median_days": 6,
+    "worst_streak": 146,
+    "exits_pct": {
+     "stop": 47.6,
+     "breakeven": 30.0,
+     "trail": 17.4,
+     "time": 5.1
+    }
+   },
+   "out_of_sample": {
+    "trades": 2208,
+    "win_pct": 19.7,
+    "avg_win_pct": 12.37,
+    "avg_loss_pct": -3.41,
+    "avg_ret_pct": -0.31,
+    "avg_r": -0.06,
+    "profit_factor": 0.89,
+    "median_days": 7,
+    "worst_streak": 151,
+    "exits_pct": {
+     "stop": 47.0,
+     "breakeven": 30.3,
+     "trail": 19.7,
+     "time": 3.0
+    }
+   },
+   "all": {
+    "trades": 5122,
+    "win_pct": 20.1,
+    "avg_win_pct": 15.95,
+    "avg_loss_pct": -3.38,
+    "avg_ret_pct": 0.5,
+    "avg_r": 0.12,
+    "profit_factor": 1.19,
+    "median_days": 6,
+    "worst_streak": 146,
+    "exits_pct": {
+     "stop": 47.3,
+     "breakeven": 30.1,
+     "trail": 18.4,
+     "time": 4.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 534,
+     "win_pct": 21.5,
+     "avg_win_pct": 11.38,
+     "avg_loss_pct": -2.92,
+     "avg_ret_pct": 0.16,
+     "avg_r": 0.02,
+     "profit_factor": 1.07,
+     "median_days": 8,
+     "worst_streak": 62,
+     "exits_pct": {
+      "stop": 47.2,
+      "breakeven": 27.9,
+      "trail": 20.0,
+      "time": 4.9
+     }
+    },
+    "Mid": {
+     "trades": 719,
+     "win_pct": 20.2,
+     "avg_win_pct": 11.46,
+     "avg_loss_pct": -3.21,
+     "avg_ret_pct": -0.25,
+     "avg_r": -0.04,
+     "profit_factor": 0.9,
+     "median_days": 7,
+     "worst_streak": 68,
+     "exits_pct": {
+      "stop": 45.1,
+      "breakeven": 30.2,
+      "trail": 22.1,
+      "time": 2.6
+     }
+    },
+    "Small": {
+     "trades": 955,
+     "win_pct": 18.2,
+     "avg_win_pct": 13.8,
+     "avg_loss_pct": -3.82,
+     "avg_ret_pct": -0.61,
+     "avg_r": -0.13,
+     "profit_factor": 0.8,
+     "median_days": 6,
+     "worst_streak": 61,
+     "exits_pct": {
+      "stop": 48.3,
+      "breakeven": 31.8,
+      "trail": 17.6,
+      "time": 2.3
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Oversold bounce",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 211,
+    "win_pct": 59.7,
+    "avg_win_pct": 6.44,
+    "avg_loss_pct": -5.83,
+    "avg_ret_pct": 1.5,
+    "avg_r": 0.25,
+    "profit_factor": 1.64,
+    "median_days": 12,
+    "worst_streak": 10,
+    "exits_pct": {
+     "target": 48.8,
+     "stop": 31.8,
+     "time": 14.7,
+     "breakeven": 4.7
+    }
+   },
+   "out_of_sample": {
+    "trades": 297,
+    "win_pct": 45.1,
+    "avg_win_pct": 6.84,
+    "avg_loss_pct": -5.86,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.03,
+    "profit_factor": 0.96,
+    "median_days": 11,
+    "worst_streak": 19,
+    "exits_pct": {
+     "stop": 42.4,
+     "target": 40.1,
+     "time": 13.1,
+     "breakeven": 4.4
+    }
+   },
+   "all": {
+    "trades": 508,
+    "win_pct": 51.2,
+    "avg_win_pct": 6.65,
+    "avg_loss_pct": -5.85,
+    "avg_ret_pct": 0.55,
+    "avg_r": 0.09,
+    "profit_factor": 1.19,
+    "median_days": 11,
+    "worst_streak": 19,
+    "exits_pct": {
+     "target": 43.7,
+     "stop": 38.0,
+     "time": 13.8,
+     "breakeven": 4.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 67,
+     "win_pct": 38.8,
+     "avg_win_pct": 6.12,
+     "avg_loss_pct": -4.29,
+     "avg_ret_pct": -0.25,
+     "avg_r": -0.05,
+     "profit_factor": 0.9,
+     "median_days": 12,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 38.8,
+      "target": 28.4,
+      "time": 19.4,
+      "breakeven": 13.4
+     }
+    },
+    "Mid": {
+     "trades": 101,
+     "win_pct": 45.5,
+     "avg_win_pct": 7.15,
+     "avg_loss_pct": -6.32,
+     "avg_ret_pct": -0.19,
+     "avg_r": -0.02,
+     "profit_factor": 0.95,
+     "median_days": 10,
+     "worst_streak": 8,
+     "exits_pct": {
+      "stop": 45.5,
+      "target": 43.6,
+      "time": 7.9,
+      "breakeven": 3.0
+     }
+    },
+    "Small": {
+     "trades": 129,
+     "win_pct": 48.1,
+     "avg_win_pct": 6.91,
+     "avg_loss_pct": -6.45,
+     "avg_ret_pct": -0.03,
+     "avg_r": -0.02,
+     "profit_factor": 0.99,
+     "median_days": 9,
+     "worst_streak": 9,
+     "exits_pct": {
+      "target": 43.4,
+      "stop": 41.9,
+      "time": 14.0,
+      "breakeven": 0.8
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Oversold bounce",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 211,
+    "win_pct": 59.7,
+    "avg_win_pct": 6.44,
+    "avg_loss_pct": -5.83,
+    "avg_ret_pct": 1.5,
+    "avg_r": 0.25,
+    "profit_factor": 1.64,
+    "median_days": 12,
+    "worst_streak": 10,
+    "exits_pct": {
+     "target": 48.8,
+     "stop": 31.8,
+     "time": 14.7,
+     "breakeven": 4.7
+    }
+   },
+   "out_of_sample": {
+    "trades": 297,
+    "win_pct": 45.1,
+    "avg_win_pct": 6.84,
+    "avg_loss_pct": -5.86,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.03,
+    "profit_factor": 0.96,
+    "median_days": 11,
+    "worst_streak": 19,
+    "exits_pct": {
+     "stop": 42.4,
+     "target": 40.1,
+     "time": 13.1,
+     "breakeven": 4.4
+    }
+   },
+   "all": {
+    "trades": 508,
+    "win_pct": 51.2,
+    "avg_win_pct": 6.65,
+    "avg_loss_pct": -5.85,
+    "avg_ret_pct": 0.55,
+    "avg_r": 0.09,
+    "profit_factor": 1.19,
+    "median_days": 11,
+    "worst_streak": 19,
+    "exits_pct": {
+     "target": 43.7,
+     "stop": 38.0,
+     "time": 13.8,
+     "breakeven": 4.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 67,
+     "win_pct": 38.8,
+     "avg_win_pct": 6.12,
+     "avg_loss_pct": -4.29,
+     "avg_ret_pct": -0.25,
+     "avg_r": -0.05,
+     "profit_factor": 0.9,
+     "median_days": 12,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 38.8,
+      "target": 28.4,
+      "time": 19.4,
+      "breakeven": 13.4
+     }
+    },
+    "Mid": {
+     "trades": 101,
+     "win_pct": 45.5,
+     "avg_win_pct": 7.15,
+     "avg_loss_pct": -6.32,
+     "avg_ret_pct": -0.19,
+     "avg_r": -0.02,
+     "profit_factor": 0.95,
+     "median_days": 10,
+     "worst_streak": 8,
+     "exits_pct": {
+      "stop": 45.5,
+      "target": 43.6,
+      "time": 7.9,
+      "breakeven": 3.0
+     }
+    },
+    "Small": {
+     "trades": 129,
+     "win_pct": 48.1,
+     "avg_win_pct": 6.91,
+     "avg_loss_pct": -6.45,
+     "avg_ret_pct": -0.03,
+     "avg_r": -0.02,
+     "profit_factor": 0.99,
+     "median_days": 9,
+     "worst_streak": 9,
+     "exits_pct": {
+      "target": 43.4,
+      "stop": 41.9,
+      "time": 14.0,
+      "breakeven": 0.8
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "52-week high",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 2103,
+    "win_pct": 20.4,
+    "avg_win_pct": 18.19,
+    "avg_loss_pct": -3.42,
+    "avg_ret_pct": 0.99,
+    "avg_r": 0.22,
+    "profit_factor": 1.37,
+    "median_days": 6,
+    "worst_streak": 98,
+    "exits_pct": {
+     "stop": 47.2,
+     "breakeven": 30.6,
+     "trail": 17.2,
+     "time": 5.0
+    }
+   },
+   "out_of_sample": {
+    "trades": 1660,
+    "win_pct": 19.9,
+    "avg_win_pct": 12.51,
+    "avg_loss_pct": -3.51,
+    "avg_ret_pct": -0.32,
+    "avg_r": -0.06,
+    "profit_factor": 0.89,
+    "median_days": 7,
+    "worst_streak": 132,
+    "exits_pct": {
+     "stop": 47.2,
+     "breakeven": 29.9,
+     "trail": 20.1,
+     "time": 2.9
+    }
+   },
+   "all": {
+    "trades": 3763,
+    "win_pct": 20.2,
+    "avg_win_pct": 15.72,
+    "avg_loss_pct": -3.46,
+    "avg_ret_pct": 0.41,
+    "avg_r": 0.1,
+    "profit_factor": 1.15,
+    "median_days": 6,
+    "worst_streak": 98,
+    "exits_pct": {
+     "stop": 47.2,
+     "breakeven": 30.3,
+     "trail": 18.4,
+     "time": 4.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 433,
+     "win_pct": 23.3,
+     "avg_win_pct": 11.33,
+     "avg_loss_pct": -3.02,
+     "avg_ret_pct": 0.32,
+     "avg_r": 0.07,
+     "profit_factor": 1.14,
+     "median_days": 7,
+     "worst_streak": 60,
+     "exits_pct": {
+      "stop": 46.7,
+      "breakeven": 26.8,
+      "trail": 22.4,
+      "time": 4.2
+     }
+    },
+    "Mid": {
+     "trades": 543,
+     "win_pct": 19.5,
+     "avg_win_pct": 11.68,
+     "avg_loss_pct": -3.27,
+     "avg_ret_pct": -0.36,
+     "avg_r": -0.06,
+     "profit_factor": 0.87,
+     "median_days": 7,
+     "worst_streak": 64,
+     "exits_pct": {
+      "stop": 45.7,
+      "breakeven": 30.8,
+      "trail": 21.2,
+      "time": 2.4
+     }
+    },
+    "Small": {
+     "trades": 684,
+     "win_pct": 18.1,
+     "avg_win_pct": 14.18,
+     "avg_loss_pct": -3.99,
+     "avg_ret_pct": -0.7,
+     "avg_r": -0.14,
+     "profit_factor": 0.79,
+     "median_days": 6,
+     "worst_streak": 48,
+     "exits_pct": {
+      "stop": 48.7,
+      "breakeven": 31.1,
+      "trail": 17.7,
+      "time": 2.5
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Pullback",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 4308,
+    "win_pct": 24.9,
+    "avg_win_pct": 11.71,
+    "avg_loss_pct": -2.67,
+    "avg_ret_pct": 0.91,
+    "avg_r": 0.22,
+    "profit_factor": 1.45,
+    "median_days": 6,
+    "worst_streak": 105,
+    "exits_pct": {
+     "trail": 53.3,
+     "stop": 23.2,
+     "breakeven": 19.6,
+     "time": 3.9
+    }
+   },
+   "out_of_sample": {
+    "trades": 4946,
+    "win_pct": 21.1,
+    "avg_win_pct": 9.81,
+    "avg_loss_pct": -2.71,
+    "avg_ret_pct": -0.07,
+    "avg_r": -0.05,
+    "profit_factor": 0.97,
+    "median_days": 6,
+    "worst_streak": 87,
+    "exits_pct": {
+     "trail": 51.1,
+     "stop": 25.0,
+     "breakeven": 21.5,
+     "time": 2.4
+    }
+   },
+   "all": {
+    "trades": 9254,
+    "win_pct": 22.9,
+    "avg_win_pct": 10.77,
+    "avg_loss_pct": -2.69,
+    "avg_ret_pct": 0.38,
+    "avg_r": 0.08,
+    "profit_factor": 1.18,
+    "median_days": 6,
+    "worst_streak": 105,
+    "exits_pct": {
+     "trail": 52.1,
+     "stop": 24.2,
+     "breakeven": 20.6,
+     "time": 3.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 1440,
+     "win_pct": 20.2,
+     "avg_win_pct": 8.44,
+     "avg_loss_pct": -2.28,
+     "avg_ret_pct": -0.11,
+     "avg_r": -0.08,
+     "profit_factor": 0.94,
+     "median_days": 7,
+     "worst_streak": 57,
+     "exits_pct": {
+      "trail": 50.2,
+      "stop": 25.7,
+      "breakeven": 21.3,
+      "time": 2.8
+     }
+    },
+    "Mid": {
+     "trades": 1589,
+     "win_pct": 23.0,
+     "avg_win_pct": 9.53,
+     "avg_loss_pct": -2.64,
+     "avg_ret_pct": 0.16,
+     "avg_r": -0.0,
+     "profit_factor": 1.08,
+     "median_days": 6,
+     "worst_streak": 51,
+     "exits_pct": {
+      "trail": 51.0,
+      "stop": 24.7,
+      "breakeven": 21.4,
+      "time": 2.9
+     }
+    },
+    "Small": {
+     "trades": 1917,
+     "win_pct": 20.2,
+     "avg_win_pct": 11.09,
+     "avg_loss_pct": -3.11,
+     "avg_ret_pct": -0.24,
+     "avg_r": -0.08,
+     "profit_factor": 0.9,
+     "median_days": 6,
+     "worst_streak": 120,
+     "exits_pct": {
+      "trail": 51.8,
+      "stop": 24.7,
+      "breakeven": 21.7,
+      "time": 1.8
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 20d",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 4929,
+    "win_pct": 20.8,
+    "avg_win_pct": 16.36,
+    "avg_loss_pct": -3.27,
+    "avg_ret_pct": 0.81,
+    "avg_r": 0.21,
+    "profit_factor": 1.31,
+    "median_days": 6,
+    "worst_streak": 235,
+    "exits_pct": {
+     "stop": 47.2,
+     "breakeven": 29.3,
+     "trail": 18.6,
+     "time": 4.9
+    }
+   },
+   "out_of_sample": {
+    "trades": 3988,
+    "win_pct": 19.1,
+    "avg_win_pct": 11.93,
+    "avg_loss_pct": -3.46,
+    "avg_ret_pct": -0.52,
+    "avg_r": -0.12,
+    "profit_factor": 0.81,
+    "median_days": 6,
+    "worst_streak": 132,
+    "exits_pct": {
+     "stop": 49.0,
+     "breakeven": 28.2,
+     "trail": 19.8,
+     "time": 2.9
+    }
+   },
+   "all": {
+    "trades": 8917,
+    "win_pct": 20.0,
+    "avg_win_pct": 14.47,
+    "avg_loss_pct": -3.36,
+    "avg_ret_pct": 0.21,
+    "avg_r": 0.06,
+    "profit_factor": 1.08,
+    "median_days": 6,
+    "worst_streak": 235,
+    "exits_pct": {
+     "stop": 48.0,
+     "breakeven": 28.8,
+     "trail": 19.2,
+     "time": 4.0
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 823,
+     "win_pct": 21.0,
+     "avg_win_pct": 10.8,
+     "avg_loss_pct": -2.84,
+     "avg_ret_pct": 0.03,
+     "avg_r": -0.0,
+     "profit_factor": 1.01,
+     "median_days": 7,
+     "worst_streak": 69,
+     "exits_pct": {
+      "stop": 47.8,
+      "breakeven": 27.5,
+      "trail": 20.4,
+      "time": 4.4
+     }
+    },
+    "Mid": {
+     "trades": 1273,
+     "win_pct": 18.2,
+     "avg_win_pct": 10.46,
+     "avg_loss_pct": -3.34,
+     "avg_ret_pct": -0.83,
+     "avg_r": -0.18,
+     "profit_factor": 0.7,
+     "median_days": 7,
+     "worst_streak": 87,
+     "exits_pct": {
+      "stop": 49.1,
+      "breakeven": 28.0,
+      "trail": 20.7,
+      "time": 2.2
+     }
+    },
+    "Small": {
+     "trades": 1892,
+     "win_pct": 18.9,
+     "avg_win_pct": 13.43,
+     "avg_loss_pct": -3.8,
+     "avg_ret_pct": -0.55,
+     "avg_r": -0.13,
+     "profit_factor": 0.82,
+     "median_days": 6,
+     "worst_streak": 64,
+     "exits_pct": {
+      "stop": 49.5,
+      "breakeven": 28.7,
+      "trail": 19.0,
+      "time": 2.8
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Pullback",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 4157,
+    "win_pct": 27.3,
+    "avg_win_pct": 11.78,
+    "avg_loss_pct": -2.92,
+    "avg_ret_pct": 1.09,
+    "avg_r": 0.21,
+    "profit_factor": 1.52,
+    "median_days": 7,
+    "worst_streak": 84,
+    "exits_pct": {
+     "trail": 71.4,
+     "breakeven": 13.0,
+     "stop": 11.1,
+     "time": 4.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 4713,
+    "win_pct": 23.2,
+    "avg_win_pct": 9.27,
+    "avg_loss_pct": -3.01,
+    "avg_ret_pct": -0.16,
+    "avg_r": -0.05,
+    "profit_factor": 0.93,
+    "median_days": 7,
+    "worst_streak": 72,
+    "exits_pct": {
+     "trail": 70.5,
+     "breakeven": 13.9,
+     "stop": 12.9,
+     "time": 2.7
+    }
+   },
+   "all": {
+    "trades": 8870,
+    "win_pct": 25.1,
+    "avg_win_pct": 10.55,
+    "avg_loss_pct": -2.97,
+    "avg_ret_pct": 0.43,
+    "avg_r": 0.07,
+    "profit_factor": 1.19,
+    "median_days": 7,
+    "worst_streak": 84,
+    "exits_pct": {
+     "trail": 70.9,
+     "breakeven": 13.5,
+     "stop": 12.0,
+     "time": 3.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 1422,
+     "win_pct": 22.1,
+     "avg_win_pct": 8.13,
+     "avg_loss_pct": -2.49,
+     "avg_ret_pct": -0.15,
+     "avg_r": -0.07,
+     "profit_factor": 0.92,
+     "median_days": 7,
+     "worst_streak": 53,
+     "exits_pct": {
+      "trail": 70.6,
+      "breakeven": 13.4,
+      "stop": 13.0,
+      "time": 3.0
+     }
+    },
+    "Mid": {
+     "trades": 1523,
+     "win_pct": 25.1,
+     "avg_win_pct": 8.93,
+     "avg_loss_pct": -2.98,
+     "avg_ret_pct": 0.02,
+     "avg_r": -0.02,
+     "profit_factor": 1.01,
+     "median_days": 7,
+     "worst_streak": 42,
+     "exits_pct": {
+      "trail": 71.2,
+      "breakeven": 14.0,
+      "stop": 11.7,
+      "time": 3.2
+     }
+    },
+    "Small": {
+     "trades": 1768,
+     "win_pct": 22.5,
+     "avg_win_pct": 10.49,
+     "avg_loss_pct": -3.46,
+     "avg_ret_pct": -0.33,
+     "avg_r": -0.06,
+     "profit_factor": 0.88,
+     "median_days": 7,
+     "worst_streak": 53,
+     "exits_pct": {
+      "trail": 69.9,
+      "breakeven": 14.3,
+      "stop": 13.7,
+      "time": 2.0
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "52-week high",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 2004,
+    "win_pct": 34.3,
+    "avg_win_pct": 11.45,
+    "avg_loss_pct": -4.71,
+    "avg_ret_pct": 0.83,
+    "avg_r": 0.13,
+    "profit_factor": 1.27,
+    "median_days": 8,
+    "worst_streak": 58,
+    "exits_pct": {
+     "stop": 43.8,
+     "target": 28.9,
+     "breakeven": 20.1,
+     "time": 7.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 1571,
+    "win_pct": 32.3,
+    "avg_win_pct": 11.4,
+    "avg_loss_pct": -4.89,
+    "avg_ret_pct": 0.38,
+    "avg_r": 0.05,
+    "profit_factor": 1.11,
+    "median_days": 8,
+    "worst_streak": 48,
+    "exits_pct": {
+     "stop": 45.5,
+     "target": 25.6,
+     "breakeven": 19.8,
+     "time": 9.1
+    }
+   },
+   "all": {
+    "trades": 3575,
+    "win_pct": 33.5,
+    "avg_win_pct": 11.43,
+    "avg_loss_pct": -4.79,
+    "avg_ret_pct": 0.63,
+    "avg_r": 0.09,
+    "profit_factor": 1.2,
+    "median_days": 8,
+    "worst_streak": 58,
+    "exits_pct": {
+     "stop": 44.5,
+     "target": 27.5,
+     "breakeven": 19.9,
+     "time": 8.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 428,
+     "win_pct": 35.5,
+     "avg_win_pct": 9.07,
+     "avg_loss_pct": -3.99,
+     "avg_ret_pct": 0.64,
+     "avg_r": 0.11,
+     "profit_factor": 1.25,
+     "median_days": 9,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 41.8,
+      "target": 26.6,
+      "breakeven": 19.6,
+      "time": 11.9
+     }
+    },
+    "Mid": {
+     "trades": 526,
+     "win_pct": 31.7,
+     "avg_win_pct": 10.82,
+     "avg_loss_pct": -4.76,
+     "avg_ret_pct": 0.19,
+     "avg_r": 0.03,
+     "profit_factor": 1.06,
+     "median_days": 9,
+     "worst_streak": 27,
+     "exits_pct": {
+      "stop": 46.2,
+      "target": 25.3,
+      "breakeven": 19.6,
+      "time": 8.9
+     }
+    },
+    "Small": {
+     "trades": 617,
+     "win_pct": 30.6,
+     "avg_win_pct": 13.79,
+     "avg_loss_pct": -5.57,
+     "avg_ret_pct": 0.36,
+     "avg_r": 0.03,
+     "profit_factor": 1.09,
+     "median_days": 8,
+     "worst_streak": 30,
+     "exits_pct": {
+      "stop": 47.5,
+      "target": 25.1,
+      "breakeven": 20.1,
+      "time": 7.3
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Pullback",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 4157,
+    "win_pct": 35.0,
+    "avg_win_pct": 9.6,
+    "avg_loss_pct": -4.3,
+    "avg_ret_pct": 0.56,
+    "avg_r": 0.11,
+    "profit_factor": 1.2,
+    "median_days": 11,
+    "worst_streak": 118,
+    "exits_pct": {
+     "stop": 42.4,
+     "target": 26.9,
+     "breakeven": 19.9,
+     "time": 10.8
+    }
+   },
+   "out_of_sample": {
+    "trades": 4710,
+    "win_pct": 30.3,
+    "avg_win_pct": 9.96,
+    "avg_loss_pct": -4.47,
+    "avg_ret_pct": -0.1,
+    "avg_r": -0.04,
+    "profit_factor": 0.97,
+    "median_days": 10,
+    "worst_streak": 109,
+    "exits_pct": {
+     "stop": 47.1,
+     "target": 21.4,
+     "breakeven": 19.6,
+     "time": 11.9
+    }
+   },
+   "all": {
+    "trades": 8867,
+    "win_pct": 32.5,
+    "avg_win_pct": 9.78,
+    "avg_loss_pct": -4.39,
+    "avg_ret_pct": 0.21,
+    "avg_r": 0.03,
+    "profit_factor": 1.07,
+    "median_days": 10,
+    "worst_streak": 118,
+    "exits_pct": {
+     "stop": 44.9,
+     "target": 24.0,
+     "breakeven": 19.8,
+     "time": 11.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 1422,
+     "win_pct": 31.7,
+     "avg_win_pct": 8.19,
+     "avg_loss_pct": -3.66,
+     "avg_ret_pct": 0.1,
+     "avg_r": -0.04,
+     "profit_factor": 1.04,
+     "median_days": 11,
+     "worst_streak": 50,
+     "exits_pct": {
+      "stop": 45.6,
+      "target": 20.3,
+      "breakeven": 19.3,
+      "time": 14.8
+     }
+    },
+    "Mid": {
+     "trades": 1525,
+     "win_pct": 31.7,
+     "avg_win_pct": 9.88,
+     "avg_loss_pct": -4.34,
+     "avg_ret_pct": 0.17,
+     "avg_r": 0.0,
+     "profit_factor": 1.06,
+     "median_days": 10,
+     "worst_streak": 42,
+     "exits_pct": {
+      "stop": 45.0,
+      "target": 22.2,
+      "breakeven": 20.9,
+      "time": 11.9
+     }
+    },
+    "Small": {
+     "trades": 1763,
+     "win_pct": 27.9,
+     "avg_win_pct": 11.67,
+     "avg_loss_pct": -5.19,
+     "avg_ret_pct": -0.49,
+     "avg_r": -0.08,
+     "profit_factor": 0.87,
+     "median_days": 9,
+     "worst_streak": 55,
+     "exits_pct": {
+      "stop": 50.0,
+      "target": 21.6,
+      "breakeven": 18.8,
+      "time": 9.6
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Oversold bounce",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 240,
+    "win_pct": 45.0,
+    "avg_win_pct": 6.84,
+    "avg_loss_pct": -4.73,
+    "avg_ret_pct": 0.48,
+    "avg_r": 0.11,
+    "profit_factor": 1.18,
+    "median_days": 9,
+    "worst_streak": 17,
+    "exits_pct": {
+     "stop": 43.8,
+     "target": 40.8,
+     "breakeven": 9.2,
+     "time": 6.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 325,
+    "win_pct": 37.8,
+    "avg_win_pct": 7.23,
+    "avg_loss_pct": -4.39,
+    "avg_ret_pct": 0.01,
+    "avg_r": -0.04,
+    "profit_factor": 1.0,
+    "median_days": 7,
+    "worst_streak": 25,
+    "exits_pct": {
+     "stop": 46.8,
+     "target": 36.6,
+     "breakeven": 13.2,
+     "time": 3.4
+    }
+   },
+   "all": {
+    "trades": 565,
+    "win_pct": 40.9,
+    "avg_win_pct": 7.05,
+    "avg_loss_pct": -4.53,
+    "avg_ret_pct": 0.21,
+    "avg_r": 0.02,
+    "profit_factor": 1.08,
+    "median_days": 8,
+    "worst_streak": 25,
+    "exits_pct": {
+     "stop": 45.5,
+     "target": 38.4,
+     "breakeven": 11.5,
+     "time": 4.6
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 68,
+     "win_pct": 27.9,
+     "avg_win_pct": 7.0,
+     "avg_loss_pct": -3.31,
+     "avg_ret_pct": -0.43,
+     "avg_r": -0.15,
+     "profit_factor": 0.82,
+     "median_days": 9,
+     "worst_streak": 15,
      "exits_pct": {
       "stop": 50.0,
       "target": 25.0,
-      "breakeven": 25.0
+      "breakeven": 20.6,
+      "time": 4.4
+     }
+    },
+    "Mid": {
+     "trades": 110,
+     "win_pct": 36.4,
+     "avg_win_pct": 7.24,
+     "avg_loss_pct": -4.73,
+     "avg_ret_pct": -0.38,
+     "avg_r": -0.06,
+     "profit_factor": 0.87,
+     "median_days": 8,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 49.1,
+      "target": 35.5,
+      "breakeven": 12.7,
+      "time": 2.7
      }
     },
     "Small": {
-     "trades": 2,
-     "win_pct": 0.0,
-     "avg_win_pct": 0,
-     "avg_loss_pct": -0.3,
-     "avg_ret_pct": -0.3,
-     "avg_r": -0.08,
-     "profit_factor": 0.0,
+     "trades": 147,
+     "win_pct": 43.5,
+     "avg_win_pct": 7.3,
+     "avg_loss_pct": -4.75,
+     "avg_ret_pct": 0.5,
+     "avg_r": 0.03,
+     "profit_factor": 1.19,
      "median_days": 7,
-     "worst_streak": 2,
+     "worst_streak": 15,
      "exits_pct": {
-      "breakeven": 100.0
-     }
-    }
-   },
-   "by_year": {
-    "2022": {
-     "trades": 3,
-     "win_pct": 33.3,
-     "avg_win_pct": 0.94,
-     "avg_loss_pct": -3.73,
-     "avg_ret_pct": -2.17,
-     "avg_r": -0.64,
-     "profit_factor": 0.13,
-     "median_days": 3,
-     "worst_streak": 2,
-     "exits_pct": {
-      "stop": 66.7,
-      "time": 33.3
-     }
-    },
-    "2023": {
-     "trades": 3,
-     "win_pct": 100.0,
-     "avg_win_pct": 3.05,
-     "avg_loss_pct": 0,
-     "avg_ret_pct": 3.05,
-     "avg_r": 0.86,
-     "profit_factor": null,
-     "median_days": 15,
-     "worst_streak": 0,
-     "exits_pct": {
-      "time": 66.7,
-      "target": 33.3
-     }
-    },
-    "2024": {
-     "trades": 3,
-     "win_pct": 0.0,
-     "avg_win_pct": 0,
-     "avg_loss_pct": -1.62,
-     "avg_ret_pct": -1.62,
-     "avg_r": -0.41,
-     "profit_factor": 0.0,
-     "median_days": 10,
-     "worst_streak": 3,
-     "exits_pct": {
-      "breakeven": 66.7,
-      "stop": 33.3
-     }
-    },
-    "2025": {
-     "trades": 3,
-     "win_pct": 33.3,
-     "avg_win_pct": 0.69,
-     "avg_loss_pct": -1.71,
-     "avg_ret_pct": -0.91,
-     "avg_r": -0.33,
-     "profit_factor": 0.2,
-     "median_days": 7,
-     "worst_streak": 1,
-     "exits_pct": {
-      "breakeven": 33.3,
-      "time": 33.3,
-      "stop": 33.3
-     }
-    },
-    "2026": {
-     "trades": 2,
-     "win_pct": 0.0,
-     "avg_win_pct": 0,
-     "avg_loss_pct": -2.16,
-     "avg_ret_pct": -2.16,
-     "avg_r": -0.72,
-     "profit_factor": 0.0,
-     "median_days": 12,
-     "worst_streak": 2,
-     "exits_pct": {
-      "stop": 50.0,
-      "time": 50.0
+      "stop": 43.5,
+      "target": 42.9,
+      "breakeven": 10.2,
+      "time": 3.4
      }
     }
    }
   },
-  "Pullback": {
-   "no_filters": {
-    "trades": 2152,
-    "win_pct": 35.6,
-    "avg_win_pct": 5.38,
-    "avg_loss_pct": -2.85,
-    "avg_ret_pct": 0.08,
-    "avg_r": 0.03,
-    "profit_factor": 1.05,
+  {
+   "name": "Oversold bounce \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Oversold bounce",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 240,
+    "win_pct": 45.0,
+    "avg_win_pct": 6.84,
+    "avg_loss_pct": -4.73,
+    "avg_ret_pct": 0.48,
+    "avg_r": 0.11,
+    "profit_factor": 1.18,
+    "median_days": 9,
+    "worst_streak": 17,
+    "exits_pct": {
+     "stop": 43.8,
+     "target": 40.8,
+     "breakeven": 9.2,
+     "time": 6.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 325,
+    "win_pct": 37.8,
+    "avg_win_pct": 7.23,
+    "avg_loss_pct": -4.39,
+    "avg_ret_pct": 0.01,
+    "avg_r": -0.04,
+    "profit_factor": 1.0,
     "median_days": 7,
+    "worst_streak": 25,
+    "exits_pct": {
+     "stop": 46.8,
+     "target": 36.6,
+     "breakeven": 13.2,
+     "time": 3.4
+    }
+   },
+   "all": {
+    "trades": 565,
+    "win_pct": 40.9,
+    "avg_win_pct": 7.05,
+    "avg_loss_pct": -4.53,
+    "avg_ret_pct": 0.21,
+    "avg_r": 0.02,
+    "profit_factor": 1.08,
+    "median_days": 8,
+    "worst_streak": 25,
+    "exits_pct": {
+     "stop": 45.5,
+     "target": 38.4,
+     "breakeven": 11.5,
+     "time": 4.6
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 68,
+     "win_pct": 27.9,
+     "avg_win_pct": 7.0,
+     "avg_loss_pct": -3.31,
+     "avg_ret_pct": -0.43,
+     "avg_r": -0.15,
+     "profit_factor": 0.82,
+     "median_days": 9,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 50.0,
+      "target": 25.0,
+      "breakeven": 20.6,
+      "time": 4.4
+     }
+    },
+    "Mid": {
+     "trades": 110,
+     "win_pct": 36.4,
+     "avg_win_pct": 7.24,
+     "avg_loss_pct": -4.73,
+     "avg_ret_pct": -0.38,
+     "avg_r": -0.06,
+     "profit_factor": 0.87,
+     "median_days": 8,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 49.1,
+      "target": 35.5,
+      "breakeven": 12.7,
+      "time": 2.7
+     }
+    },
+    "Small": {
+     "trades": 147,
+     "win_pct": 43.5,
+     "avg_win_pct": 7.3,
+     "avg_loss_pct": -4.75,
+     "avg_ret_pct": 0.5,
+     "avg_r": 0.03,
+     "profit_factor": 1.19,
+     "median_days": 7,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 43.5,
+      "target": 42.9,
+      "breakeven": 10.2,
+      "time": 3.4
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Breakout 50d",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 2810,
+    "win_pct": 33.5,
+    "avg_win_pct": 11.16,
+    "avg_loss_pct": -4.64,
+    "avg_ret_pct": 0.65,
+    "avg_r": 0.1,
+    "profit_factor": 1.21,
+    "median_days": 8,
+    "worst_streak": 74,
+    "exits_pct": {
+     "stop": 44.6,
+     "target": 28.3,
+     "breakeven": 20.1,
+     "time": 7.1
+    }
+   },
+   "out_of_sample": {
+    "trades": 2105,
+    "win_pct": 31.2,
+    "avg_win_pct": 11.29,
+    "avg_loss_pct": -4.75,
+    "avg_ret_pct": 0.25,
+    "avg_r": 0.03,
+    "profit_factor": 1.08,
+    "median_days": 8,
+    "worst_streak": 64,
+    "exits_pct": {
+     "stop": 46.2,
+     "target": 25.0,
+     "breakeven": 20.6,
+     "time": 8.2
+    }
+   },
+   "all": {
+    "trades": 4915,
+    "win_pct": 32.5,
+    "avg_win_pct": 11.21,
+    "avg_loss_pct": -4.69,
+    "avg_ret_pct": 0.48,
+    "avg_r": 0.07,
+    "profit_factor": 1.15,
+    "median_days": 8,
+    "worst_streak": 74,
+    "exits_pct": {
+     "stop": 45.2,
+     "target": 26.9,
+     "breakeven": 20.3,
+     "time": 7.6
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 529,
+     "win_pct": 32.5,
+     "avg_win_pct": 9.05,
+     "avg_loss_pct": -3.84,
+     "avg_ret_pct": 0.35,
+     "avg_r": 0.05,
+     "profit_factor": 1.14,
+     "median_days": 9,
+     "worst_streak": 29,
+     "exits_pct": {
+      "stop": 43.7,
+      "target": 25.0,
+      "breakeven": 21.0,
+      "time": 10.4
+     }
+    },
+    "Mid": {
+     "trades": 699,
+     "win_pct": 31.8,
+     "avg_win_pct": 10.49,
+     "avg_loss_pct": -4.65,
+     "avg_ret_pct": 0.16,
+     "avg_r": 0.03,
+     "profit_factor": 1.05,
+     "median_days": 9,
+     "worst_streak": 27,
+     "exits_pct": {
+      "stop": 46.2,
+      "target": 25.0,
+      "breakeven": 19.6,
+      "time": 9.2
+     }
+    },
+    "Small": {
+     "trades": 877,
+     "win_pct": 29.9,
+     "avg_win_pct": 13.44,
+     "avg_loss_pct": -5.35,
+     "avg_ret_pct": 0.26,
+     "avg_r": 0.02,
+     "profit_factor": 1.07,
+     "median_days": 8,
+     "worst_streak": 44,
+     "exits_pct": {
+      "stop": 47.7,
+      "target": 25.0,
+      "breakeven": 21.2,
+      "time": 6.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Pullback",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 1212,
+    "win_pct": 23.8,
+    "avg_win_pct": 11.54,
+    "avg_loss_pct": -2.94,
+    "avg_ret_pct": 0.5,
+    "avg_r": 0.1,
+    "profit_factor": 1.22,
+    "median_days": 6,
+    "worst_streak": 40,
+    "exits_pct": {
+     "trail": 61.2,
+     "breakeven": 18.5,
+     "stop": 17.3,
+     "time": 3.0
+    }
+   },
+   "out_of_sample": {
+    "trades": 1695,
+    "win_pct": 22.2,
+    "avg_win_pct": 9.19,
+    "avg_loss_pct": -2.9,
+    "avg_ret_pct": -0.22,
+    "avg_r": -0.08,
+    "profit_factor": 0.9,
+    "median_days": 6,
+    "worst_streak": 37,
+    "exits_pct": {
+     "trail": 56.0,
+     "stop": 22.8,
+     "breakeven": 20.0,
+     "time": 1.2
+    }
+   },
+   "all": {
+    "trades": 2907,
+    "win_pct": 22.8,
+    "avg_win_pct": 10.21,
+    "avg_loss_pct": -2.92,
+    "avg_ret_pct": 0.08,
+    "avg_r": -0.01,
+    "profit_factor": 1.04,
+    "median_days": 6,
+    "worst_streak": 40,
+    "exits_pct": {
+     "trail": 58.2,
+     "stop": 20.5,
+     "breakeven": 19.4,
+     "time": 1.9
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 404,
+     "win_pct": 21.5,
+     "avg_win_pct": 8.22,
+     "avg_loss_pct": -2.52,
+     "avg_ret_pct": -0.21,
+     "avg_r": -0.11,
+     "profit_factor": 0.89,
+     "median_days": 7,
+     "worst_streak": 24,
+     "exits_pct": {
+      "trail": 53.7,
+      "stop": 25.0,
+      "breakeven": 19.6,
+      "time": 1.7
+     }
+    },
+    "Mid": {
+     "trades": 557,
+     "win_pct": 24.2,
+     "avg_win_pct": 9.02,
+     "avg_loss_pct": -2.7,
+     "avg_ret_pct": 0.14,
+     "avg_r": -0.02,
+     "profit_factor": 1.07,
+     "median_days": 7,
+     "worst_streak": 23,
+     "exits_pct": {
+      "trail": 53.5,
+      "breakeven": 22.6,
+      "stop": 22.4,
+      "time": 1.4
+     }
+    },
+    "Small": {
+     "trades": 734,
+     "win_pct": 21.0,
+     "avg_win_pct": 9.9,
+     "avg_loss_pct": -3.26,
+     "avg_ret_pct": -0.5,
+     "avg_r": -0.12,
+     "profit_factor": 0.81,
+     "median_days": 5,
+     "worst_streak": 36,
+     "exits_pct": {
+      "trail": 59.3,
+      "stop": 21.8,
+      "breakeven": 18.3,
+      "time": 0.7
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Pullback",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 4308,
+    "win_pct": 37.2,
+    "avg_win_pct": 7.07,
+    "avg_loss_pct": -3.64,
+    "avg_ret_pct": 0.35,
+    "avg_r": 0.09,
+    "profit_factor": 1.15,
+    "median_days": 6,
+    "worst_streak": 88,
+    "exits_pct": {
+     "stop": 44.9,
+     "target": 35.4,
+     "breakeven": 17.2,
+     "time": 2.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 4958,
+    "win_pct": 33.5,
+    "avg_win_pct": 7.07,
+    "avg_loss_pct": -3.74,
+    "avg_ret_pct": -0.11,
+    "avg_r": -0.06,
+    "profit_factor": 0.95,
+    "median_days": 6,
+    "worst_streak": 97,
+    "exits_pct": {
+     "stop": 48.1,
+     "target": 31.8,
+     "breakeven": 17.6,
+     "time": 2.5
+    }
+   },
+   "all": {
+    "trades": 9266,
+    "win_pct": 35.3,
+    "avg_win_pct": 7.07,
+    "avg_loss_pct": -3.69,
+    "avg_ret_pct": 0.1,
+    "avg_r": 0.01,
+    "profit_factor": 1.04,
+    "median_days": 6,
+    "worst_streak": 97,
+    "exits_pct": {
+     "stop": 46.6,
+     "target": 33.5,
+     "breakeven": 17.4,
+     "time": 2.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 1441,
+     "win_pct": 28.0,
+     "avg_win_pct": 6.82,
+     "avg_loss_pct": -2.9,
+     "avg_ret_pct": -0.18,
+     "avg_r": -0.09,
+     "profit_factor": 0.92,
+     "median_days": 7,
+     "worst_streak": 41,
+     "exits_pct": {
+      "stop": 47.7,
+      "target": 24.4,
+      "breakeven": 23.5,
+      "time": 4.4
+     }
+    },
+    "Mid": {
+     "trades": 1595,
+     "win_pct": 36.3,
+     "avg_win_pct": 7.12,
+     "avg_loss_pct": -3.6,
+     "avg_ret_pct": 0.29,
+     "avg_r": 0.02,
+     "profit_factor": 1.13,
+     "median_days": 6,
+     "worst_streak": 37,
+     "exits_pct": {
+      "stop": 45.5,
+      "target": 35.2,
+      "breakeven": 17.5,
+      "time": 1.8
+     }
+    },
+    "Small": {
+     "trades": 1922,
+     "win_pct": 35.4,
+     "avg_win_pct": 7.18,
+     "avg_loss_pct": -4.55,
+     "avg_ret_pct": -0.4,
+     "avg_r": -0.1,
+     "profit_factor": 0.86,
+     "median_days": 5,
+     "worst_streak": 42,
+     "exits_pct": {
+      "stop": 50.5,
+      "target": 34.7,
+      "breakeven": 13.3,
+      "time": 1.6
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Pullback",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 4308,
+    "win_pct": 32.3,
+    "avg_win_pct": 8.38,
+    "avg_loss_pct": -3.4,
+    "avg_ret_pct": 0.4,
+    "avg_r": 0.09,
+    "profit_factor": 1.17,
+    "median_days": 7,
+    "worst_streak": 82,
+    "exits_pct": {
+     "stop": 44.9,
+     "target": 30.6,
+     "breakeven": 22.2,
+     "time": 2.3
+    }
+   },
+   "out_of_sample": {
+    "trades": 4952,
+    "win_pct": 27.6,
+    "avg_win_pct": 9.03,
+    "avg_loss_pct": -3.47,
+    "avg_ret_pct": -0.02,
+    "avg_r": -0.04,
+    "profit_factor": 0.99,
+    "median_days": 7,
+    "worst_streak": 110,
+    "exits_pct": {
+     "stop": 48.2,
+     "target": 25.1,
+     "breakeven": 23.4,
+     "time": 3.3
+    }
+   },
+   "all": {
+    "trades": 9260,
+    "win_pct": 29.8,
+    "avg_win_pct": 8.7,
+    "avg_loss_pct": -3.44,
+    "avg_ret_pct": 0.18,
+    "avg_r": 0.02,
+    "profit_factor": 1.07,
+    "median_days": 7,
+    "worst_streak": 110,
+    "exits_pct": {
+     "stop": 46.7,
+     "target": 27.7,
+     "breakeven": 22.8,
+     "time": 2.8
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 1441,
+     "win_pct": 27.9,
+     "avg_win_pct": 7.41,
+     "avg_loss_pct": -2.89,
+     "avg_ret_pct": -0.02,
+     "avg_r": -0.06,
+     "profit_factor": 0.99,
+     "median_days": 7,
+     "worst_streak": 41,
+     "exits_pct": {
+      "stop": 47.7,
+      "target": 24.3,
+      "breakeven": 23.6,
+      "time": 4.4
+     }
+    },
+    "Mid": {
+     "trades": 1594,
+     "win_pct": 30.1,
+     "avg_win_pct": 8.97,
+     "avg_loss_pct": -3.32,
+     "avg_ret_pct": 0.39,
+     "avg_r": 0.04,
+     "profit_factor": 1.17,
+     "median_days": 7,
+     "worst_streak": 41,
+     "exits_pct": {
+      "stop": 45.5,
+      "target": 27.6,
+      "breakeven": 23.7,
+      "time": 3.2
+     }
+    },
+    "Small": {
+     "trades": 1917,
+     "win_pct": 25.4,
+     "avg_win_pct": 10.41,
+     "avg_loss_pct": -4.02,
+     "avg_ret_pct": -0.36,
+     "avg_r": -0.09,
+     "profit_factor": 0.88,
+     "median_days": 6,
+     "worst_streak": 55,
+     "exits_pct": {
+      "stop": 50.8,
+      "target": 23.7,
+      "breakeven": 23.0,
+      "time": 2.6
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Pullback",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 4157,
+    "win_pct": 45.7,
+    "avg_win_pct": 6.87,
+    "avg_loss_pct": -5.02,
+    "avg_ret_pct": 0.41,
+    "avg_r": 0.09,
+    "profit_factor": 1.15,
+    "median_days": 8,
+    "worst_streak": 126,
+    "exits_pct": {
+     "stop": 42.1,
+     "target": 41.5,
+     "breakeven": 9.6,
+     "time": 6.8
+    }
+   },
+   "out_of_sample": {
+    "trades": 4721,
+    "win_pct": 41.2,
+    "avg_win_pct": 6.85,
+    "avg_loss_pct": -5.15,
+    "avg_ret_pct": -0.21,
+    "avg_r": -0.05,
+    "profit_factor": 0.93,
+    "median_days": 8,
+    "worst_streak": 92,
+    "exits_pct": {
+     "stop": 46.6,
+     "target": 37.2,
+     "breakeven": 9.4,
+     "time": 6.9
+    }
+   },
+   "all": {
+    "trades": 8878,
+    "win_pct": 43.3,
+    "avg_win_pct": 6.86,
+    "avg_loss_pct": -5.09,
+    "avg_ret_pct": 0.08,
+    "avg_r": 0.01,
+    "profit_factor": 1.03,
+    "median_days": 8,
+    "worst_streak": 126,
+    "exits_pct": {
+     "stop": 44.5,
+     "target": 39.2,
+     "breakeven": 9.5,
+     "time": 6.8
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 1423,
+     "win_pct": 36.6,
+     "avg_win_pct": 6.47,
+     "avg_loss_pct": -3.91,
+     "avg_ret_pct": -0.11,
+     "avg_r": -0.07,
+     "profit_factor": 0.95,
+     "median_days": 10,
+     "worst_streak": 40,
+     "exits_pct": {
+      "stop": 45.6,
+      "target": 29.2,
+      "breakeven": 14.5,
+      "time": 10.6
+     }
+    },
+    "Mid": {
+     "trades": 1529,
+     "win_pct": 43.4,
+     "avg_win_pct": 6.88,
+     "avg_loss_pct": -5.04,
+     "avg_ret_pct": 0.14,
+     "avg_r": 0.0,
+     "profit_factor": 1.05,
+     "median_days": 8,
+     "worst_streak": 32,
+     "exits_pct": {
+      "stop": 44.3,
+      "target": 40.0,
+      "breakeven": 9.9,
+      "time": 5.8
+     }
+    },
+    "Small": {
+     "trades": 1769,
+     "win_pct": 43.0,
+     "avg_win_pct": 7.09,
+     "avg_loss_pct": -6.36,
+     "avg_ret_pct": -0.58,
+     "avg_r": -0.09,
+     "profit_factor": 0.84,
+     "median_days": 7,
+     "worst_streak": 40,
+     "exits_pct": {
+      "stop": 49.3,
+      "target": 41.2,
+      "time": 4.9,
+      "breakeven": 4.7
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Pullback",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 1212,
+    "win_pct": 31.3,
+    "avg_win_pct": 10.58,
+    "avg_loss_pct": -3.99,
+    "avg_ret_pct": 0.57,
+    "avg_r": 0.09,
+    "profit_factor": 1.21,
+    "median_days": 8,
+    "worst_streak": 47,
+    "exits_pct": {
+     "stop": 43.6,
+     "target": 28.8,
+     "breakeven": 24.1,
+     "time": 3.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 1695,
+    "win_pct": 27.3,
+    "avg_win_pct": 9.86,
+    "avg_loss_pct": -3.74,
+    "avg_ret_pct": -0.03,
+    "avg_r": -0.04,
+    "profit_factor": 0.99,
+    "median_days": 7,
+    "worst_streak": 57,
+    "exits_pct": {
+     "stop": 47.6,
+     "target": 24.3,
+     "breakeven": 24.1,
+     "time": 4.0
+    }
+   },
+   "all": {
+    "trades": 2907,
+    "win_pct": 29.0,
+    "avg_win_pct": 10.19,
+    "avg_loss_pct": -3.84,
+    "avg_ret_pct": 0.22,
+    "avg_r": 0.01,
+    "profit_factor": 1.08,
+    "median_days": 7,
+    "worst_streak": 57,
+    "exits_pct": {
+     "stop": 46.0,
+     "target": 26.2,
+     "breakeven": 24.1,
+     "time": 3.7
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 404,
+     "win_pct": 29.0,
+     "avg_win_pct": 8.68,
+     "avg_loss_pct": -3.21,
+     "avg_ret_pct": 0.23,
+     "avg_r": -0.02,
+     "profit_factor": 1.1,
+     "median_days": 7,
+     "worst_streak": 28,
+     "exits_pct": {
+      "stop": 46.8,
+      "target": 25.7,
+      "breakeven": 23.3,
+      "time": 4.2
+     }
+    },
+    "Mid": {
+     "trades": 558,
+     "win_pct": 30.3,
+     "avg_win_pct": 9.83,
+     "avg_loss_pct": -3.38,
+     "avg_ret_pct": 0.62,
+     "avg_r": 0.06,
+     "profit_factor": 1.26,
+     "median_days": 7,
+     "worst_streak": 23,
+     "exits_pct": {
+      "stop": 42.5,
+      "target": 26.5,
+      "breakeven": 26.3,
+      "time": 4.7
+     }
+    },
+    "Small": {
+     "trades": 733,
+     "win_pct": 24.1,
+     "avg_win_pct": 10.68,
+     "avg_loss_pct": -4.27,
+     "avg_ret_pct": -0.66,
+     "avg_r": -0.14,
+     "profit_factor": 0.8,
+     "median_days": 7,
+     "worst_streak": 32,
+     "exits_pct": {
+      "stop": 52.0,
+      "breakeven": 22.9,
+      "target": 21.8,
+      "time": 3.3
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Oversold bounce",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 240,
+    "win_pct": 35.0,
+    "avg_win_pct": 8.85,
+    "avg_loss_pct": -4.16,
+    "avg_ret_pct": 0.39,
+    "avg_r": 0.09,
+    "profit_factor": 1.14,
+    "median_days": 10,
+    "worst_streak": 16,
+    "exits_pct": {
+     "stop": 44.6,
+     "target": 27.5,
+     "breakeven": 18.3,
+     "time": 9.6
+    }
+   },
+   "out_of_sample": {
+    "trades": 325,
+    "win_pct": 27.4,
+    "avg_win_pct": 10.49,
+    "avg_loss_pct": -3.88,
+    "avg_ret_pct": 0.06,
+    "avg_r": -0.05,
+    "profit_factor": 1.02,
+    "median_days": 9,
+    "worst_streak": 26,
+    "exits_pct": {
+     "stop": 47.1,
+     "breakeven": 23.1,
+     "target": 22.5,
+     "time": 7.4
+    }
+   },
+   "all": {
+    "trades": 565,
+    "win_pct": 30.6,
+    "avg_win_pct": 9.7,
+    "avg_loss_pct": -3.99,
+    "avg_ret_pct": 0.2,
+    "avg_r": 0.01,
+    "profit_factor": 1.07,
+    "median_days": 9,
+    "worst_streak": 26,
+    "exits_pct": {
+     "stop": 46.0,
+     "target": 24.6,
+     "breakeven": 21.1,
+     "time": 8.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 68,
+     "win_pct": 22.1,
+     "avg_win_pct": 7.78,
+     "avg_loss_pct": -3.08,
+     "avg_ret_pct": -0.69,
+     "avg_r": -0.21,
+     "profit_factor": 0.71,
+     "median_days": 10,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 50.0,
+      "breakeven": 26.5,
+      "target": 17.6,
+      "time": 5.9
+     }
+    },
+    "Mid": {
+     "trades": 110,
+     "win_pct": 30.0,
+     "avg_win_pct": 9.84,
+     "avg_loss_pct": -4.37,
+     "avg_ret_pct": -0.11,
+     "avg_r": -0.02,
+     "profit_factor": 0.96,
+     "median_days": 8,
+     "worst_streak": 17,
+     "exits_pct": {
+      "stop": 49.1,
+      "target": 25.5,
+      "breakeven": 18.2,
+      "time": 7.3
+     }
+    },
+    "Small": {
+     "trades": 147,
+     "win_pct": 27.9,
+     "avg_win_pct": 12.01,
+     "avg_loss_pct": -3.92,
+     "avg_ret_pct": 0.52,
+     "avg_r": 0.01,
+     "profit_factor": 1.18,
+     "median_days": 8,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 44.2,
+      "breakeven": 25.2,
+      "target": 22.4,
+      "time": 8.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Oversold bounce",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 240,
+    "win_pct": 35.0,
+    "avg_win_pct": 8.85,
+    "avg_loss_pct": -4.16,
+    "avg_ret_pct": 0.39,
+    "avg_r": 0.09,
+    "profit_factor": 1.14,
+    "median_days": 10,
+    "worst_streak": 16,
+    "exits_pct": {
+     "stop": 44.6,
+     "target": 27.5,
+     "breakeven": 18.3,
+     "time": 9.6
+    }
+   },
+   "out_of_sample": {
+    "trades": 325,
+    "win_pct": 27.4,
+    "avg_win_pct": 10.49,
+    "avg_loss_pct": -3.88,
+    "avg_ret_pct": 0.06,
+    "avg_r": -0.05,
+    "profit_factor": 1.02,
+    "median_days": 9,
+    "worst_streak": 26,
+    "exits_pct": {
+     "stop": 47.1,
+     "breakeven": 23.1,
+     "target": 22.5,
+     "time": 7.4
+    }
+   },
+   "all": {
+    "trades": 565,
+    "win_pct": 30.6,
+    "avg_win_pct": 9.7,
+    "avg_loss_pct": -3.99,
+    "avg_ret_pct": 0.2,
+    "avg_r": 0.01,
+    "profit_factor": 1.07,
+    "median_days": 9,
+    "worst_streak": 26,
+    "exits_pct": {
+     "stop": 46.0,
+     "target": 24.6,
+     "breakeven": 21.1,
+     "time": 8.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 68,
+     "win_pct": 22.1,
+     "avg_win_pct": 7.78,
+     "avg_loss_pct": -3.08,
+     "avg_ret_pct": -0.69,
+     "avg_r": -0.21,
+     "profit_factor": 0.71,
+     "median_days": 10,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 50.0,
+      "breakeven": 26.5,
+      "target": 17.6,
+      "time": 5.9
+     }
+    },
+    "Mid": {
+     "trades": 110,
+     "win_pct": 30.0,
+     "avg_win_pct": 9.84,
+     "avg_loss_pct": -4.37,
+     "avg_ret_pct": -0.11,
+     "avg_r": -0.02,
+     "profit_factor": 0.96,
+     "median_days": 8,
+     "worst_streak": 17,
+     "exits_pct": {
+      "stop": 49.1,
+      "target": 25.5,
+      "breakeven": 18.2,
+      "time": 7.3
+     }
+    },
+    "Small": {
+     "trades": 147,
+     "win_pct": 27.9,
+     "avg_win_pct": 12.01,
+     "avg_loss_pct": -3.92,
+     "avg_ret_pct": 0.52,
+     "avg_r": 0.01,
+     "profit_factor": 1.18,
+     "median_days": 8,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 44.2,
+      "breakeven": 25.2,
+      "target": 22.4,
+      "time": 8.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Breakout 20d",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 4802,
+    "win_pct": 32.9,
+    "avg_win_pct": 10.6,
+    "avg_loss_pct": -4.5,
+    "avg_ret_pct": 0.47,
+    "avg_r": 0.08,
+    "profit_factor": 1.16,
+    "median_days": 8,
+    "worst_streak": 101,
+    "exits_pct": {
+     "stop": 44.4,
+     "target": 27.1,
+     "breakeven": 20.6,
+     "time": 7.9
+    }
+   },
+   "out_of_sample": {
+    "trades": 3841,
+    "win_pct": 29.8,
+    "avg_win_pct": 10.94,
+    "avg_loss_pct": -4.8,
+    "avg_ret_pct": -0.11,
+    "avg_r": -0.04,
+    "profit_factor": 0.97,
+    "median_days": 8,
+    "worst_streak": 78,
+    "exits_pct": {
+     "stop": 48.4,
+     "target": 22.9,
+     "breakeven": 19.4,
+     "time": 9.2
+    }
+   },
+   "all": {
+    "trades": 8643,
+    "win_pct": 31.5,
+    "avg_win_pct": 10.74,
+    "avg_loss_pct": -4.64,
+    "avg_ret_pct": 0.21,
+    "avg_r": 0.03,
+    "profit_factor": 1.07,
+    "median_days": 8,
+    "worst_streak": 101,
+    "exits_pct": {
+     "stop": 46.2,
+     "target": 25.2,
+     "breakeven": 20.1,
+     "time": 8.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 820,
+     "win_pct": 32.4,
+     "avg_win_pct": 8.61,
+     "avg_loss_pct": -3.81,
+     "avg_ret_pct": 0.22,
+     "avg_r": 0.02,
+     "profit_factor": 1.09,
+     "median_days": 10,
+     "worst_streak": 37,
+     "exits_pct": {
+      "stop": 44.4,
+      "target": 24.3,
+      "breakeven": 20.1,
+      "time": 11.2
+     }
+    },
+    "Mid": {
+     "trades": 1243,
+     "win_pct": 29.4,
+     "avg_win_pct": 9.9,
+     "avg_loss_pct": -4.71,
+     "avg_ret_pct": -0.42,
+     "avg_r": -0.08,
+     "profit_factor": 0.87,
+     "median_days": 8,
+     "worst_streak": 37,
+     "exits_pct": {
+      "stop": 49.6,
+      "target": 20.9,
+      "breakeven": 18.2,
+      "time": 11.3
+     }
+    },
+    "Small": {
+     "trades": 1778,
+     "win_pct": 28.9,
+     "avg_win_pct": 12.9,
+     "avg_loss_pct": -5.3,
+     "avg_ret_pct": -0.05,
+     "avg_r": -0.04,
+     "profit_factor": 0.99,
+     "median_days": 8,
+     "worst_streak": 48,
+     "exits_pct": {
+      "stop": 49.4,
+      "target": 23.7,
+      "breakeven": 20.0,
+      "time": 6.9
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Pullback",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 1212,
+    "win_pct": 42.8,
+    "avg_win_pct": 7.15,
+    "avg_loss_pct": -4.69,
+    "avg_ret_pct": 0.38,
+    "avg_r": 0.07,
+    "profit_factor": 1.14,
+    "median_days": 6,
     "worst_streak": 48,
     "exits_pct": {
-     "stop": 46.9,
-     "time": 20.3,
-     "target": 20.1,
-     "breakeven": 12.7
+     "stop": 43.6,
+     "target": 41.6,
+     "breakeven": 12.6,
+     "time": 2.2
     }
    },
-   "with_filters": {
-    "trades": 122,
-    "win_pct": 27.9,
-    "avg_win_pct": 5.67,
-    "avg_loss_pct": -2.98,
-    "avg_ret_pct": -0.57,
-    "avg_r": -0.16,
-    "profit_factor": 0.74,
+   "out_of_sample": {
+    "trades": 1698,
+    "win_pct": 36.3,
+    "avg_win_pct": 7.1,
+    "avg_loss_pct": -4.2,
+    "avg_ret_pct": -0.09,
+    "avg_r": -0.05,
+    "profit_factor": 0.97,
     "median_days": 6,
-    "worst_streak": 12,
+    "worst_streak": 41,
     "exits_pct": {
-     "stop": 54.1,
-     "target": 18.9,
-     "breakeven": 15.6,
-     "time": 11.5
+     "stop": 47.3,
+     "target": 34.6,
+     "breakeven": 15.4,
+     "time": 2.7
     }
    },
-   "by_cap": {
+   "all": {
+    "trades": 2910,
+    "win_pct": 39.0,
+    "avg_win_pct": 7.12,
+    "avg_loss_pct": -4.39,
+    "avg_ret_pct": 0.1,
+    "avg_r": -0.0,
+    "profit_factor": 1.04,
+    "median_days": 6,
+    "worst_streak": 48,
+    "exits_pct": {
+     "stop": 45.8,
+     "target": 37.5,
+     "breakeven": 14.3,
+     "time": 2.5
+    }
+   },
+   "by_cap_oos": {
     "Large": {
-     "trades": 50,
-     "win_pct": 22.0,
-     "avg_win_pct": 5.63,
-     "avg_loss_pct": -2.81,
-     "avg_ret_pct": -0.95,
-     "avg_r": -0.27,
-     "profit_factor": 0.56,
+     "trades": 404,
+     "win_pct": 30.0,
+     "avg_win_pct": 7.05,
+     "avg_loss_pct": -3.27,
+     "avg_ret_pct": -0.18,
+     "avg_r": -0.08,
+     "profit_factor": 0.92,
      "median_days": 7,
-     "worst_streak": 20,
+     "worst_streak": 29,
      "exits_pct": {
-      "stop": 54.0,
-      "breakeven": 22.0,
-      "target": 14.0,
-      "time": 10.0
+      "stop": 46.8,
+      "target": 26.5,
+      "breakeven": 22.3,
+      "time": 4.5
      }
     },
     "Mid": {
-     "trades": 35,
-     "win_pct": 40.0,
-     "avg_win_pct": 5.15,
-     "avg_loss_pct": -3.24,
-     "avg_ret_pct": 0.12,
-     "avg_r": -0.02,
-     "profit_factor": 1.06,
+     "trades": 558,
+     "win_pct": 40.7,
+     "avg_win_pct": 7.14,
+     "avg_loss_pct": -3.91,
+     "avg_ret_pct": 0.58,
+     "avg_r": 0.06,
+     "profit_factor": 1.25,
      "median_days": 6,
-     "worst_streak": 7,
+     "worst_streak": 20,
      "exits_pct": {
-      "stop": 51.4,
-      "target": 25.7,
-      "time": 17.1,
-      "breakeven": 5.7
+      "stop": 42.5,
+      "target": 39.4,
+      "breakeven": 15.9,
+      "time": 2.2
      }
     },
     "Small": {
-     "trades": 37,
-     "win_pct": 24.3,
-     "avg_win_pct": 6.53,
-     "avg_loss_pct": -3.02,
-     "avg_ret_pct": -0.7,
-     "avg_r": -0.16,
-     "profit_factor": 0.69,
-     "median_days": 5,
-     "worst_streak": 8,
-     "exits_pct": {
-      "stop": 56.8,
-      "target": 18.9,
-      "breakeven": 16.2,
-      "time": 8.1
-     }
-    }
-   },
-   "by_year": {
-    "2021": {
-     "trades": 5,
-     "win_pct": 80.0,
-     "avg_win_pct": 7.37,
-     "avg_loss_pct": -4.28,
-     "avg_ret_pct": 5.04,
-     "avg_r": 1.57,
-     "profit_factor": 6.89,
-     "median_days": 8,
-     "worst_streak": 1,
-     "exits_pct": {
-      "target": 80.0,
-      "stop": 20.0
-     }
-    },
-    "2022": {
-     "trades": 19,
-     "win_pct": 21.1,
-     "avg_win_pct": 3.13,
-     "avg_loss_pct": -3.05,
-     "avg_ret_pct": -1.75,
-     "avg_r": -0.5,
-     "profit_factor": 0.27,
+     "trades": 736,
+     "win_pct": 36.5,
+     "avg_win_pct": 7.08,
+     "avg_loss_pct": -4.96,
+     "avg_ret_pct": -0.56,
+     "avg_r": -0.12,
+     "profit_factor": 0.82,
      "median_days": 6,
-     "worst_streak": 7,
+     "worst_streak": 24,
      "exits_pct": {
-      "stop": 57.9,
-      "breakeven": 21.1,
-      "time": 15.8,
-      "target": 5.3
-     }
-    },
-    "2023": {
-     "trades": 20,
-     "win_pct": 35.0,
-     "avg_win_pct": 5.71,
-     "avg_loss_pct": -2.28,
-     "avg_ret_pct": 0.52,
-     "avg_r": 0.15,
-     "profit_factor": 1.35,
-     "median_days": 8,
-     "worst_streak": 4,
-     "exits_pct": {
-      "stop": 35.0,
-      "breakeven": 25.0,
-      "target": 20.0,
-      "time": 20.0
-     }
-    },
-    "2024": {
-     "trades": 12,
-     "win_pct": 8.3,
-     "avg_win_pct": 7.2,
-     "avg_loss_pct": -3.06,
-     "avg_ret_pct": -2.2,
-     "avg_r": -0.56,
-     "profit_factor": 0.21,
-     "median_days": 3,
-     "worst_streak": 10,
-     "exits_pct": {
-      "stop": 66.7,
-      "breakeven": 25.0,
-      "target": 8.3
-     }
-    },
-    "2025": {
-     "trades": 40,
-     "win_pct": 25.0,
-     "avg_win_pct": 5.2,
-     "avg_loss_pct": -3.23,
-     "avg_ret_pct": -1.12,
-     "avg_r": -0.36,
-     "profit_factor": 0.54,
-     "median_days": 5,
-     "worst_streak": 11,
-     "exits_pct": {
-      "stop": 65.0,
-      "target": 15.0,
-      "time": 12.5,
-      "breakeven": 7.5
-     }
-    },
-    "2026": {
-     "trades": 26,
-     "win_pct": 30.8,
-     "avg_win_pct": 6.45,
-     "avg_loss_pct": -2.89,
-     "avg_ret_pct": -0.01,
-     "avg_r": -0.0,
-     "profit_factor": 0.99,
-     "median_days": 6,
-     "worst_streak": 5,
-     "exits_pct": {
-      "stop": 50.0,
-      "target": 26.9,
-      "breakeven": 15.4,
-      "time": 7.7
+      "stop": 51.4,
+      "target": 35.3,
+      "breakeven": 11.3,
+      "time": 2.0
      }
     }
    }
   },
-  "Oversold bounce": {
-   "no_filters": {
-    "trades": 292,
-    "win_pct": 29.5,
-    "avg_win_pct": 6.05,
-    "avg_loss_pct": -2.7,
-    "avg_ret_pct": -0.12,
-    "avg_r": -0.03,
-    "profit_factor": 0.94,
-    "median_days": 5,
-    "worst_streak": 20,
+  {
+   "name": "Pullback \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Pullback",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 1092,
+    "win_pct": 24.4,
+    "avg_win_pct": 11.48,
+    "avg_loss_pct": -3.11,
+    "avg_ret_pct": 0.44,
+    "avg_r": 0.07,
+    "profit_factor": 1.19,
+    "median_days": 6,
+    "worst_streak": 48,
     "exits_pct": {
-     "stop": 54.1,
-     "target": 21.6,
-     "breakeven": 14.0,
-     "time": 10.3
-    }
-   },
-   "with_filters": {
-    "trades": 124,
-    "win_pct": 25.0,
-    "avg_win_pct": 5.65,
-    "avg_loss_pct": -2.62,
-    "avg_ret_pct": -0.55,
-    "avg_r": -0.26,
-    "profit_factor": 0.72,
-    "median_days": 5,
-    "worst_streak": 13,
-    "exits_pct": {
-     "stop": 60.5,
-     "target": 16.1,
+     "trail": 75.5,
      "breakeven": 12.9,
-     "time": 10.5
+     "stop": 8.3,
+     "time": 3.2
     }
    },
-   "by_cap": {
+   "out_of_sample": {
+    "trades": 1547,
+    "win_pct": 23.4,
+    "avg_win_pct": 8.92,
+    "avg_loss_pct": -3.18,
+    "avg_ret_pct": -0.35,
+    "avg_r": -0.08,
+    "profit_factor": 0.86,
+    "median_days": 7,
+    "worst_streak": 37,
+    "exits_pct": {
+     "trail": 73.1,
+     "breakeven": 12.9,
+     "stop": 12.5,
+     "time": 1.6
+    }
+   },
+   "all": {
+    "trades": 2639,
+    "win_pct": 23.8,
+    "avg_win_pct": 10.0,
+    "avg_loss_pct": -3.15,
+    "avg_ret_pct": -0.02,
+    "avg_r": -0.02,
+    "profit_factor": 0.99,
+    "median_days": 6,
+    "worst_streak": 48,
+    "exits_pct": {
+     "trail": 74.1,
+     "breakeven": 12.9,
+     "stop": 10.8,
+     "time": 2.2
+    }
+   },
+   "by_cap_oos": {
     "Large": {
-     "trades": 42,
-     "win_pct": 23.8,
-     "avg_win_pct": 4.61,
-     "avg_loss_pct": -2.61,
-     "avg_ret_pct": -0.89,
-     "avg_r": -0.41,
-     "profit_factor": 0.55,
+     "trades": 390,
+     "win_pct": 22.1,
+     "avg_win_pct": 8.02,
+     "avg_loss_pct": -2.63,
+     "avg_ret_pct": -0.28,
+     "avg_r": -0.09,
+     "profit_factor": 0.86,
      "median_days": 7,
-     "worst_streak": 14,
+     "worst_streak": 27,
      "exits_pct": {
-      "stop": 61.9,
-      "time": 16.7,
-      "breakeven": 11.9,
-      "target": 9.5
+      "trail": 70.8,
+      "breakeven": 14.1,
+      "stop": 13.3,
+      "time": 1.8
      }
     },
     "Mid": {
-     "trades": 43,
-     "win_pct": 23.3,
-     "avg_win_pct": 5.78,
-     "avg_loss_pct": -2.42,
-     "avg_ret_pct": -0.51,
-     "avg_r": -0.21,
+     "trades": 509,
+     "win_pct": 25.7,
+     "avg_win_pct": 8.52,
+     "avg_loss_pct": -3.17,
+     "avg_ret_pct": -0.16,
+     "avg_r": -0.05,
+     "profit_factor": 0.93,
+     "median_days": 7,
+     "worst_streak": 19,
+     "exits_pct": {
+      "trail": 72.1,
+      "breakeven": 14.3,
+      "stop": 11.6,
+      "time": 2.0
+     }
+    },
+    "Small": {
+     "trades": 648,
+     "win_pct": 22.4,
+     "avg_win_pct": 9.82,
+     "avg_loss_pct": -3.51,
+     "avg_ret_pct": -0.53,
+     "avg_r": -0.1,
+     "profit_factor": 0.81,
+     "median_days": 6,
+     "worst_streak": 37,
+     "exits_pct": {
+      "trail": 75.3,
+      "stop": 12.7,
+      "breakeven": 11.0,
+      "time": 1.1
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "52-week high",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 2004,
+    "win_pct": 47.3,
+    "avg_win_pct": 7.02,
+    "avg_loss_pct": -5.68,
+    "avg_ret_pct": 0.33,
+    "avg_r": 0.06,
+    "profit_factor": 1.11,
+    "median_days": 6,
+    "worst_streak": 37,
+    "exits_pct": {
+     "target": 44.6,
+     "stop": 43.3,
+     "breakeven": 7.8,
+     "time": 4.3
+    }
+   },
+   "out_of_sample": {
+    "trades": 1575,
+    "win_pct": 45.7,
+    "avg_win_pct": 7.13,
+    "avg_loss_pct": -5.83,
+    "avg_ret_pct": 0.09,
+    "avg_r": 0.01,
+    "profit_factor": 1.03,
+    "median_days": 7,
+    "worst_streak": 37,
+    "exits_pct": {
+     "stop": 44.7,
+     "target": 43.0,
+     "breakeven": 7.4,
+     "time": 4.8
+    }
+   },
+   "all": {
+    "trades": 3579,
+    "win_pct": 46.6,
+    "avg_win_pct": 7.07,
+    "avg_loss_pct": -5.75,
+    "avg_ret_pct": 0.22,
+    "avg_r": 0.04,
+    "profit_factor": 1.07,
+    "median_days": 6,
+    "worst_streak": 37,
+    "exits_pct": {
+     "stop": 43.9,
+     "target": 43.9,
+     "breakeven": 7.6,
+     "time": 4.6
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 430,
+     "win_pct": 44.0,
+     "avg_win_pct": 6.8,
+     "avg_loss_pct": -4.48,
+     "avg_ret_pct": 0.48,
+     "avg_r": 0.08,
+     "profit_factor": 1.19,
+     "median_days": 7,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 41.4,
+      "target": 38.8,
+      "breakeven": 11.6,
+      "time": 8.1
+     }
+    },
+    "Mid": {
+     "trades": 527,
+     "win_pct": 43.5,
+     "avg_win_pct": 7.08,
+     "avg_loss_pct": -5.51,
+     "avg_ret_pct": -0.04,
+     "avg_r": -0.01,
+     "profit_factor": 0.99,
+     "median_days": 7,
+     "worst_streak": 17,
+     "exits_pct": {
+      "stop": 45.7,
+      "target": 41.0,
+      "breakeven": 8.7,
+      "time": 4.6
+     }
+    },
+    "Small": {
+     "trades": 618,
+     "win_pct": 48.9,
+     "avg_win_pct": 7.37,
+     "avg_loss_pct": -7.17,
+     "avg_ret_pct": -0.06,
+     "avg_r": -0.02,
+     "profit_factor": 0.98,
+     "median_days": 5,
+     "worst_streak": 14,
+     "exits_pct": {
+      "target": 47.7,
+      "stop": 46.1,
+      "breakeven": 3.4,
+      "time": 2.8
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Pullback",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 1092,
+    "win_pct": 32.5,
+    "avg_win_pct": 11.5,
+    "avg_loss_pct": -4.9,
+    "avg_ret_pct": 0.43,
+    "avg_r": 0.06,
+    "profit_factor": 1.13,
+    "median_days": 12,
+    "worst_streak": 61,
+    "exits_pct": {
+     "stop": 41.9,
+     "target": 23.2,
+     "breakeven": 22.1,
+     "time": 12.8
+    }
+   },
+   "out_of_sample": {
+    "trades": 1545,
+    "win_pct": 29.3,
+    "avg_win_pct": 10.69,
+    "avg_loss_pct": -4.9,
+    "avg_ret_pct": -0.33,
+    "avg_r": -0.07,
+    "profit_factor": 0.9,
+    "median_days": 10,
+    "worst_streak": 50,
+    "exits_pct": {
+     "stop": 48.6,
+     "target": 20.1,
+     "breakeven": 19.1,
+     "time": 12.2
+    }
+   },
+   "all": {
+    "trades": 2637,
+    "win_pct": 30.6,
+    "avg_win_pct": 11.05,
+    "avg_loss_pct": -4.9,
+    "avg_ret_pct": -0.01,
+    "avg_r": -0.02,
+    "profit_factor": 1.0,
+    "median_days": 11,
+    "worst_streak": 61,
+    "exits_pct": {
+     "stop": 45.8,
+     "target": 21.4,
+     "breakeven": 20.3,
+     "time": 12.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 390,
+     "win_pct": 30.8,
+     "avg_win_pct": 9.23,
+     "avg_loss_pct": -3.8,
+     "avg_ret_pct": 0.21,
+     "avg_r": -0.03,
+     "profit_factor": 1.08,
+     "median_days": 11,
+     "worst_streak": 27,
+     "exits_pct": {
+      "stop": 43.8,
+      "breakeven": 21.5,
+      "target": 19.7,
+      "time": 14.9
+     }
+    },
+    "Mid": {
+     "trades": 509,
+     "win_pct": 31.2,
+     "avg_win_pct": 10.32,
+     "avg_loss_pct": -4.81,
+     "avg_ret_pct": -0.08,
+     "avg_r": -0.03,
+     "profit_factor": 0.97,
+     "median_days": 11,
+     "worst_streak": 17,
+     "exits_pct": {
+      "stop": 46.4,
+      "breakeven": 20.4,
+      "target": 20.0,
+      "time": 13.2
+     }
+    },
+    "Small": {
+     "trades": 646,
+     "win_pct": 26.9,
+     "avg_win_pct": 12.03,
+     "avg_loss_pct": -5.6,
+     "avg_ret_pct": -0.85,
+     "avg_r": -0.14,
+     "profit_factor": 0.79,
+     "median_days": 9,
+     "worst_streak": 33,
+     "exits_pct": {
+      "stop": 53.3,
+      "target": 20.3,
+      "breakeven": 16.6,
+      "time": 9.9
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 20d",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 4802,
+    "win_pct": 45.2,
+    "avg_win_pct": 6.97,
+    "avg_loss_pct": -5.31,
+    "avg_ret_pct": 0.25,
+    "avg_r": 0.05,
+    "profit_factor": 1.09,
+    "median_days": 6,
+    "worst_streak": 65,
+    "exits_pct": {
+     "stop": 43.8,
+     "target": 42.2,
+     "breakeven": 9.1,
+     "time": 4.9
+    }
+   },
+   "out_of_sample": {
+    "trades": 3853,
+    "win_pct": 42.3,
+    "avg_win_pct": 7.05,
+    "avg_loss_pct": -5.64,
+    "avg_ret_pct": -0.27,
+    "avg_r": -0.06,
+    "profit_factor": 0.92,
+    "median_days": 7,
+    "worst_streak": 83,
+    "exits_pct": {
+     "stop": 47.8,
+     "target": 39.7,
+     "breakeven": 7.7,
+     "time": 4.9
+    }
+   },
+   "all": {
+    "trades": 8655,
+    "win_pct": 43.9,
+    "avg_win_pct": 7.01,
+    "avg_loss_pct": -5.46,
+    "avg_ret_pct": 0.02,
+    "avg_r": 0.0,
+    "profit_factor": 1.01,
+    "median_days": 7,
+    "worst_streak": 83,
+    "exits_pct": {
+     "stop": 45.6,
+     "target": 41.1,
+     "breakeven": 8.5,
+     "time": 4.9
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 825,
+     "win_pct": 39.9,
+     "avg_win_pct": 6.7,
+     "avg_loss_pct": -4.19,
+     "avg_ret_pct": 0.15,
+     "avg_r": 0.01,
+     "profit_factor": 1.06,
+     "median_days": 8,
+     "worst_streak": 33,
+     "exits_pct": {
+      "stop": 44.0,
+      "target": 34.7,
+      "breakeven": 13.1,
+      "time": 8.2
+     }
+    },
+    "Mid": {
+     "trades": 1248,
+     "win_pct": 40.1,
+     "avg_win_pct": 6.95,
+     "avg_loss_pct": -5.39,
+     "avg_ret_pct": -0.45,
+     "avg_r": -0.08,
+     "profit_factor": 0.86,
+     "median_days": 7,
+     "worst_streak": 52,
+     "exits_pct": {
+      "stop": 49.2,
+      "target": 36.8,
+      "breakeven": 8.0,
+      "time": 6.0
+     }
+    },
+    "Small": {
+     "trades": 1780,
+     "win_pct": 45.0,
+     "avg_win_pct": 7.27,
+     "avg_loss_pct": -6.56,
+     "avg_ret_pct": -0.34,
+     "avg_r": -0.07,
+     "profit_factor": 0.91,
+     "median_days": 6,
+     "worst_streak": 35,
+     "exits_pct": {
+      "stop": 48.5,
+      "target": 44.0,
+      "breakeven": 5.1,
+      "time": 2.5
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 20d",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 457,
+    "win_pct": 19.5,
+    "avg_win_pct": 17.38,
+    "avg_loss_pct": -3.86,
+    "avg_ret_pct": 0.28,
+    "avg_r": 0.04,
+    "profit_factor": 1.09,
+    "median_days": 9,
+    "worst_streak": 43,
+    "exits_pct": {
+     "trail": 37.4,
+     "stop": 33.5,
+     "breakeven": 23.2,
+     "time": 5.9
+    }
+   },
+   "out_of_sample": {
+    "trades": 489,
+    "win_pct": 22.7,
+    "avg_win_pct": 9.52,
+    "avg_loss_pct": -3.8,
+    "avg_ret_pct": -0.77,
+    "avg_r": -0.13,
+    "profit_factor": 0.74,
+    "median_days": 9,
+    "worst_streak": 24,
+    "exits_pct": {
+     "trail": 41.5,
+     "stop": 33.7,
+     "breakeven": 20.9,
+     "time": 3.9
+    }
+   },
+   "all": {
+    "trades": 946,
+    "win_pct": 21.1,
+    "avg_win_pct": 13.02,
+    "avg_loss_pct": -3.83,
+    "avg_ret_pct": -0.27,
+    "avg_r": -0.05,
+    "profit_factor": 0.91,
+    "median_days": 9,
+    "worst_streak": 43,
+    "exits_pct": {
+     "trail": 39.5,
+     "stop": 33.6,
+     "breakeven": 22.0,
+     "time": 4.9
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 143,
+     "win_pct": 22.4,
+     "avg_win_pct": 10.73,
+     "avg_loss_pct": -3.05,
+     "avg_ret_pct": 0.03,
+     "avg_r": -0.04,
+     "profit_factor": 1.01,
+     "median_days": 11,
+     "worst_streak": 16,
+     "exits_pct": {
+      "trail": 37.8,
+      "stop": 31.5,
+      "breakeven": 25.2,
+      "time": 5.6
+     }
+    },
+    "Mid": {
+     "trades": 183,
+     "win_pct": 22.4,
+     "avg_win_pct": 9.5,
+     "avg_loss_pct": -3.81,
+     "avg_ret_pct": -0.82,
+     "avg_r": -0.12,
      "profit_factor": 0.72,
+     "median_days": 10,
+     "worst_streak": 31,
+     "exits_pct": {
+      "trail": 44.3,
+      "stop": 32.2,
+      "breakeven": 19.1,
+      "time": 4.4
+     }
+    },
+    "Small": {
+     "trades": 163,
+     "win_pct": 23.3,
+     "avg_win_pct": 8.53,
+     "avg_loss_pct": -4.45,
+     "avg_ret_pct": -1.43,
+     "avg_r": -0.24,
+     "profit_factor": 0.58,
+     "median_days": 8,
+     "worst_streak": 12,
+     "exits_pct": {
+      "trail": 41.7,
+      "stop": 37.4,
+      "breakeven": 19.0,
+      "time": 1.8
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 50d",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 2810,
+    "win_pct": 46.0,
+    "avg_win_pct": 7.01,
+    "avg_loss_pct": -5.53,
+    "avg_ret_pct": 0.24,
+    "avg_r": 0.04,
+    "profit_factor": 1.08,
+    "median_days": 6,
+    "worst_streak": 47,
+    "exits_pct": {
+     "stop": 44.1,
+     "target": 43.5,
+     "breakeven": 8.3,
+     "time": 4.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 2111,
+    "win_pct": 44.8,
+    "avg_win_pct": 7.12,
+    "avg_loss_pct": -5.68,
+    "avg_ret_pct": 0.05,
+    "avg_r": 0.0,
+    "profit_factor": 1.02,
+    "median_days": 7,
+    "worst_streak": 47,
+    "exits_pct": {
+     "stop": 45.4,
+     "target": 42.3,
+     "breakeven": 7.9,
+     "time": 4.4
+    }
+   },
+   "all": {
+    "trades": 4921,
+    "win_pct": 45.5,
+    "avg_win_pct": 7.06,
+    "avg_loss_pct": -5.59,
+    "avg_ret_pct": 0.16,
+    "avg_r": 0.02,
+    "profit_factor": 1.05,
+    "median_days": 6,
+    "worst_streak": 47,
+    "exits_pct": {
+     "stop": 44.6,
+     "target": 43.0,
+     "breakeven": 8.1,
+     "time": 4.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 531,
+     "win_pct": 41.4,
+     "avg_win_pct": 6.81,
+     "avg_loss_pct": -4.32,
+     "avg_ret_pct": 0.29,
+     "avg_r": 0.04,
+     "profit_factor": 1.11,
+     "median_days": 8,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 43.3,
+      "target": 36.7,
+      "breakeven": 12.4,
+      "time": 7.5
+     }
+    },
+    "Mid": {
+     "trades": 702,
+     "win_pct": 43.4,
+     "avg_win_pct": 7.05,
+     "avg_loss_pct": -5.39,
+     "avg_ret_pct": 0.02,
+     "avg_r": 0.0,
+     "profit_factor": 1.01,
+     "median_days": 7,
+     "worst_streak": 24,
+     "exits_pct": {
+      "stop": 45.7,
+      "target": 40.7,
+      "breakeven": 8.7,
+      "time": 4.8
+     }
+    },
+    "Small": {
+     "trades": 878,
+     "win_pct": 47.8,
+     "avg_win_pct": 7.33,
+     "avg_loss_pct": -6.85,
+     "avg_ret_pct": -0.07,
+     "avg_r": -0.02,
+     "profit_factor": 0.98,
+     "median_days": 6,
+     "worst_streak": 19,
+     "exits_pct": {
+      "target": 46.9,
+      "stop": 46.5,
+      "breakeven": 4.6,
+      "time": 2.1
+     }
+    }
+   }
+  },
+  {
+   "name": "Pullback \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Pullback",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 1092,
+    "win_pct": 49.9,
+    "avg_win_pct": 6.99,
+    "avg_loss_pct": -6.36,
+    "avg_ret_pct": 0.3,
+    "avg_r": 0.04,
+    "profit_factor": 1.09,
+    "median_days": 8,
+    "worst_streak": 46,
+    "exits_pct": {
+     "target": 47.2,
+     "stop": 41.4,
+     "time": 6.0,
+     "breakeven": 5.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 1549,
+    "win_pct": 41.3,
+    "avg_win_pct": 6.93,
+    "avg_loss_pct": -5.68,
+    "avg_ret_pct": -0.47,
+    "avg_r": -0.09,
+    "profit_factor": 0.86,
+    "median_days": 8,
+    "worst_streak": 39,
+    "exits_pct": {
+     "stop": 47.7,
+     "target": 37.6,
+     "breakeven": 8.3,
+     "time": 6.4
+    }
+   },
+   "all": {
+    "trades": 2641,
+    "win_pct": 44.9,
+    "avg_win_pct": 6.96,
+    "avg_loss_pct": -5.94,
+    "avg_ret_pct": -0.15,
+    "avg_r": -0.04,
+    "profit_factor": 0.95,
+    "median_days": 8,
+    "worst_streak": 46,
+    "exits_pct": {
+     "stop": 45.1,
+     "target": 41.6,
+     "breakeven": 7.1,
+     "time": 6.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 390,
+     "win_pct": 37.7,
+     "avg_win_pct": 6.81,
+     "avg_loss_pct": -4.18,
+     "avg_ret_pct": -0.04,
+     "avg_r": -0.06,
+     "profit_factor": 0.99,
+     "median_days": 9,
+     "worst_streak": 27,
+     "exits_pct": {
+      "stop": 43.8,
+      "target": 31.5,
+      "breakeven": 14.9,
+      "time": 9.7
+     }
+    },
+    "Mid": {
+     "trades": 510,
+     "win_pct": 44.9,
+     "avg_win_pct": 6.87,
+     "avg_loss_pct": -5.56,
+     "avg_ret_pct": 0.02,
+     "avg_r": -0.02,
+     "profit_factor": 1.01,
+     "median_days": 8,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 44.3,
+      "target": 40.8,
+      "breakeven": 9.0,
+      "time": 5.9
+     }
+    },
+    "Small": {
+     "trades": 649,
+     "win_pct": 40.7,
+     "avg_win_pct": 7.06,
+     "avg_loss_pct": -6.72,
+     "avg_ret_pct": -1.12,
+     "avg_r": -0.17,
+     "profit_factor": 0.72,
+     "median_days": 7,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 52.7,
+      "target": 38.8,
+      "time": 4.8,
+      "breakeven": 3.7
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 20d",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 458,
+    "win_pct": 16.2,
+    "avg_win_pct": 16.96,
+    "avg_loss_pct": -3.17,
+    "avg_ret_pct": 0.08,
+    "avg_r": 0.03,
+    "profit_factor": 1.03,
+    "median_days": 6,
+    "worst_streak": 52,
+    "exits_pct": {
+     "stop": 49.8,
+     "breakeven": 30.1,
+     "trail": 14.8,
+     "time": 5.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 492,
+    "win_pct": 19.9,
+    "avg_win_pct": 9.55,
+    "avg_loss_pct": -2.98,
+    "avg_ret_pct": -0.48,
+    "avg_r": -0.12,
+    "profit_factor": 0.8,
+    "median_days": 7,
+    "worst_streak": 24,
+    "exits_pct": {
+     "stop": 44.7,
+     "breakeven": 29.5,
+     "trail": 22.8,
+     "time": 3.0
+    }
+   },
+   "all": {
+    "trades": 950,
+    "win_pct": 18.1,
+    "avg_win_pct": 12.74,
+    "avg_loss_pct": -3.07,
+    "avg_ret_pct": -0.21,
+    "avg_r": -0.05,
+    "profit_factor": 0.92,
+    "median_days": 7,
+    "worst_streak": 52,
+    "exits_pct": {
+     "stop": 47.2,
+     "breakeven": 29.8,
+     "trail": 18.9,
+     "time": 4.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 143,
+     "win_pct": 20.3,
+     "avg_win_pct": 10.88,
+     "avg_loss_pct": -2.51,
+     "avg_ret_pct": 0.21,
+     "avg_r": -0.01,
+     "profit_factor": 1.1,
+     "median_days": 8,
+     "worst_streak": 20,
+     "exits_pct": {
+      "stop": 41.3,
+      "breakeven": 31.5,
+      "trail": 22.4,
+      "time": 4.9
+     }
+    },
+    "Mid": {
+     "trades": 185,
+     "win_pct": 19.5,
+     "avg_win_pct": 9.19,
+     "avg_loss_pct": -2.95,
+     "avg_ret_pct": -0.59,
+     "avg_r": -0.11,
+     "profit_factor": 0.75,
+     "median_days": 8,
+     "worst_streak": 41,
+     "exits_pct": {
+      "stop": 44.3,
+      "breakeven": 29.7,
+      "trail": 22.7,
+      "time": 3.2
+     }
+    },
+    "Small": {
+     "trades": 164,
+     "win_pct": 20.1,
+     "avg_win_pct": 8.77,
+     "avg_loss_pct": -3.42,
+     "avg_ret_pct": -0.96,
+     "avg_r": -0.22,
+     "profit_factor": 0.65,
+     "median_days": 6,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 48.2,
+      "breakeven": 27.4,
+      "trail": 23.2,
+      "time": 1.2
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "52-week high",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 2103,
+    "win_pct": 36.0,
+    "avg_win_pct": 7.18,
+    "avg_loss_pct": -4.14,
+    "avg_ret_pct": -0.07,
+    "avg_r": -0.01,
+    "profit_factor": 0.98,
+    "median_days": 4,
+    "worst_streak": 41,
+    "exits_pct": {
+     "stop": 48.3,
+     "target": 34.9,
+     "breakeven": 15.4,
+     "time": 1.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 1668,
+    "win_pct": 35.6,
+    "avg_win_pct": 7.27,
+    "avg_loss_pct": -4.22,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.04,
+    "profit_factor": 0.95,
+    "median_days": 4,
+    "worst_streak": 34,
+    "exits_pct": {
+     "stop": 48.6,
+     "target": 34.7,
+     "breakeven": 15.5,
+     "time": 1.3
+    }
+   },
+   "all": {
+    "trades": 3771,
+    "win_pct": 35.8,
+    "avg_win_pct": 7.22,
+    "avg_loss_pct": -4.18,
+    "avg_ret_pct": -0.09,
+    "avg_r": -0.02,
+    "profit_factor": 0.97,
+    "median_days": 4,
+    "worst_streak": 41,
+    "exits_pct": {
+     "stop": 48.4,
+     "target": 34.8,
+     "breakeven": 15.4,
+     "time": 1.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 438,
+     "win_pct": 34.2,
+     "avg_win_pct": 6.96,
+     "avg_loss_pct": -3.41,
+     "avg_ret_pct": 0.14,
+     "avg_r": 0.01,
+     "profit_factor": 1.06,
+     "median_days": 5,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 47.3,
+      "target": 32.0,
+      "breakeven": 17.6,
+      "time": 3.2
+     }
+    },
+    "Mid": {
+     "trades": 545,
+     "win_pct": 32.7,
+     "avg_win_pct": 7.25,
+     "avg_loss_pct": -3.84,
+     "avg_ret_pct": -0.21,
+     "avg_r": -0.05,
+     "profit_factor": 0.92,
+     "median_days": 5,
+     "worst_streak": 27,
+     "exits_pct": {
+      "stop": 48.1,
+      "target": 31.9,
+      "breakeven": 18.9,
+      "time": 1.1
+     }
+    },
+    "Small": {
+     "trades": 685,
+     "win_pct": 38.8,
+     "avg_win_pct": 7.46,
+     "avg_loss_pct": -5.12,
+     "avg_ret_pct": -0.23,
+     "avg_r": -0.06,
+     "profit_factor": 0.93,
      "median_days": 4,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 49.8,
+      "target": 38.7,
+      "breakeven": 11.4,
+      "time": 0.1
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 20d",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 4929,
+    "win_pct": 33.9,
+    "avg_win_pct": 7.15,
+    "avg_loss_pct": -3.85,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.02,
+    "profit_factor": 0.95,
+    "median_days": 4,
+    "worst_streak": 50,
+    "exits_pct": {
+     "stop": 49.2,
+     "target": 32.7,
+     "breakeven": 16.7,
+     "time": 1.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 4015,
+    "win_pct": 32.8,
+    "avg_win_pct": 7.2,
+    "avg_loss_pct": -4.09,
+    "avg_ret_pct": -0.38,
+    "avg_r": -0.1,
+    "profit_factor": 0.86,
+    "median_days": 5,
+    "worst_streak": 79,
+    "exits_pct": {
+     "stop": 51.2,
+     "target": 31.8,
+     "breakeven": 15.6,
+     "time": 1.3
+    }
+   },
+   "all": {
+    "trades": 8944,
+    "win_pct": 33.4,
+    "avg_win_pct": 7.17,
+    "avg_loss_pct": -3.96,
+    "avg_ret_pct": -0.24,
+    "avg_r": -0.05,
+    "profit_factor": 0.91,
+    "median_days": 4,
+    "worst_streak": 79,
+    "exits_pct": {
+     "stop": 50.1,
+     "target": 32.3,
+     "breakeven": 16.2,
+     "time": 1.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 836,
+     "win_pct": 30.4,
+     "avg_win_pct": 6.89,
+     "avg_loss_pct": -3.14,
+     "avg_ret_pct": -0.09,
+     "avg_r": -0.05,
+     "profit_factor": 0.96,
+     "median_days": 6,
+     "worst_streak": 35,
+     "exits_pct": {
+      "stop": 49.0,
+      "target": 27.9,
+      "breakeven": 20.1,
+      "time": 3.0
+     }
+    },
+    "Mid": {
+     "trades": 1282,
+     "win_pct": 29.6,
+     "avg_win_pct": 7.12,
+     "avg_loss_pct": -3.84,
+     "avg_ret_pct": -0.59,
+     "avg_r": -0.14,
+     "profit_factor": 0.78,
+     "median_days": 5,
+     "worst_streak": 52,
+     "exits_pct": {
+      "stop": 52.1,
+      "target": 28.5,
+      "breakeven": 17.8,
+      "time": 1.6
+     }
+    },
+    "Small": {
+     "trades": 1897,
+     "win_pct": 36.0,
+     "avg_win_pct": 7.36,
+     "avg_loss_pct": -4.72,
+     "avg_ret_pct": -0.37,
+     "avg_r": -0.09,
+     "profit_factor": 0.88,
+     "median_days": 4,
+     "worst_streak": 39,
+     "exits_pct": {
+      "stop": 51.6,
+      "target": 35.7,
+      "breakeven": 12.2,
+      "time": 0.5
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Breakout 20d",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 4929,
+    "win_pct": 28.2,
+    "avg_win_pct": 8.8,
+    "avg_loss_pct": -3.59,
+    "avg_ret_pct": -0.1,
+    "avg_r": -0.02,
+    "profit_factor": 0.96,
+    "median_days": 5,
+    "worst_streak": 82,
+    "exits_pct": {
+     "stop": 49.2,
+     "target": 27.1,
+     "breakeven": 22.3,
+     "time": 1.3
+    }
+   },
+   "out_of_sample": {
+    "trades": 4016,
+    "win_pct": 26.0,
+    "avg_win_pct": 9.45,
+    "avg_loss_pct": -3.76,
+    "avg_ret_pct": -0.33,
+    "avg_r": -0.09,
+    "profit_factor": 0.88,
+    "median_days": 5,
+    "worst_streak": 84,
+    "exits_pct": {
+     "stop": 51.3,
+     "target": 24.7,
+     "breakeven": 22.3,
+     "time": 1.7
+    }
+   },
+   "all": {
+    "trades": 8945,
+    "win_pct": 27.2,
+    "avg_win_pct": 9.08,
+    "avg_loss_pct": -3.67,
+    "avg_ret_pct": -0.2,
+    "avg_r": -0.05,
+    "profit_factor": 0.92,
+    "median_days": 5,
+    "worst_streak": 84,
+    "exits_pct": {
+     "stop": 50.2,
+     "target": 26.0,
+     "breakeven": 22.3,
+     "time": 1.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 837,
+     "win_pct": 28.3,
+     "avg_win_pct": 7.39,
+     "avg_loss_pct": -3.06,
+     "avg_ret_pct": -0.1,
+     "avg_r": -0.05,
+     "profit_factor": 0.95,
+     "median_days": 6,
+     "worst_streak": 31,
+     "exits_pct": {
+      "stop": 49.0,
+      "target": 26.2,
+      "breakeven": 22.2,
+      "time": 2.6
+     }
+    },
+    "Mid": {
+     "trades": 1283,
+     "win_pct": 24.9,
+     "avg_win_pct": 8.76,
+     "avg_loss_pct": -3.63,
+     "avg_ret_pct": -0.55,
+     "avg_r": -0.13,
+     "profit_factor": 0.8,
+     "median_days": 5,
+     "worst_streak": 50,
+     "exits_pct": {
+      "stop": 52.1,
+      "target": 23.5,
+      "breakeven": 22.5,
+      "time": 1.8
+     }
+    },
+    "Small": {
+     "trades": 1896,
+     "win_pct": 25.8,
+     "avg_win_pct": 10.9,
+     "avg_loss_pct": -4.16,
+     "avg_ret_pct": -0.27,
+     "avg_r": -0.08,
+     "profit_factor": 0.91,
+     "median_days": 5,
+     "worst_streak": 49,
+     "exits_pct": {
+      "stop": 51.8,
+      "target": 24.8,
+      "breakeven": 22.2,
+      "time": 1.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 50d",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 2914,
+    "win_pct": 34.7,
+    "avg_win_pct": 7.17,
+    "avg_loss_pct": -4.0,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.02,
+    "profit_factor": 0.95,
+    "median_days": 4,
+    "worst_streak": 46,
+    "exits_pct": {
+     "stop": 49.0,
+     "target": 33.8,
+     "breakeven": 16.0,
+     "time": 1.2
+    }
+   },
+   "out_of_sample": {
+    "trades": 2220,
+    "win_pct": 34.8,
+    "avg_win_pct": 7.26,
+    "avg_loss_pct": -4.08,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.04,
+    "profit_factor": 0.95,
+    "median_days": 5,
+    "worst_streak": 43,
+    "exits_pct": {
+     "stop": 48.6,
+     "target": 33.9,
+     "breakeven": 16.3,
+     "time": 1.2
+    }
+   },
+   "all": {
+    "trades": 5134,
+    "win_pct": 34.7,
+    "avg_win_pct": 7.21,
+    "avg_loss_pct": -4.04,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.03,
+    "profit_factor": 0.95,
+    "median_days": 4,
+    "worst_streak": 46,
+    "exits_pct": {
+     "stop": 48.8,
+     "target": 33.8,
+     "breakeven": 16.1,
+     "time": 1.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 539,
+     "win_pct": 32.5,
+     "avg_win_pct": 6.99,
+     "avg_loss_pct": -3.29,
+     "avg_ret_pct": 0.04,
+     "avg_r": -0.02,
+     "profit_factor": 1.02,
+     "median_days": 5,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 48.4,
+      "target": 30.4,
+      "breakeven": 18.4,
+      "time": 2.8
+     }
+    },
+    "Mid": {
+     "trades": 723,
+     "win_pct": 32.4,
+     "avg_win_pct": 7.18,
+     "avg_loss_pct": -3.74,
+     "avg_ret_pct": -0.2,
+     "avg_r": -0.05,
+     "profit_factor": 0.92,
+     "median_days": 5,
+     "worst_streak": 29,
+     "exits_pct": {
+      "stop": 48.0,
+      "target": 31.3,
+      "breakeven": 19.2,
+      "time": 1.5
+     }
+    },
+    "Small": {
+     "trades": 958,
+     "win_pct": 38.0,
+     "avg_win_pct": 7.44,
+     "avg_loss_pct": -4.85,
+     "avg_ret_pct": -0.18,
+     "avg_r": -0.05,
+     "profit_factor": 0.94,
+     "median_days": 4,
+     "worst_streak": 19,
+     "exits_pct": {
+      "stop": 49.1,
+      "target": 37.9,
+      "breakeven": 12.9,
+      "time": 0.1
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 50d",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 306,
+    "win_pct": 15.7,
+    "avg_win_pct": 16.06,
+    "avg_loss_pct": -3.25,
+    "avg_ret_pct": -0.22,
+    "avg_r": -0.03,
+    "profit_factor": 0.92,
+    "median_days": 6,
+    "worst_streak": 43,
+    "exits_pct": {
+     "stop": 52.9,
+     "breakeven": 26.5,
+     "trail": 15.0,
+     "time": 5.6
+    }
+   },
+   "out_of_sample": {
+    "trades": 334,
+    "win_pct": 20.4,
+    "avg_win_pct": 8.71,
+    "avg_loss_pct": -2.89,
+    "avg_ret_pct": -0.53,
+    "avg_r": -0.13,
+    "profit_factor": 0.77,
+    "median_days": 7,
+    "worst_streak": 28,
+    "exits_pct": {
+     "stop": 44.6,
+     "breakeven": 29.0,
+     "trail": 23.1,
+     "time": 3.3
+    }
+   },
+   "all": {
+    "trades": 640,
+    "win_pct": 18.1,
+    "avg_win_pct": 11.75,
+    "avg_loss_pct": -3.07,
+    "avg_ret_pct": -0.38,
+    "avg_r": -0.08,
+    "profit_factor": 0.85,
+    "median_days": 7,
+    "worst_streak": 43,
+    "exits_pct": {
+     "stop": 48.6,
+     "breakeven": 27.8,
+     "trail": 19.2,
+     "time": 4.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 115,
+     "win_pct": 19.1,
+     "avg_win_pct": 9.91,
+     "avg_loss_pct": -2.51,
+     "avg_ret_pct": -0.13,
+     "avg_r": -0.11,
+     "profit_factor": 0.93,
+     "median_days": 8,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 41.7,
+      "breakeven": 32.2,
+      "trail": 21.7,
+      "time": 4.3
+     }
+    },
+    "Mid": {
+     "trades": 132,
+     "win_pct": 23.5,
+     "avg_win_pct": 8.99,
+     "avg_loss_pct": -2.79,
+     "avg_ret_pct": -0.02,
+     "avg_r": 0.02,
+     "profit_factor": 0.99,
+     "median_days": 9,
+     "worst_streak": 28,
+     "exits_pct": {
+      "stop": 40.9,
+      "breakeven": 27.3,
+      "trail": 27.3,
+      "time": 4.5
+     }
+    },
+    "Small": {
+     "trades": 87,
+     "win_pct": 17.2,
+     "avg_win_pct": 6.39,
+     "avg_loss_pct": -3.51,
+     "avg_ret_pct": -1.8,
+     "avg_r": -0.37,
+     "profit_factor": 0.38,
+     "median_days": 5,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 54.0,
+      "breakeven": 27.6,
+      "trail": 18.4
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 basic filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Oversold bounce",
+   "filters": "basic",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 211,
+    "win_pct": 40.3,
+    "avg_win_pct": 2.32,
+    "avg_loss_pct": -2.03,
+    "avg_ret_pct": -0.28,
+    "avg_r": -0.03,
+    "profit_factor": 0.77,
+    "median_days": 2,
+    "worst_streak": 10,
+    "exits_pct": {
+     "trail": 96.7,
+     "stop": 2.8,
+     "time": 0.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 297,
+    "win_pct": 35.4,
+    "avg_win_pct": 1.75,
+    "avg_loss_pct": -2.2,
+    "avg_ret_pct": -0.81,
+    "avg_r": -0.11,
+    "profit_factor": 0.43,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 95.6,
+     "stop": 3.4,
+     "breakeven": 1.0
+    }
+   },
+   "all": {
+    "trades": 508,
+    "win_pct": 37.4,
+    "avg_win_pct": 2.0,
+    "avg_loss_pct": -2.14,
+    "avg_ret_pct": -0.59,
+    "avg_r": -0.08,
+    "profit_factor": 0.56,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 96.1,
+     "stop": 3.1,
+     "breakeven": 0.6,
+     "time": 0.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 67,
+     "win_pct": 35.8,
+     "avg_win_pct": 1.95,
+     "avg_loss_pct": -1.95,
+     "avg_ret_pct": -0.55,
+     "avg_r": -0.1,
+     "profit_factor": 0.56,
+     "median_days": 2,
+     "worst_streak": 10,
+     "exits_pct": {
+      "trail": 92.5,
+      "stop": 4.5,
+      "breakeven": 3.0
+     }
+    },
+    "Mid": {
+     "trades": 101,
+     "win_pct": 36.6,
+     "avg_win_pct": 1.61,
+     "avg_loss_pct": -1.97,
+     "avg_ret_pct": -0.66,
+     "avg_r": -0.09,
+     "profit_factor": 0.47,
+     "median_days": 2,
+     "worst_streak": 11,
+     "exits_pct": {
+      "trail": 97.0,
+      "stop": 2.0,
+      "breakeven": 1.0
+     }
+    },
+    "Small": {
+     "trades": 129,
+     "win_pct": 34.1,
+     "avg_win_pct": 1.76,
+     "avg_loss_pct": -2.51,
+     "avg_ret_pct": -1.05,
+     "avg_r": -0.14,
+     "profit_factor": 0.36,
+     "median_days": 2,
+     "worst_streak": 18,
+     "exits_pct": {
+      "trail": 96.1,
+      "stop": 3.9
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Oversold bounce",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 211,
+    "win_pct": 40.3,
+    "avg_win_pct": 2.32,
+    "avg_loss_pct": -2.03,
+    "avg_ret_pct": -0.28,
+    "avg_r": -0.03,
+    "profit_factor": 0.77,
+    "median_days": 2,
+    "worst_streak": 10,
+    "exits_pct": {
+     "trail": 96.7,
+     "stop": 2.8,
+     "time": 0.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 297,
+    "win_pct": 35.4,
+    "avg_win_pct": 1.75,
+    "avg_loss_pct": -2.2,
+    "avg_ret_pct": -0.81,
+    "avg_r": -0.11,
+    "profit_factor": 0.43,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 95.6,
+     "stop": 3.4,
+     "breakeven": 1.0
+    }
+   },
+   "all": {
+    "trades": 508,
+    "win_pct": 37.4,
+    "avg_win_pct": 2.0,
+    "avg_loss_pct": -2.14,
+    "avg_ret_pct": -0.59,
+    "avg_r": -0.08,
+    "profit_factor": 0.56,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 96.1,
+     "stop": 3.1,
+     "breakeven": 0.6,
+     "time": 0.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 67,
+     "win_pct": 35.8,
+     "avg_win_pct": 1.95,
+     "avg_loss_pct": -1.95,
+     "avg_ret_pct": -0.55,
+     "avg_r": -0.1,
+     "profit_factor": 0.56,
+     "median_days": 2,
+     "worst_streak": 10,
+     "exits_pct": {
+      "trail": 92.5,
+      "stop": 4.5,
+      "breakeven": 3.0
+     }
+    },
+    "Mid": {
+     "trades": 101,
+     "win_pct": 36.6,
+     "avg_win_pct": 1.61,
+     "avg_loss_pct": -1.97,
+     "avg_ret_pct": -0.66,
+     "avg_r": -0.09,
+     "profit_factor": 0.47,
+     "median_days": 2,
+     "worst_streak": 11,
+     "exits_pct": {
+      "trail": 97.0,
+      "stop": 2.0,
+      "breakeven": 1.0
+     }
+    },
+    "Small": {
+     "trades": 129,
+     "win_pct": 34.1,
+     "avg_win_pct": 1.76,
+     "avg_loss_pct": -2.51,
+     "avg_ret_pct": -1.05,
+     "avg_r": -0.14,
+     "profit_factor": 0.36,
+     "median_days": 2,
+     "worst_streak": 18,
+     "exits_pct": {
+      "trail": 96.1,
+      "stop": 3.9
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Oversold bounce",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 240,
+    "win_pct": 39.2,
+    "avg_win_pct": 2.61,
+    "avg_loss_pct": -2.12,
+    "avg_ret_pct": -0.26,
+    "avg_r": -0.04,
+    "profit_factor": 0.79,
+    "median_days": 2,
+    "worst_streak": 9,
+    "exits_pct": {
+     "trail": 92.1,
+     "stop": 5.8,
+     "breakeven": 1.7,
+     "time": 0.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 325,
+    "win_pct": 35.7,
+    "avg_win_pct": 2.06,
+    "avg_loss_pct": -2.25,
+    "avg_ret_pct": -0.71,
+    "avg_r": -0.14,
+    "profit_factor": 0.51,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 89.8,
+     "stop": 7.4,
+     "breakeven": 2.8
+    }
+   },
+   "all": {
+    "trades": 565,
+    "win_pct": 37.2,
+    "avg_win_pct": 2.31,
+    "avg_loss_pct": -2.19,
+    "avg_ret_pct": -0.52,
+    "avg_r": -0.1,
+    "profit_factor": 0.62,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 90.8,
+     "stop": 6.7,
+     "breakeven": 2.3,
+     "time": 0.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 68,
+     "win_pct": 36.8,
+     "avg_win_pct": 1.88,
+     "avg_loss_pct": -1.96,
+     "avg_ret_pct": -0.55,
+     "avg_r": -0.13,
+     "profit_factor": 0.56,
+     "median_days": 2,
+     "worst_streak": 10,
+     "exits_pct": {
+      "trail": 88.2,
+      "stop": 8.8,
+      "breakeven": 2.9
+     }
+    },
+    "Mid": {
+     "trades": 110,
+     "win_pct": 37.3,
+     "avg_win_pct": 1.95,
+     "avg_loss_pct": -2.05,
+     "avg_ret_pct": -0.56,
+     "avg_r": -0.11,
+     "profit_factor": 0.57,
+     "median_days": 2,
+     "worst_streak": 11,
+     "exits_pct": {
+      "trail": 92.7,
+      "stop": 4.5,
+      "breakeven": 2.7
+     }
+    },
+    "Small": {
+     "trades": 147,
+     "win_pct": 34.0,
+     "avg_win_pct": 2.24,
+     "avg_loss_pct": -2.51,
+     "avg_ret_pct": -0.89,
+     "avg_r": -0.16,
+     "profit_factor": 0.46,
+     "median_days": 2,
+     "worst_streak": 18,
+     "exits_pct": {
+      "trail": 88.4,
+      "stop": 8.8,
+      "breakeven": 2.7
+     }
+    }
+   }
+  },
+  {
+   "name": "Oversold bounce \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Oversold bounce",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 240,
+    "win_pct": 39.2,
+    "avg_win_pct": 2.61,
+    "avg_loss_pct": -2.12,
+    "avg_ret_pct": -0.26,
+    "avg_r": -0.04,
+    "profit_factor": 0.79,
+    "median_days": 2,
+    "worst_streak": 9,
+    "exits_pct": {
+     "trail": 92.1,
+     "stop": 5.8,
+     "breakeven": 1.7,
+     "time": 0.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 325,
+    "win_pct": 35.7,
+    "avg_win_pct": 2.06,
+    "avg_loss_pct": -2.25,
+    "avg_ret_pct": -0.71,
+    "avg_r": -0.14,
+    "profit_factor": 0.51,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 89.8,
+     "stop": 7.4,
+     "breakeven": 2.8
+    }
+   },
+   "all": {
+    "trades": 565,
+    "win_pct": 37.2,
+    "avg_win_pct": 2.31,
+    "avg_loss_pct": -2.19,
+    "avg_ret_pct": -0.52,
+    "avg_r": -0.1,
+    "profit_factor": 0.62,
+    "median_days": 2,
+    "worst_streak": 16,
+    "exits_pct": {
+     "trail": 90.8,
+     "stop": 6.7,
+     "breakeven": 2.3,
+     "time": 0.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 68,
+     "win_pct": 36.8,
+     "avg_win_pct": 1.88,
+     "avg_loss_pct": -1.96,
+     "avg_ret_pct": -0.55,
+     "avg_r": -0.13,
+     "profit_factor": 0.56,
+     "median_days": 2,
+     "worst_streak": 10,
+     "exits_pct": {
+      "trail": 88.2,
+      "stop": 8.8,
+      "breakeven": 2.9
+     }
+    },
+    "Mid": {
+     "trades": 110,
+     "win_pct": 37.3,
+     "avg_win_pct": 1.95,
+     "avg_loss_pct": -2.05,
+     "avg_ret_pct": -0.56,
+     "avg_r": -0.11,
+     "profit_factor": 0.57,
+     "median_days": 2,
+     "worst_streak": 11,
+     "exits_pct": {
+      "trail": 92.7,
+      "stop": 4.5,
+      "breakeven": 2.7
+     }
+    },
+    "Small": {
+     "trades": 147,
+     "win_pct": 34.0,
+     "avg_win_pct": 2.24,
+     "avg_loss_pct": -2.51,
+     "avg_ret_pct": -0.89,
+     "avg_r": -0.16,
+     "profit_factor": 0.46,
+     "median_days": 2,
+     "worst_streak": 18,
+     "exits_pct": {
+      "trail": 88.4,
+      "stop": 8.8,
+      "breakeven": 2.7
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "Breakout 50d",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 306,
+    "win_pct": 19.0,
+    "avg_win_pct": 14.64,
+    "avg_loss_pct": -3.93,
+    "avg_ret_pct": -0.41,
+    "avg_r": -0.07,
+    "profit_factor": 0.87,
+    "median_days": 9,
+    "worst_streak": 43,
+    "exits_pct": {
+     "stop": 36.9,
+     "trail": 36.3,
+     "breakeven": 20.9,
+     "time": 5.9
+    }
+   },
+   "out_of_sample": {
+    "trades": 333,
+    "win_pct": 23.1,
+    "avg_win_pct": 8.88,
+    "avg_loss_pct": -3.77,
+    "avg_ret_pct": -0.84,
+    "avg_r": -0.14,
+    "profit_factor": 0.71,
+    "median_days": 10,
+    "worst_streak": 21,
+    "exits_pct": {
+     "trail": 38.7,
+     "stop": 36.6,
+     "breakeven": 20.4,
+     "time": 4.2
+    }
+   },
+   "all": {
+    "trades": 639,
+    "win_pct": 21.1,
+    "avg_win_pct": 11.36,
+    "avg_loss_pct": -3.85,
+    "avg_ret_pct": -0.63,
+    "avg_r": -0.11,
+    "profit_factor": 0.79,
+    "median_days": 10,
+    "worst_streak": 43,
+    "exits_pct": {
+     "trail": 37.6,
+     "stop": 36.8,
+     "breakeven": 20.7,
+     "time": 5.0
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 115,
+     "win_pct": 21.7,
+     "avg_win_pct": 9.84,
+     "avg_loss_pct": -3.08,
+     "avg_ret_pct": -0.27,
+     "avg_r": -0.11,
+     "profit_factor": 0.89,
+     "median_days": 10,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 34.8,
+      "trail": 33.9,
+      "breakeven": 26.1,
+      "time": 5.2
+     }
+    },
+    "Mid": {
+     "trades": 131,
+     "win_pct": 27.5,
+     "avg_win_pct": 9.38,
+     "avg_loss_pct": -3.85,
+     "avg_ret_pct": -0.22,
+     "avg_r": -0.01,
+     "profit_factor": 0.92,
+     "median_days": 11,
+     "worst_streak": 19,
+     "exits_pct": {
+      "trail": 42.7,
+      "stop": 35.1,
+      "breakeven": 16.0,
+      "time": 6.1
+     }
+    },
+    "Small": {
+     "trades": 87,
+     "win_pct": 18.4,
+     "avg_win_pct": 6.28,
+     "avg_loss_pct": -4.53,
+     "avg_ret_pct": -2.54,
+     "avg_r": -0.39,
+     "profit_factor": 0.31,
+     "median_days": 8,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 41.4,
+      "trail": 39.1,
+      "breakeven": 19.5
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "52-week high",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 225,
+    "win_pct": 14.7,
+    "avg_win_pct": 15.79,
+    "avg_loss_pct": -3.18,
+    "avg_ret_pct": -0.4,
+    "avg_r": -0.07,
+    "profit_factor": 0.85,
+    "median_days": 6,
+    "worst_streak": 38,
+    "exits_pct": {
+     "stop": 52.4,
+     "breakeven": 29.3,
+     "trail": 12.4,
+     "time": 5.8
+    }
+   },
+   "out_of_sample": {
+    "trades": 248,
+    "win_pct": 20.6,
+    "avg_win_pct": 8.82,
+    "avg_loss_pct": -2.79,
+    "avg_ret_pct": -0.4,
+    "avg_r": -0.09,
+    "profit_factor": 0.82,
+    "median_days": 8,
+    "worst_streak": 20,
+    "exits_pct": {
+     "stop": 42.3,
+     "breakeven": 31.0,
+     "trail": 23.4,
+     "time": 3.2
+    }
+   },
+   "all": {
+    "trades": 473,
+    "win_pct": 17.8,
+    "avg_win_pct": 11.56,
+    "avg_loss_pct": -2.98,
+    "avg_ret_pct": -0.4,
+    "avg_r": -0.08,
+    "profit_factor": 0.84,
+    "median_days": 7,
+    "worst_streak": 38,
+    "exits_pct": {
+     "stop": 47.1,
+     "breakeven": 30.2,
+     "trail": 18.2,
+     "time": 4.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 96,
+     "win_pct": 19.8,
+     "avg_win_pct": 8.89,
+     "avg_loss_pct": -2.42,
+     "avg_ret_pct": -0.18,
+     "avg_r": -0.11,
+     "profit_factor": 0.91,
+     "median_days": 7,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 37.5,
+      "breakeven": 34.4,
+      "trail": 25.0,
+      "time": 3.1
+     }
+    },
+    "Mid": {
+     "trades": 97,
+     "win_pct": 24.7,
+     "avg_win_pct": 9.52,
+     "avg_loss_pct": -2.72,
+     "avg_ret_pct": 0.31,
+     "avg_r": 0.1,
+     "profit_factor": 1.15,
+     "median_days": 9,
+     "worst_streak": 23,
+     "exits_pct": {
+      "stop": 39.2,
+      "breakeven": 28.9,
+      "trail": 26.8,
+      "time": 5.2
+     }
+    },
+    "Small": {
+     "trades": 55,
+     "win_pct": 14.5,
+     "avg_win_pct": 6.54,
+     "avg_loss_pct": -3.5,
+     "avg_ret_pct": -2.04,
+     "avg_r": -0.41,
+     "profit_factor": 0.32,
+     "median_days": 6,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 56.4,
+      "breakeven": 29.1,
+      "trail": 14.5
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 Trailing 20-EMA",
+   "entry": "52-week high",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "trail",
+   "in_sample": {
+    "trades": 225,
+    "win_pct": 18.7,
+    "avg_win_pct": 13.56,
+    "avg_loss_pct": -3.91,
+    "avg_ret_pct": -0.65,
+    "avg_r": -0.1,
+    "profit_factor": 0.8,
+    "median_days": 9,
+    "worst_streak": 31,
+    "exits_pct": {
+     "stop": 37.3,
+     "trail": 33.8,
+     "breakeven": 23.1,
+     "time": 5.8
+    }
+   },
+   "out_of_sample": {
+    "trades": 247,
+    "win_pct": 23.5,
+    "avg_win_pct": 9.18,
+    "avg_loss_pct": -3.78,
+    "avg_ret_pct": -0.74,
+    "avg_r": -0.11,
+    "profit_factor": 0.75,
+    "median_days": 10,
+    "worst_streak": 17,
+    "exits_pct": {
+     "trail": 38.9,
+     "stop": 36.4,
+     "breakeven": 20.2,
+     "time": 4.5
+    }
+   },
+   "all": {
+    "trades": 472,
+    "win_pct": 21.2,
+    "avg_win_pct": 11.02,
+    "avg_loss_pct": -3.84,
+    "avg_ret_pct": -0.7,
+    "avg_r": -0.11,
+    "profit_factor": 0.77,
+    "median_days": 9,
+    "worst_streak": 31,
+    "exits_pct": {
+     "stop": 36.9,
+     "trail": 36.4,
+     "breakeven": 21.6,
+     "time": 5.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 96,
+     "win_pct": 22.9,
+     "avg_win_pct": 8.95,
+     "avg_loss_pct": -3.08,
+     "avg_ret_pct": -0.33,
+     "avg_r": -0.1,
+     "profit_factor": 0.86,
+     "median_days": 10,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 35.4,
+      "trail": 34.4,
+      "breakeven": 26.0,
+      "time": 4.2
+     }
+    },
+    "Mid": {
+     "trades": 96,
+     "win_pct": 29.2,
+     "avg_win_pct": 10.11,
+     "avg_loss_pct": -3.9,
+     "avg_ret_pct": 0.19,
+     "avg_r": 0.08,
+     "profit_factor": 1.07,
+     "median_days": 11,
+     "worst_streak": 14,
+     "exits_pct": {
+      "trail": 43.8,
+      "stop": 32.3,
+      "breakeven": 16.7,
+      "time": 7.3
+     }
+    },
+    "Small": {
+     "trades": 55,
+     "win_pct": 14.5,
+     "avg_win_pct": 6.54,
+     "avg_loss_pct": -4.7,
+     "avg_ret_pct": -3.07,
+     "avg_r": -0.47,
+     "profit_factor": 0.24,
+     "median_days": 8,
+     "worst_streak": 13,
+     "exits_pct": {
+      "stop": 45.5,
+      "trail": 38.2,
+      "breakeven": 16.4
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Breakout 20d",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 457,
+    "win_pct": 26.7,
+    "avg_win_pct": 10.03,
+    "avg_loss_pct": -4.53,
+    "avg_ret_pct": -0.65,
+    "avg_r": -0.11,
+    "profit_factor": 0.81,
+    "median_days": 8,
+    "worst_streak": 28,
+    "exits_pct": {
+     "stop": 50.3,
+     "breakeven": 20.8,
+     "target": 20.4,
+     "time": 8.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 492,
+    "win_pct": 28.5,
+    "avg_win_pct": 9.47,
+    "avg_loss_pct": -4.41,
+    "avg_ret_pct": -0.46,
+    "avg_r": -0.08,
+    "profit_factor": 0.85,
+    "median_days": 9,
+    "worst_streak": 26,
+    "exits_pct": {
+     "stop": 50.4,
+     "target": 22.0,
+     "breakeven": 19.7,
+     "time": 7.9
+    }
+   },
+   "all": {
+    "trades": 949,
+    "win_pct": 27.6,
+    "avg_win_pct": 9.73,
+    "avg_loss_pct": -4.47,
+    "avg_ret_pct": -0.55,
+    "avg_r": -0.09,
+    "profit_factor": 0.83,
+    "median_days": 8,
+    "worst_streak": 28,
+    "exits_pct": {
+     "stop": 50.4,
+     "target": 21.2,
+     "breakeven": 20.2,
+     "time": 8.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 144,
+     "win_pct": 30.6,
+     "avg_win_pct": 8.96,
+     "avg_loss_pct": -3.47,
+     "avg_ret_pct": 0.33,
+     "avg_r": 0.03,
+     "profit_factor": 1.14,
+     "median_days": 10,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 43.8,
+      "target": 25.0,
+      "breakeven": 22.9,
+      "time": 8.3
+     }
+    },
+    "Mid": {
+     "trades": 184,
+     "win_pct": 28.3,
+     "avg_win_pct": 8.35,
+     "avg_loss_pct": -4.58,
+     "avg_ret_pct": -0.93,
+     "avg_r": -0.15,
+     "profit_factor": 0.72,
+     "median_days": 9,
+     "worst_streak": 24,
+     "exits_pct": {
+      "stop": 52.7,
+      "target": 19.6,
+      "breakeven": 17.9,
+      "time": 9.8
+     }
+    },
+    "Small": {
+     "trades": 164,
+     "win_pct": 26.8,
+     "avg_win_pct": 11.3,
+     "avg_loss_pct": -5.01,
+     "avg_ret_pct": -0.63,
+     "avg_r": -0.1,
+     "profit_factor": 0.83,
+     "median_days": 8,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 53.7,
+      "target": 22.0,
+      "breakeven": 18.9,
+      "time": 5.5
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 20d",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 457,
+    "win_pct": 38.1,
+    "avg_win_pct": 6.79,
+    "avg_loss_pct": -5.23,
+    "avg_ret_pct": -0.65,
+    "avg_r": -0.12,
+    "profit_factor": 0.8,
+    "median_days": 7,
+    "worst_streak": 19,
+    "exits_pct": {
+     "stop": 49.9,
+     "target": 34.1,
+     "breakeven": 9.8,
+     "time": 6.1
+    }
+   },
+   "out_of_sample": {
+    "trades": 493,
+    "win_pct": 37.7,
+    "avg_win_pct": 6.95,
+    "avg_loss_pct": -5.0,
+    "avg_ret_pct": -0.49,
+    "avg_r": -0.09,
+    "profit_factor": 0.84,
+    "median_days": 7,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 50.3,
+     "target": 34.9,
+     "breakeven": 10.5,
+     "time": 4.3
+    }
+   },
+   "all": {
+    "trades": 950,
+    "win_pct": 37.9,
+    "avg_win_pct": 6.87,
+    "avg_loss_pct": -5.11,
+    "avg_ret_pct": -0.57,
+    "avg_r": -0.1,
+    "profit_factor": 0.82,
+    "median_days": 7,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 50.1,
+     "target": 34.5,
+     "breakeven": 10.2,
+     "time": 5.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 144,
+     "win_pct": 36.8,
+     "avg_win_pct": 7.01,
+     "avg_loss_pct": -3.78,
+     "avg_ret_pct": 0.19,
+     "avg_r": 0.0,
+     "profit_factor": 1.08,
+     "median_days": 8,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 43.8,
+      "target": 33.3,
+      "breakeven": 16.7,
+      "time": 6.2
+     }
+    },
+    "Mid": {
+     "trades": 185,
+     "win_pct": 37.8,
+     "avg_win_pct": 6.62,
+     "avg_loss_pct": -5.18,
+     "avg_ret_pct": -0.71,
+     "avg_r": -0.12,
+     "profit_factor": 0.78,
+     "median_days": 8,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 52.4,
+      "target": 33.5,
+      "breakeven": 8.6,
+      "time": 5.4
+     }
+    },
+    "Small": {
+     "trades": 164,
+     "win_pct": 38.4,
+     "avg_win_pct": 7.27,
+     "avg_loss_pct": -5.9,
+     "avg_ret_pct": -0.84,
+     "avg_r": -0.14,
+     "profit_factor": 0.77,
+     "median_days": 6,
+     "worst_streak": 10,
+     "exits_pct": {
+      "stop": 53.7,
+      "target": 37.8,
+      "breakeven": 7.3,
+      "time": 1.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 20d",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 458,
+    "win_pct": 28.6,
+    "avg_win_pct": 7.09,
+    "avg_loss_pct": -3.71,
+    "avg_ret_pct": -0.62,
+    "avg_r": -0.15,
+    "profit_factor": 0.76,
+    "median_days": 5,
+    "worst_streak": 17,
+    "exits_pct": {
+     "stop": 53.3,
+     "target": 27.5,
+     "breakeven": 18.1,
+     "time": 1.1
+    }
+   },
+   "out_of_sample": {
+    "trades": 496,
+    "win_pct": 31.0,
+    "avg_win_pct": 7.15,
+    "avg_loss_pct": -3.43,
+    "avg_ret_pct": -0.14,
+    "avg_r": -0.04,
+    "profit_factor": 0.94,
+    "median_days": 5,
+    "worst_streak": 29,
+    "exits_pct": {
+     "stop": 48.2,
+     "target": 30.2,
+     "breakeven": 20.4,
+     "time": 1.2
+    }
+   },
+   "all": {
+    "trades": 954,
+    "win_pct": 29.9,
+    "avg_win_pct": 7.12,
+    "avg_loss_pct": -3.57,
+    "avg_ret_pct": -0.37,
+    "avg_r": -0.09,
+    "profit_factor": 0.85,
+    "median_days": 5,
+    "worst_streak": 29,
+    "exits_pct": {
+     "stop": 50.6,
+     "target": 28.9,
+     "breakeven": 19.3,
+     "time": 1.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 144,
+     "win_pct": 30.6,
+     "avg_win_pct": 7.12,
+     "avg_loss_pct": -2.78,
+     "avg_ret_pct": 0.24,
+     "avg_r": 0.02,
+     "profit_factor": 1.13,
+     "median_days": 6,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 44.4,
+      "target": 29.2,
+      "breakeven": 24.3,
+      "time": 2.1
+     }
+    },
+    "Mid": {
+     "trades": 187,
+     "win_pct": 29.9,
+     "avg_win_pct": 6.99,
+     "avg_loss_pct": -3.41,
+     "avg_ret_pct": -0.3,
+     "avg_r": -0.06,
+     "profit_factor": 0.88,
+     "median_days": 6,
+     "worst_streak": 21,
+     "exits_pct": {
+      "stop": 48.7,
+      "target": 28.9,
+      "breakeven": 20.9,
+      "time": 1.6
+     }
+    },
+    "Small": {
+     "trades": 165,
+     "win_pct": 32.7,
+     "avg_win_pct": 7.33,
+     "avg_loss_pct": -4.02,
+     "avg_ret_pct": -0.31,
+     "avg_r": -0.08,
+     "profit_factor": 0.89,
+     "median_days": 5,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 50.9,
+      "target": 32.7,
+      "breakeven": 16.4
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 20d \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Breakout 20d",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 458,
+    "win_pct": 22.7,
+    "avg_win_pct": 8.6,
+    "avg_loss_pct": -3.46,
+    "avg_ret_pct": -0.72,
+    "avg_r": -0.17,
+    "profit_factor": 0.73,
+    "median_days": 5,
+    "worst_streak": 29,
+    "exits_pct": {
+     "stop": 53.3,
+     "breakeven": 24.0,
+     "target": 22.1,
+     "time": 0.7
+    }
+   },
+   "out_of_sample": {
+    "trades": 497,
+    "win_pct": 27.2,
+    "avg_win_pct": 7.98,
+    "avg_loss_pct": -3.25,
+    "avg_ret_pct": -0.2,
+    "avg_r": -0.05,
+    "profit_factor": 0.91,
+    "median_days": 6,
+    "worst_streak": 30,
+    "exits_pct": {
+     "stop": 48.1,
+     "target": 25.8,
+     "breakeven": 24.3,
+     "time": 1.8
+    }
+   },
+   "all": {
+    "trades": 955,
+    "win_pct": 25.0,
+    "avg_win_pct": 8.25,
+    "avg_loss_pct": -3.36,
+    "avg_ret_pct": -0.45,
+    "avg_r": -0.11,
+    "profit_factor": 0.82,
+    "median_days": 6,
+    "worst_streak": 30,
+    "exits_pct": {
+     "stop": 50.6,
+     "breakeven": 24.2,
+     "target": 24.0,
+     "time": 1.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 144,
+     "win_pct": 30.6,
+     "avg_win_pct": 7.19,
+     "avg_loss_pct": -2.78,
+     "avg_ret_pct": 0.26,
+     "avg_r": 0.03,
+     "profit_factor": 1.14,
+     "median_days": 5,
+     "worst_streak": 17,
+     "exits_pct": {
+      "stop": 44.4,
+      "target": 29.2,
+      "breakeven": 24.3,
+      "time": 2.1
+     }
+    },
+    "Mid": {
+     "trades": 188,
+     "win_pct": 25.5,
+     "avg_win_pct": 7.38,
+     "avg_loss_pct": -3.21,
+     "avg_ret_pct": -0.51,
+     "avg_r": -0.11,
+     "profit_factor": 0.79,
+     "median_days": 6,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 48.4,
+      "breakeven": 25.5,
+      "target": 23.4,
+      "time": 2.7
+     }
+    },
+    "Small": {
+     "trades": 165,
+     "win_pct": 26.1,
+     "avg_win_pct": 9.46,
+     "avg_loss_pct": -3.69,
+     "avg_ret_pct": -0.26,
+     "avg_r": -0.07,
+     "profit_factor": 0.9,
+     "median_days": 5,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 50.9,
+      "target": 25.5,
+      "breakeven": 23.0,
+      "time": 0.6
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "52-week high",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 225,
+    "win_pct": 33.3,
+    "avg_win_pct": 6.75,
+    "avg_loss_pct": -5.03,
+    "avg_ret_pct": -1.1,
+    "avg_r": -0.18,
+    "profit_factor": 0.67,
+    "median_days": 7,
+    "worst_streak": 11,
+    "exits_pct": {
+     "stop": 52.4,
+     "target": 29.3,
+     "breakeven": 11.1,
+     "time": 7.1
+    }
+   },
+   "out_of_sample": {
+    "trades": 248,
+    "win_pct": 36.7,
+    "avg_win_pct": 6.75,
+    "avg_loss_pct": -4.67,
+    "avg_ret_pct": -0.48,
+    "avg_r": -0.08,
+    "profit_factor": 0.84,
+    "median_days": 8,
+    "worst_streak": 14,
+    "exits_pct": {
+     "stop": 48.4,
+     "target": 32.7,
+     "breakeven": 12.9,
+     "time": 6.0
+    }
+   },
+   "all": {
+    "trades": 473,
+    "win_pct": 35.1,
+    "avg_win_pct": 6.75,
+    "avg_loss_pct": -4.85,
+    "avg_ret_pct": -0.78,
+    "avg_r": -0.13,
+    "profit_factor": 0.75,
+    "median_days": 7,
+    "worst_streak": 14,
+    "exits_pct": {
+     "stop": 50.3,
+     "target": 31.1,
+     "breakeven": 12.1,
+     "time": 6.6
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 97,
+     "win_pct": 36.1,
+     "avg_win_pct": 6.85,
+     "avg_loss_pct": -3.61,
+     "avg_ret_pct": 0.17,
+     "avg_r": 0.0,
+     "profit_factor": 1.07,
+     "median_days": 7,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 41.2,
+      "target": 32.0,
+      "breakeven": 19.6,
+      "time": 7.2
+     }
+    },
+    "Mid": {
+     "trades": 96,
+     "win_pct": 40.6,
+     "avg_win_pct": 6.5,
+     "avg_loss_pct": -5.02,
+     "avg_ret_pct": -0.34,
+     "avg_r": -0.04,
+     "profit_factor": 0.89,
+     "median_days": 9,
+     "worst_streak": 11,
+     "exits_pct": {
+      "stop": 49.0,
+      "target": 35.4,
+      "breakeven": 9.4,
+      "time": 6.2
+     }
+    },
+    "Small": {
+     "trades": 55,
+     "win_pct": 30.9,
+     "avg_win_pct": 7.13,
+     "avg_loss_pct": -5.9,
+     "avg_ret_pct": -1.87,
+     "avg_r": -0.29,
+     "profit_factor": 0.54,
+     "median_days": 6,
+     "worst_streak": 7,
+     "exits_pct": {
+      "stop": 60.0,
+      "target": 29.1,
+      "breakeven": 7.3,
+      "time": 3.6
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 50d",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 306,
+    "win_pct": 33.0,
+    "avg_win_pct": 6.75,
+    "avg_loss_pct": -5.03,
+    "avg_ret_pct": -1.14,
+    "avg_r": -0.19,
+    "profit_factor": 0.66,
+    "median_days": 7,
+    "worst_streak": 12,
+    "exits_pct": {
+     "stop": 53.6,
+     "target": 29.1,
+     "breakeven": 10.8,
+     "time": 6.5
+    }
+   },
+   "out_of_sample": {
+    "trades": 335,
+    "win_pct": 36.4,
+    "avg_win_pct": 6.88,
+    "avg_loss_pct": -4.74,
+    "avg_ret_pct": -0.51,
+    "avg_r": -0.1,
+    "profit_factor": 0.83,
+    "median_days": 8,
+    "worst_streak": 17,
+    "exits_pct": {
+     "stop": 50.1,
+     "target": 33.1,
+     "breakeven": 11.9,
+     "time": 4.8
+    }
+   },
+   "all": {
+    "trades": 641,
+    "win_pct": 34.8,
+    "avg_win_pct": 6.82,
+    "avg_loss_pct": -4.88,
+    "avg_ret_pct": -0.81,
+    "avg_r": -0.14,
+    "profit_factor": 0.75,
+    "median_days": 7,
+    "worst_streak": 17,
+    "exits_pct": {
+     "stop": 51.8,
+     "target": 31.2,
+     "breakeven": 11.4,
+     "time": 5.6
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 116,
+     "win_pct": 34.5,
+     "avg_win_pct": 6.94,
+     "avg_loss_pct": -3.64,
+     "avg_ret_pct": 0.01,
+     "avg_r": -0.04,
+     "profit_factor": 1.0,
+     "median_days": 8,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 44.0,
+      "target": 31.0,
+      "breakeven": 19.0,
+      "time": 6.0
+     }
+    },
+    "Mid": {
+     "trades": 132,
+     "win_pct": 38.6,
+     "avg_win_pct": 6.6,
+     "avg_loss_pct": -4.93,
+     "avg_ret_pct": -0.48,
+     "avg_r": -0.09,
+     "profit_factor": 0.84,
+     "median_days": 9,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 51.5,
+      "target": 34.1,
+      "breakeven": 9.1,
+      "time": 5.3
+     }
+    },
+    "Small": {
+     "trades": 87,
+     "win_pct": 35.6,
+     "avg_win_pct": 7.27,
+     "avg_loss_pct": -5.95,
+     "avg_ret_pct": -1.24,
+     "avg_r": -0.19,
+     "profit_factor": 0.68,
+     "median_days": 6,
      "worst_streak": 8,
      "exits_pct": {
-      "stop": 55.8,
-      "breakeven": 18.6,
-      "target": 16.3,
+      "stop": 56.3,
+      "target": 34.5,
+      "breakeven": 6.9,
+      "time": 2.3
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "Breakout 50d",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 306,
+    "win_pct": 24.5,
+    "avg_win_pct": 9.28,
+    "avg_loss_pct": -4.51,
+    "avg_ret_pct": -1.13,
+    "avg_r": -0.19,
+    "profit_factor": 0.67,
+    "median_days": 8,
+    "worst_streak": 29,
+    "exits_pct": {
+     "stop": 53.6,
+     "breakeven": 19.3,
+     "target": 18.3,
+     "time": 8.8
+    }
+   },
+   "out_of_sample": {
+    "trades": 334,
+    "win_pct": 28.4,
+    "avg_win_pct": 9.06,
+    "avg_loss_pct": -4.28,
+    "avg_ret_pct": -0.48,
+    "avg_r": -0.08,
+    "profit_factor": 0.84,
+    "median_days": 9,
+    "worst_streak": 22,
+    "exits_pct": {
+     "stop": 50.3,
+     "target": 22.5,
+     "breakeven": 19.8,
+     "time": 7.5
+    }
+   },
+   "all": {
+    "trades": 640,
+    "win_pct": 26.6,
+    "avg_win_pct": 9.16,
+    "avg_loss_pct": -4.39,
+    "avg_ret_pct": -0.79,
+    "avg_r": -0.13,
+    "profit_factor": 0.75,
+    "median_days": 9,
+    "worst_streak": 29,
+    "exits_pct": {
+     "stop": 51.9,
+     "target": 20.5,
+     "breakeven": 19.5,
+     "time": 8.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 116,
+     "win_pct": 28.4,
+     "avg_win_pct": 8.81,
+     "avg_loss_pct": -3.36,
+     "avg_ret_pct": 0.1,
+     "avg_r": -0.01,
+     "profit_factor": 1.04,
+     "median_days": 9,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 44.0,
+      "breakeven": 25.0,
+      "target": 23.3,
+      "time": 7.8
+     }
+    },
+    "Mid": {
+     "trades": 131,
+     "win_pct": 31.3,
+     "avg_win_pct": 8.25,
+     "avg_loss_pct": -4.52,
+     "avg_ret_pct": -0.53,
+     "avg_r": -0.09,
+     "profit_factor": 0.83,
+     "median_days": 10,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 51.9,
+      "target": 22.1,
+      "breakeven": 16.0,
+      "time": 9.9
+     }
+    },
+    "Small": {
+     "trades": 87,
+     "win_pct": 24.1,
+     "avg_win_pct": 11.05,
+     "avg_loss_pct": -5.1,
+     "avg_ret_pct": -1.2,
+     "avg_r": -0.16,
+     "profit_factor": 0.69,
+     "median_days": 7,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 56.3,
+      "target": 21.8,
+      "breakeven": 18.4,
+      "time": 3.4
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 full filters \u00b7 2.0x ATR stop \u00b7 2R target",
+   "entry": "52-week high",
+   "filters": "full",
+   "atr": 2.0,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 225,
+    "win_pct": 24.0,
+    "avg_win_pct": 9.36,
+    "avg_loss_pct": -4.47,
+    "avg_ret_pct": -1.15,
+    "avg_r": -0.19,
+    "profit_factor": 0.66,
+    "median_days": 8,
+    "worst_streak": 25,
+    "exits_pct": {
+     "stop": 52.4,
+     "breakeven": 20.4,
+     "target": 17.8,
+     "time": 9.3
+    }
+   },
+   "out_of_sample": {
+    "trades": 248,
+    "win_pct": 29.8,
+    "avg_win_pct": 8.87,
+    "avg_loss_pct": -4.27,
+    "avg_ret_pct": -0.35,
+    "avg_r": -0.05,
+    "profit_factor": 0.88,
+    "median_days": 9,
+    "worst_streak": 20,
+    "exits_pct": {
+     "stop": 48.4,
+     "target": 23.0,
+     "breakeven": 19.8,
+     "time": 8.9
+    }
+   },
+   "all": {
+    "trades": 473,
+    "win_pct": 27.1,
+    "avg_win_pct": 9.08,
+    "avg_loss_pct": -4.37,
+    "avg_ret_pct": -0.73,
+    "avg_r": -0.12,
+    "profit_factor": 0.77,
+    "median_days": 9,
+    "worst_streak": 25,
+    "exits_pct": {
+     "stop": 50.3,
+     "target": 20.5,
+     "breakeven": 20.1,
+     "time": 9.1
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 97,
+     "win_pct": 29.9,
+     "avg_win_pct": 8.75,
+     "avg_loss_pct": -3.32,
+     "avg_ret_pct": 0.29,
+     "avg_r": 0.03,
+     "profit_factor": 1.13,
+     "median_days": 8,
+     "worst_streak": 18,
+     "exits_pct": {
+      "stop": 41.2,
+      "breakeven": 25.8,
+      "target": 23.7,
       "time": 9.3
      }
     },
-    "Small": {
-     "trades": 39,
-     "win_pct": 28.2,
-     "avg_win_pct": 6.48,
-     "avg_loss_pct": -2.87,
-     "avg_ret_pct": -0.23,
-     "avg_r": -0.14,
-     "profit_factor": 0.89,
-     "median_days": 5,
-     "worst_streak": 9,
+    "Mid": {
+     "trades": 96,
+     "win_pct": 34.4,
+     "avg_win_pct": 8.43,
+     "avg_loss_pct": -4.64,
+     "avg_ret_pct": -0.15,
+     "avg_r": -0.01,
+     "profit_factor": 0.95,
+     "median_days": 10,
+     "worst_streak": 12,
      "exits_pct": {
-      "stop": 64.1,
-      "target": 23.1,
-      "breakeven": 7.7,
-      "time": 5.1
+      "stop": 49.0,
+      "target": 25.0,
+      "breakeven": 15.6,
+      "time": 10.4
+     }
+    },
+    "Small": {
+     "trades": 55,
+     "win_pct": 21.8,
+     "avg_win_pct": 10.38,
+     "avg_loss_pct": -5.25,
+     "avg_ret_pct": -1.84,
+     "avg_r": -0.27,
+     "profit_factor": 0.55,
+     "median_days": 8,
+     "worst_streak": 10,
+     "exits_pct": {
+      "stop": 60.0,
+      "target": 18.2,
+      "breakeven": 16.4,
+      "time": 5.5
      }
     }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "52-week high",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 225,
+    "win_pct": 24.9,
+    "avg_win_pct": 7.12,
+    "avg_loss_pct": -3.64,
+    "avg_ret_pct": -0.96,
+    "avg_r": -0.21,
+    "profit_factor": 0.65,
+    "median_days": 5,
+    "worst_streak": 15,
+    "exits_pct": {
+     "stop": 56.0,
+     "target": 23.6,
+     "breakeven": 19.1,
+     "time": 1.3
+    }
    },
-   "by_year": {
-    "2021": {
-     "trades": 13,
-     "win_pct": 15.4,
-     "avg_win_pct": 7.2,
-     "avg_loss_pct": -2.64,
-     "avg_ret_pct": -1.12,
-     "avg_r": -0.52,
-     "profit_factor": 0.5,
-     "median_days": 5,
-     "worst_streak": 6,
+   "out_of_sample": {
+    "trades": 249,
+    "win_pct": 29.7,
+    "avg_win_pct": 6.97,
+    "avg_loss_pct": -3.13,
+    "avg_ret_pct": -0.13,
+    "avg_r": -0.03,
+    "profit_factor": 0.94,
+    "median_days": 6,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 45.4,
+     "target": 28.1,
+     "breakeven": 24.5,
+     "time": 2.0
+    }
+   },
+   "all": {
+    "trades": 474,
+    "win_pct": 27.4,
+    "avg_win_pct": 7.03,
+    "avg_loss_pct": -3.38,
+    "avg_ret_pct": -0.52,
+    "avg_r": -0.12,
+    "profit_factor": 0.79,
+    "median_days": 5,
+    "worst_streak": 23,
+    "exits_pct": {
+     "stop": 50.4,
+     "target": 25.9,
+     "breakeven": 21.9,
+     "time": 1.7
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 97,
+     "win_pct": 29.9,
+     "avg_win_pct": 6.97,
+     "avg_loss_pct": -2.65,
+     "avg_ret_pct": 0.23,
+     "avg_r": 0.02,
+     "profit_factor": 1.12,
+     "median_days": 6,
+     "worst_streak": 15,
      "exits_pct": {
-      "stop": 69.2,
-      "target": 15.4,
-      "breakeven": 7.7,
-      "time": 7.7
+      "stop": 40.2,
+      "breakeven": 28.9,
+      "target": 27.8,
+      "time": 3.1
      }
     },
-    "2022": {
-     "trades": 10,
-     "win_pct": 10.0,
-     "avg_win_pct": 7.2,
-     "avg_loss_pct": -3.05,
-     "avg_ret_pct": -2.02,
-     "avg_r": -0.7,
-     "profit_factor": 0.26,
-     "median_days": 4,
-     "worst_streak": 5,
-     "exits_pct": {
-      "stop": 80.0,
-      "time": 10.0,
-      "target": 10.0
-     }
-    },
-    "2023": {
-     "trades": 33,
-     "win_pct": 45.5,
-     "avg_win_pct": 5.12,
-     "avg_loss_pct": -2.39,
-     "avg_ret_pct": 1.02,
-     "avg_r": 0.33,
-     "profit_factor": 1.78,
-     "median_days": 9,
-     "worst_streak": 4,
-     "exits_pct": {
-      "stop": 42.4,
-      "target": 24.2,
-      "time": 21.2,
-      "breakeven": 12.1
-     }
-    },
-    "2024": {
-     "trades": 46,
-     "win_pct": 21.7,
-     "avg_win_pct": 5.1,
-     "avg_loss_pct": -2.56,
-     "avg_ret_pct": -0.89,
-     "avg_r": -0.4,
-     "profit_factor": 0.55,
-     "median_days": 5,
-     "worst_streak": 9,
-     "exits_pct": {
-      "stop": 60.9,
-      "breakeven": 17.4,
-      "target": 13.0,
-      "time": 8.7
-     }
-    },
-    "2025": {
-     "trades": 18,
-     "win_pct": 16.7,
-     "avg_win_pct": 8.59,
-     "avg_loss_pct": -2.62,
-     "avg_ret_pct": -0.75,
-     "avg_r": -0.35,
-     "profit_factor": 0.66,
-     "median_days": 4,
-     "worst_streak": 6,
-     "exits_pct": {
-      "stop": 66.7,
-      "target": 16.7,
-      "breakeven": 16.7
-     }
-    },
-    "2026": {
-     "trades": 4,
-     "win_pct": 0.0,
-     "avg_win_pct": 0,
-     "avg_loss_pct": -3.18,
-     "avg_ret_pct": -3.18,
-     "avg_r": -1.11,
-     "profit_factor": 0.0,
+    "Mid": {
+     "trades": 97,
+     "win_pct": 32.0,
+     "avg_win_pct": 6.82,
+     "avg_loss_pct": -3.11,
+     "avg_ret_pct": 0.06,
+     "avg_r": 0.03,
+     "profit_factor": 1.03,
      "median_days": 7,
-     "worst_streak": 4,
+     "worst_streak": 11,
      "exits_pct": {
-      "stop": 100.0
+      "stop": 44.3,
+      "target": 29.9,
+      "breakeven": 23.7,
+      "time": 2.1
+     }
+    },
+    "Small": {
+     "trades": 55,
+     "win_pct": 25.5,
+     "avg_win_pct": 7.3,
+     "avg_loss_pct": -3.97,
+     "avg_ret_pct": -1.1,
+     "avg_r": -0.23,
+     "profit_factor": 0.63,
+     "median_days": 4,
+     "worst_streak": 11,
+     "exits_pct": {
+      "stop": 56.4,
+      "target": 25.5,
+      "breakeven": 18.2
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 +7.5% target",
+   "entry": "Breakout 50d",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "t75",
+   "in_sample": {
+    "trades": 306,
+    "win_pct": 24.5,
+    "avg_win_pct": 7.07,
+    "avg_loss_pct": -3.66,
+    "avg_ret_pct": -1.03,
+    "avg_r": -0.22,
+    "profit_factor": 0.63,
+    "median_days": 5,
+    "worst_streak": 18,
+    "exits_pct": {
+     "stop": 57.5,
+     "target": 23.2,
+     "breakeven": 18.0,
+     "time": 1.3
+    }
+   },
+   "out_of_sample": {
+    "trades": 336,
+    "win_pct": 29.8,
+    "avg_win_pct": 7.08,
+    "avg_loss_pct": -3.24,
+    "avg_ret_pct": -0.17,
+    "avg_r": -0.05,
+    "profit_factor": 0.93,
+    "median_days": 5,
+    "worst_streak": 21,
+    "exits_pct": {
+     "stop": 47.9,
+     "target": 28.6,
+     "breakeven": 22.0,
+     "time": 1.5
+    }
+   },
+   "all": {
+    "trades": 642,
+    "win_pct": 27.3,
+    "avg_win_pct": 7.07,
+    "avg_loss_pct": -3.45,
+    "avg_ret_pct": -0.58,
+    "avg_r": -0.13,
+    "profit_factor": 0.77,
+    "median_days": 5,
+    "worst_streak": 21,
+    "exits_pct": {
+     "stop": 52.5,
+     "target": 26.0,
+     "breakeven": 20.1,
+     "time": 1.4
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 116,
+     "win_pct": 29.3,
+     "avg_win_pct": 7.06,
+     "avg_loss_pct": -2.73,
+     "avg_ret_pct": 0.14,
+     "avg_r": -0.01,
+     "profit_factor": 1.07,
+     "median_days": 6,
+     "worst_streak": 16,
+     "exits_pct": {
+      "stop": 44.0,
+      "target": 27.6,
+      "breakeven": 25.9,
+      "time": 2.6
+     }
+    },
+    "Mid": {
+     "trades": 133,
+     "win_pct": 30.1,
+     "avg_win_pct": 6.91,
+     "avg_loss_pct": -3.18,
+     "avg_ret_pct": -0.15,
+     "avg_r": -0.03,
+     "profit_factor": 0.93,
+     "median_days": 6,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 47.4,
+      "target": 28.6,
+      "breakeven": 22.6,
+      "time": 1.5
+     }
+    },
+    "Small": {
+     "trades": 87,
+     "win_pct": 29.9,
+     "avg_win_pct": 7.38,
+     "avg_loss_pct": -4.03,
+     "avg_ret_pct": -0.62,
+     "avg_r": -0.13,
+     "profit_factor": 0.78,
+     "median_days": 4,
+     "worst_streak": 10,
+     "exits_pct": {
+      "stop": 54.0,
+      "target": 29.9,
+      "breakeven": 16.1
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Breakout 50d",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 306,
+    "win_pct": 21.2,
+    "avg_win_pct": 7.89,
+    "avg_loss_pct": -3.53,
+    "avg_ret_pct": -1.11,
+    "avg_r": -0.24,
+    "profit_factor": 0.6,
+    "median_days": 6,
+    "worst_streak": 19,
+    "exits_pct": {
+     "stop": 57.5,
+     "breakeven": 21.2,
+     "target": 20.6,
+     "time": 0.7
+    }
+   },
+   "out_of_sample": {
+    "trades": 337,
+    "win_pct": 27.6,
+    "avg_win_pct": 7.49,
+    "avg_loss_pct": -3.15,
+    "avg_ret_pct": -0.21,
+    "avg_r": -0.05,
+    "profit_factor": 0.91,
+    "median_days": 6,
+    "worst_streak": 21,
+    "exits_pct": {
+     "stop": 47.8,
+     "target": 26.1,
+     "breakeven": 24.3,
+     "time": 1.8
+    }
+   },
+   "all": {
+    "trades": 643,
+    "win_pct": 24.6,
+    "avg_win_pct": 7.65,
+    "avg_loss_pct": -3.34,
+    "avg_ret_pct": -0.64,
+    "avg_r": -0.14,
+    "profit_factor": 0.75,
+    "median_days": 6,
+    "worst_streak": 21,
+    "exits_pct": {
+     "stop": 52.4,
+     "target": 23.5,
+     "breakeven": 22.9,
+     "time": 1.2
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 116,
+     "win_pct": 30.2,
+     "avg_win_pct": 7.0,
+     "avg_loss_pct": -2.76,
+     "avg_ret_pct": 0.18,
+     "avg_r": 0.01,
+     "profit_factor": 1.09,
+     "median_days": 5,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 44.0,
+      "target": 28.4,
+      "breakeven": 25.0,
+      "time": 2.6
+     }
+    },
+    "Mid": {
+     "trades": 134,
+     "win_pct": 27.6,
+     "avg_win_pct": 7.09,
+     "avg_loss_pct": -3.06,
+     "avg_ret_pct": -0.26,
+     "avg_r": -0.05,
+     "profit_factor": 0.88,
+     "median_days": 7,
+     "worst_streak": 14,
+     "exits_pct": {
+      "stop": 47.0,
+      "breakeven": 25.4,
+      "target": 25.4,
+      "time": 2.2
+     }
+    },
+    "Small": {
+     "trades": 87,
+     "win_pct": 24.1,
+     "avg_win_pct": 9.02,
+     "avg_loss_pct": -3.74,
+     "avg_ret_pct": -0.66,
+     "avg_r": -0.13,
+     "profit_factor": 0.77,
+     "median_days": 5,
+     "worst_streak": 13,
+     "exits_pct": {
+      "stop": 54.0,
+      "target": 24.1,
+      "breakeven": 21.8
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 full filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "52-week high",
+   "filters": "full",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 225,
+    "win_pct": 20.4,
+    "avg_win_pct": 8.08,
+    "avg_loss_pct": -3.47,
+    "avg_ret_pct": -1.11,
+    "avg_r": -0.24,
+    "profit_factor": 0.6,
+    "median_days": 5,
+    "worst_streak": 20,
+    "exits_pct": {
+     "stop": 56.0,
+     "breakeven": 23.6,
+     "target": 20.0,
+     "time": 0.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 249,
+    "win_pct": 28.1,
+    "avg_win_pct": 7.3,
+    "avg_loss_pct": -3.07,
+    "avg_ret_pct": -0.16,
+    "avg_r": -0.03,
+    "profit_factor": 0.93,
+    "median_days": 6,
+    "worst_streak": 21,
+    "exits_pct": {
+     "stop": 45.4,
+     "breakeven": 26.1,
+     "target": 26.1,
+     "time": 2.4
+    }
+   },
+   "all": {
+    "trades": 474,
+    "win_pct": 24.5,
+    "avg_win_pct": 7.61,
+    "avg_loss_pct": -3.27,
+    "avg_ret_pct": -0.61,
+    "avg_r": -0.13,
+    "profit_factor": 0.75,
+    "median_days": 5,
+    "worst_streak": 21,
+    "exits_pct": {
+     "stop": 50.4,
+     "breakeven": 24.9,
+     "target": 23.2,
+     "time": 1.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 97,
+     "win_pct": 30.9,
+     "avg_win_pct": 6.92,
+     "avg_loss_pct": -2.68,
+     "avg_ret_pct": 0.29,
+     "avg_r": 0.05,
+     "profit_factor": 1.16,
+     "median_days": 5,
+     "worst_streak": 17,
+     "exits_pct": {
+      "stop": 40.2,
+      "target": 28.9,
+      "breakeven": 27.8,
+      "time": 3.1
+     }
+    },
+    "Mid": {
+     "trades": 97,
+     "win_pct": 29.9,
+     "avg_win_pct": 7.06,
+     "avg_loss_pct": -3.03,
+     "avg_ret_pct": -0.01,
+     "avg_r": 0.01,
+     "profit_factor": 0.99,
+     "median_days": 7,
+     "worst_streak": 12,
+     "exits_pct": {
+      "stop": 44.3,
+      "target": 26.8,
+      "breakeven": 25.8,
+      "time": 3.1
+     }
+    },
+    "Small": {
+     "trades": 55,
+     "win_pct": 20.0,
+     "avg_win_pct": 8.92,
+     "avg_loss_pct": -3.72,
+     "avg_ret_pct": -1.19,
+     "avg_r": -0.23,
+     "profit_factor": 0.6,
+     "median_days": 5,
+     "worst_streak": 15,
+     "exits_pct": {
+      "stop": 56.4,
+      "breakeven": 23.6,
+      "target": 20.0
+     }
+    }
+   }
+  },
+  {
+   "name": "Breakout 50d \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "Breakout 50d",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 2914,
+    "win_pct": 28.6,
+    "avg_win_pct": 9.2,
+    "avg_loss_pct": -3.71,
+    "avg_ret_pct": -0.01,
+    "avg_r": -0.0,
+    "profit_factor": 1.0,
+    "median_days": 4,
+    "worst_streak": 80,
+    "exits_pct": {
+     "stop": 49.0,
+     "target": 27.6,
+     "breakeven": 22.1,
+     "time": 1.3
+    }
+   },
+   "out_of_sample": {
+    "trades": 2220,
+    "win_pct": 27.3,
+    "avg_win_pct": 9.7,
+    "avg_loss_pct": -3.73,
+    "avg_ret_pct": -0.07,
+    "avg_r": -0.03,
+    "profit_factor": 0.97,
+    "median_days": 5,
+    "worst_streak": 50,
+    "exits_pct": {
+     "stop": 48.8,
+     "target": 26.2,
+     "breakeven": 23.6,
+     "time": 1.4
+    }
+   },
+   "all": {
+    "trades": 5134,
+    "win_pct": 28.0,
+    "avg_win_pct": 9.41,
+    "avg_loss_pct": -3.72,
+    "avg_ret_pct": -0.04,
+    "avg_r": -0.02,
+    "profit_factor": 0.99,
+    "median_days": 5,
+    "worst_streak": 80,
+    "exits_pct": {
+     "stop": 48.9,
+     "target": 27.0,
+     "breakeven": 22.8,
+     "time": 1.3
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 539,
+     "win_pct": 29.5,
+     "avg_win_pct": 7.75,
+     "avg_loss_pct": -3.17,
+     "avg_ret_pct": 0.05,
+     "avg_r": -0.02,
+     "profit_factor": 1.02,
+     "median_days": 6,
+     "worst_streak": 24,
+     "exits_pct": {
+      "stop": 48.4,
+      "target": 27.6,
+      "breakeven": 21.3,
+      "time": 2.6
+     }
+    },
+    "Mid": {
+     "trades": 724,
+     "win_pct": 26.9,
+     "avg_win_pct": 8.95,
+     "avg_loss_pct": -3.5,
+     "avg_ret_pct": -0.15,
+     "avg_r": -0.04,
+     "profit_factor": 0.94,
+     "median_days": 5,
+     "worst_streak": 36,
+     "exits_pct": {
+      "stop": 48.1,
+      "target": 25.8,
+      "breakeven": 24.6,
+      "time": 1.5
+     }
+    },
+    "Small": {
+     "trades": 957,
+     "win_pct": 26.2,
+     "avg_win_pct": 11.51,
+     "avg_loss_pct": -4.2,
+     "avg_ret_pct": -0.08,
+     "avg_r": -0.04,
+     "profit_factor": 0.97,
+     "median_days": 5,
+     "worst_streak": 27,
+     "exits_pct": {
+      "stop": 49.5,
+      "target": 25.6,
+      "breakeven": 24.2,
+      "time": 0.6
+     }
+    }
+   }
+  },
+  {
+   "name": "52-week high \u00b7 basic filters \u00b7 1.5x ATR stop \u00b7 2R target",
+   "entry": "52-week high",
+   "filters": "basic",
+   "atr": 1.5,
+   "exit": "2r",
+   "in_sample": {
+    "trades": 2103,
+    "win_pct": 28.6,
+    "avg_win_pct": 9.52,
+    "avg_loss_pct": -3.77,
+    "avg_ret_pct": 0.03,
+    "avg_r": 0.0,
+    "profit_factor": 1.01,
+    "median_days": 4,
+    "worst_streak": 63,
+    "exits_pct": {
+     "stop": 48.4,
+     "target": 27.5,
+     "breakeven": 22.7,
+     "time": 1.4
+    }
+   },
+   "out_of_sample": {
+    "trades": 1667,
+    "win_pct": 27.9,
+    "avg_win_pct": 9.83,
+    "avg_loss_pct": -3.86,
+    "avg_ret_pct": -0.04,
+    "avg_r": -0.02,
+    "profit_factor": 0.99,
+    "median_days": 5,
+    "worst_streak": 45,
+    "exits_pct": {
+     "stop": 48.9,
+     "target": 26.6,
+     "breakeven": 22.9,
+     "time": 1.7
+    }
+   },
+   "all": {
+    "trades": 3770,
+    "win_pct": 28.3,
+    "avg_win_pct": 9.65,
+    "avg_loss_pct": -3.81,
+    "avg_ret_pct": 0.0,
+    "avg_r": -0.01,
+    "profit_factor": 1.0,
+    "median_days": 5,
+    "worst_streak": 63,
+    "exits_pct": {
+     "stop": 48.6,
+     "target": 27.1,
+     "breakeven": 22.8,
+     "time": 1.5
+    }
+   },
+   "by_cap_oos": {
+    "Large": {
+     "trades": 438,
+     "win_pct": 31.7,
+     "avg_win_pct": 7.86,
+     "avg_loss_pct": -3.29,
+     "avg_ret_pct": 0.25,
+     "avg_r": 0.03,
+     "profit_factor": 1.11,
+     "median_days": 5,
+     "worst_streak": 32,
+     "exits_pct": {
+      "stop": 47.3,
+      "target": 29.5,
+      "breakeven": 20.1,
+      "time": 3.2
+     }
+    },
+    "Mid": {
+     "trades": 545,
+     "win_pct": 26.8,
+     "avg_win_pct": 9.2,
+     "avg_loss_pct": -3.58,
+     "avg_ret_pct": -0.16,
+     "avg_r": -0.04,
+     "profit_factor": 0.94,
+     "median_days": 6,
+     "worst_streak": 34,
+     "exits_pct": {
+      "stop": 48.3,
+      "target": 25.7,
+      "breakeven": 24.6,
+      "time": 1.5
+     }
+    },
+    "Small": {
+     "trades": 684,
+     "win_pct": 26.3,
+     "avg_win_pct": 11.86,
+     "avg_loss_pct": -4.41,
+     "avg_ret_pct": -0.13,
+     "avg_r": -0.04,
+     "profit_factor": 0.96,
+     "median_days": 5,
+     "worst_streak": 22,
+     "exits_pct": {
+      "stop": 50.4,
+      "target": 25.4,
+      "breakeven": 23.2,
+      "time": 0.9
      }
     }
    }
   }
- },
- "enabled": [],
- "portfolio": {
-  "trades": 0
- }
+ ]
 }
