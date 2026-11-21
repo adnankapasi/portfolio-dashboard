@@ -2,161 +2,505 @@
 <html lang="en">
 <head>
 <meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>My Portfolio Dashboard</title>
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#0f1115">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="robots" content="noindex">
+<title>Portfolio</title>
 <style>
-  :root { --bg:#0f1115; --card:#181b22; --line:#262a33; --text:#e7e9ee; --mute:#8b92a1;
-          --green:#22c55e; --red:#ef4444; --amber:#f59e0b; --grey:#6b7280; }
-  * { box-sizing:border-box; }
-  body { margin:0; font-family:system-ui,-apple-system,Segoe UI,Roboto,sans-serif; background:var(--bg); color:var(--text); }
-  header { padding:20px 16px 4px; max-width:1200px; margin:auto; }
-  h1 { margin:0; font-size:22px; } .mute { color:var(--mute); font-size:13px; }
-  main { max-width:1200px; margin:auto; padding:12px 16px 40px; }
-  .grid { display:grid; gap:12px; grid-template-columns:repeat(auto-fit,minmax(170px,1fr)); }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; }
-  .k { color:var(--mute); font-size:12px; text-transform:uppercase; letter-spacing:.04em; }
-  .v { font-size:22px; font-weight:650; margin-top:4px; font-variant-numeric:tabular-nums; }
-  .pos { color:var(--green); } .neg { color:var(--red); }
-  h2 { font-size:15px; margin:26px 0 10px; color:var(--mute); font-weight:600; }
-  .stocks { display:grid; gap:12px; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); }
-  .top { display:flex; justify-content:space-between; align-items:flex-start; gap:8px; }
-  .sym { font-weight:700; font-size:17px; } .grp { font-size:12px; color:var(--mute); }
-  .badge { font-size:11px; font-weight:700; padding:4px 8px; border-radius:999px; white-space:nowrap; }
-  .b-green{background:#14532d;color:#bbf7d0}.b-red{background:#7f1d1d;color:#fecaca}
-  .b-amber{background:#78350f;color:#fde68a}.b-grey{background:#374151;color:#e5e7eb}
-  .row { display:flex; justify-content:space-between; font-size:13px; padding:3px 0; font-variant-numeric:tabular-nums; }
-  .row span:first-child { color:var(--mute); }
-  .note { font-size:12px; color:var(--mute); margin-top:8px; border-top:1px solid var(--line); padding-top:8px; }
-  svg { width:100%; height:44px; margin:8px 0 4px; }
-  .lvl { display:flex; gap:6px; flex-wrap:wrap; margin-top:6px; }
-  .pill { font-size:11px; border:1px solid var(--line); border-radius:6px; padding:3px 6px; }
-  .fbtn { padding:7px 14px; border-radius:999px; border:1px solid var(--line); background:var(--card); color:var(--text); font-size:13px; cursor:pointer; }
-  .fbtn.on { background:#2563eb; border-color:#2563eb; }
-  .err { color:var(--amber); font-size:12px; margin-top:16px; }
+:root{--bg:#0f1115;--card:#171a21;--card2:#1e222b;--line:#272c36;--text:#e8eaef;--mute:#8d94a3;--faint:#5d6472;
+--green:#22c55e;--red:#ef4444;--amber:#f59e0b;--blue:#3b82f6;--violet:#8b7cf6;
+--gbg:#0f2e1c;--rbg:#3a1515;--abg:#3a2a0c;--bbg:#132544}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{margin:0;font-family:system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;background:var(--bg);color:var(--text);font-size:14px}
+button{font:inherit;color:inherit}
+.wrap{max-width:760px;margin:auto;padding:12px 14px 96px}
+.top{display:flex;justify-content:space-between;align-items:center;padding:6px 0 10px}
+.top h1{font-size:19px;margin:0;font-weight:650}
+.mute{color:var(--mute);font-size:12px}.faint{color:var(--faint);font-size:11px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+.big{font-size:28px;font-weight:700;font-variant-numeric:tabular-nums;letter-spacing:-.5px}
+.pos{color:var(--green)}.neg{color:var(--red)}
+.g2{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.mini{background:var(--card2);border-radius:10px;padding:10px}
+.mini b{display:block;font-size:16px;margin-top:2px;font-variant-numeric:tabular-nums}
+h2{font-size:14px;font-weight:600;margin:18px 2px 8px;color:var(--mute)}
+.row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 2px;border-top:1px solid var(--line)}
+.row:first-child{border-top:0}
+.click{cursor:pointer}.click:active{opacity:.7}
+.sym{font-weight:650}.tag{font-size:10px;color:var(--mute);border:1px solid var(--line);border-radius:5px;padding:1px 5px;margin-left:4px;font-weight:500}
+.r{text-align:right;font-variant-numeric:tabular-nums}
+.alert{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:10px;margin-bottom:6px;font-size:13px}
+.a-g{background:var(--gbg);color:#a7f3c4}.a-r{background:var(--rbg);color:#fecaca}.a-a{background:var(--abg);color:#fde68a}.a-n{background:var(--card2);color:var(--mute)}.a-b{background:var(--bbg);color:#bfdbfe}
+.chips{display:flex;gap:6px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}.chips::-webkit-scrollbar{display:none}
+.chip{border:1px solid var(--line);background:transparent;padding:6px 12px;border-radius:999px;font-size:12.5px;white-space:nowrap;cursor:pointer}
+.chip.on{background:var(--blue);border-color:var(--blue);color:#fff}
+.badge{font-size:11px;font-weight:650;padding:3px 8px;border-radius:999px;white-space:nowrap}
+.b-add{background:var(--gbg);color:#86efac}.b-hold{background:#123524;color:#bbf7d0}.b-wait{background:var(--abg);color:#fde68a}.b-noadd{background:#2a2f3a;color:#cbd5e1}.b-exit{background:var(--rbg);color:#fecaca}
+input[type=text],input[type=password],input[type=search]{width:100%;padding:10px 12px;border-radius:10px;border:1px solid var(--line);background:var(--card2);color:var(--text);font-size:15px}
+.btn{padding:11px 14px;border:0;border-radius:10px;background:var(--blue);color:#fff;font-weight:600;font-size:14px;cursor:pointer;width:100%}
+.btn2{padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--card2);cursor:pointer;font-size:13px}
+nav{position:fixed;bottom:0;left:0;right:0;background:rgba(15,17,21,.96);border-top:1px solid var(--line);display:flex;justify-content:center;padding:6px 0 calc(6px + env(safe-area-inset-bottom));backdrop-filter:blur(8px)}
+nav div{display:flex;max-width:760px;width:100%;justify-content:space-around}
+nav button{background:none;border:0;color:var(--faint);font-size:11px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;padding:4px 8px}
+nav button svg{width:22px;height:22px}nav button.on{color:var(--text)}
+.sheet{position:fixed;inset:0;background:var(--bg);overflow-y:auto;z-index:20;display:none}
+.sheet .wrap{padding-bottom:40px}
+.bar{display:flex;height:8px;border-radius:4px;overflow:hidden;background:var(--card2)}
+.seg{display:flex;gap:4px}.seg button{flex:1;background:none;border:0;color:var(--faint);font-size:12px;padding:6px 0;cursor:pointer;border-radius:8px}.seg button.on{background:var(--card2);color:var(--text)}
+table.t{width:100%;border-collapse:collapse;font-size:12.5px}table.t td{padding:6px 4px;border-top:1px solid var(--line)}
+.err{color:var(--amber);font-size:12px}
+.hidden{display:none}
 </style>
 </head>
 <body>
-<header>
-  <h1>Portfolio Dashboard</h1>
-  <div class="mute" id="upd">Loading…</div>
-</header>
-<main>
-  <form id="lock" class="card" style="max-width:360px;margin:40px auto;text-align:center">
-    <div class="k" style="margin-bottom:10px">🔒 Enter password</div>
-    <input id="pw" type="password" autocomplete="current-password" style="width:100%;padding:10px;border-radius:8px;border:1px solid var(--line);background:#0f1115;color:var(--text);font-size:16px">
-    <label class="mute" style="display:block;margin-top:8px"><input type="checkbox" id="rem"> Remember on this device</label>
-    <button style="margin-top:10px;width:100%;padding:10px;border:0;border-radius:8px;background:#2563eb;color:#fff;font-weight:600;font-size:15px">Unlock</button>
-    <div id="lockmsg" class="mute" style="margin-top:8px"></div>
+<div class="wrap" id="lockwrap">
+  <form id="lock" class="card" style="max-width:360px;margin:18vh auto 0;text-align:center">
+    <div style="font-size:30px">🔒</div>
+    <div style="font-weight:650;margin:6px 0 12px">Portfolio dashboard</div>
+    <input id="pw" type="password" autocomplete="current-password" placeholder="Password">
+    <label class="mute" style="display:block;margin:10px 0"><input type="checkbox" id="rem" checked> Remember on this device</label>
+    <button class="btn">Unlock</button>
+    <div id="lockmsg" class="mute" style="margin-top:10px">Loading…</div>
   </form>
-  <div id="app" style="display:none">
-  <div class="grid" id="summary"></div>
-  <div class="grid" id="brokers" style="margin-top:12px"></div>
-  <div id="filters" style="margin-top:16px;display:flex;gap:8px"></div>
-  <h2>Global markers</h2>
-  <div class="grid" id="macro"></div>
-  <div id="groups"></div>
-  <div class="err" id="err"></div>
-  </div>
-  <p class="mute" style="margin-top:28px">Signals are rule-based reminders from your own trigger levels, not financial advice. Data: Yahoo Finance daily closes.</p>
-</main>
-<script>
-const inr = n => n == null ? "–" : "₹" + Math.round(n).toLocaleString("en-IN");
-const num = (n, d = 2) => n == null ? "–" : Number(n).toLocaleString("en-IN", {maximumFractionDigits: d, minimumFractionDigits: d});
-const pc = n => (n >= 0 ? "+" : "") + num(n) + "%";
-const cls = n => n >= 0 ? "pos" : "neg";
+</div>
 
-function spark(vals, levels) {
-  const all = vals.concat(levels.filter(v => v != null));
-  const lo = Math.min(...all), hi = Math.max(...all), W = 300, H = 44;
-  const y = v => H - 3 - (v - lo) / ((hi - lo) || 1) * (H - 6);
-  const pts = vals.map((v, i) => `${(i / (vals.length - 1) * W).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
-  const up = vals[vals.length - 1] >= vals[0];
-  const lines = levels.map((v, i) => v == null ? "" :
-    `<line x1="0" x2="${W}" y1="${y(v)}" y2="${y(v)}" stroke="${i ? '#ef4444' : '#22c55e'}" stroke-dasharray="4 4" stroke-width="1" opacity=".7"/>`).join("");
-  return `<svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${lines}<polyline fill="none" stroke="${up ? '#22c55e' : '#ef4444'}" stroke-width="2" points="${pts}"/></svg>`;
+<div id="app" class="hidden">
+  <div class="wrap">
+    <div class="top"><div><h1 id="title">Home</h1><div class="faint" id="upd"></div></div>
+      <button class="btn2" id="importBtn" title="Import holdings">⇪ Import</button></div>
+    <section id="tab-home"></section>
+    <section id="tab-holdings" class="hidden"></section>
+    <section id="tab-signals" class="hidden"></section>
+    <section id="tab-health" class="hidden"></section>
+    <section id="tab-market" class="hidden"></section>
+    <div class="err" id="err"></div>
+    <p class="faint" style="margin-top:24px">Signals are rule-based reminders from your trigger levels, not financial advice. Prices: NSE/BSE official close, Yahoo for history.</p>
+  </div>
+  <nav><div id="nav"></div></nav>
+</div>
+
+<div class="sheet" id="detail"><div class="wrap" id="detailBody"></div></div>
+<div class="sheet" id="import"><div class="wrap" id="importBody"></div></div>
+
+<script>
+// ---------- helpers
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? "").replace(/[&<>"]/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]));
+const inr = (n, sign) => n == null ? "–" : (n < 0 ? "−" : sign && n > 0 ? "+" : "") + "₹" + Math.abs(Math.round(n)).toLocaleString("en-IN");
+const num = (n, d = 2) => n == null ? "–" : Number(n).toLocaleString("en-IN", {maximumFractionDigits: d, minimumFractionDigits: d});
+const pc = (n, d = 2) => n == null ? "–" : (n > 0 ? "+" : n < 0 ? "−" : "") + Math.abs(n).toFixed(d) + "%";
+const cls = n => n > 0 ? "pos" : n < 0 ? "neg" : "";
+const store = { get: k => { try { return localStorage.getItem(k); } catch { return null; } },
+  set: (k, v) => { try { localStorage.setItem(k, v); } catch {} }, del: k => { try { localStorage.removeItem(k); } catch {} } };
+const SIG_ORDER = {exit: 0, add: 1, wait: 2, hold: 3, noadd: 4};
+const badge = h => `<span class="badge b-${h.sig}">${esc(h.signal)}</span>`;
+const ICONS = {
+  home: '<path d="M3 11l9-8 9 8v10a1 1 0 0 1-1 1h-5v-7H9v7H4a1 1 0 0 1-1-1z"/>',
+  holdings: '<path d="M4 6h16M4 12h16M4 18h16"/>',
+  signals: '<path d="M13 2L4 14h7l-1 8 9-12h-7z"/>',
+  health: '<path d="M12 3a9 9 0 1 0 9 9h-9z"/><path d="M15 3.5A9 9 0 0 1 20.5 9H15z"/>',
+  market: '<circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c3 3 3 15 0 18M12 3c-3 3-3 15 0 18"/>'};
+
+// ---------- crypto (matches scripts/update.py)
+const b64d = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
+const b64e = b => btoa(String.fromCharCode(...new Uint8Array(b)));
+async function aesKey(pw, salt, iter) {
+  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
+  return crypto.subtle.deriveKey({name: "PBKDF2", salt, iterations: iter, hash: "SHA-256"}, base,
+    {name: "AES-GCM", length: 256}, false, ["encrypt", "decrypt"]);
+}
+async function decrypt(blob, pw) {
+  const key = await aesKey(pw, b64d(blob.salt), blob.iter);
+  return JSON.parse(new TextDecoder().decode(await crypto.subtle.decrypt({name: "AES-GCM", iv: b64d(blob.iv)}, key, b64d(blob.ct))));
+}
+async function encrypt(obj, pw) {
+  const salt = crypto.getRandomValues(new Uint8Array(16)), iv = crypto.getRandomValues(new Uint8Array(12)), iter = 310000;
+  const ct = await crypto.subtle.encrypt({name: "AES-GCM", iv}, await aesKey(pw, salt, iter), new TextEncoder().encode(JSON.stringify(obj)));
+  return {v: 1, iter, salt: b64e(salt), iv: b64e(iv), ct: b64e(ct)};
 }
 
-const b64 = s => Uint8Array.from(atob(s), c => c.charCodeAt(0));
-async function decrypt(blob, pw) {
-  const base = await crypto.subtle.importKey("raw", new TextEncoder().encode(pw), "PBKDF2", false, ["deriveKey"]);
-  const key = await crypto.subtle.deriveKey({name: "PBKDF2", salt: b64(blob.salt), iterations: blob.iter, hash: "SHA-256"},
-    base, {name: "AES-GCM", length: 256}, false, ["decrypt"]);
-  const pt = await crypto.subtle.decrypt({name: "AES-GCM", iv: b64(blob.iv)}, key, b64(blob.ct));
-  return JSON.parse(new TextDecoder().decode(pt));
+// ---------- charts (plain SVG)
+function line(vals, {w = 300, h = 60, color, fill = false, levels = []} = {}) {
+  const v = vals.filter(x => x != null);
+  if (v.length < 2) return `<div class="faint" style="height:${h}px;display:flex;align-items:center">Chart appears after a few days of data</div>`;
+  const all = v.concat(levels.map(l => l.v));
+  const lo = Math.min(...all), hi = Math.max(...all), rng = (hi - lo) || 1;
+  const x = i => (i / (vals.length - 1) * w).toFixed(1), y = n => (h - 4 - (n - lo) / rng * (h - 8)).toFixed(1);
+  const pts = vals.map((n, i) => n == null ? null : `${x(i)},${y(n)}`).filter(Boolean).join(" ");
+  const col = color || (v[v.length - 1] >= v[0] ? "#22c55e" : "#ef4444");
+  const lv = levels.map(l => `<line x1="0" x2="${w}" y1="${y(l.v)}" y2="${y(l.v)}" stroke="${l.c}" stroke-dasharray="4 4" stroke-width="1"/>`).join("");
+  const area = fill ? `<polygon fill="${col}" opacity=".12" points="0,${h} ${pts} ${w},${h}"/>` : "";
+  return `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none" style="width:100%;height:${h}px;display:block">${lv}${area}<polyline fill="none" stroke="${col}" stroke-width="2" vector-effect="non-scaling-stroke" points="${pts}"/></svg>`;
+}
+function candles(ch, levels) {
+  const n = ch.c.length, w = 600, h = 240, pad = 4;
+  const vals = [...ch.h, ...ch.l, ...ch.ema, ...levels.map(l => l.v)].filter(x => x != null);
+  const lo = Math.min(...vals), hi = Math.max(...vals), rng = (hi - lo) || 1;
+  const y = v => (pad + (hi - v) / rng * (h - 2 * pad)).toFixed(1), step = w / n, bw = Math.max(1.5, step * .6);
+  let s = levels.map(l => `<line x1="0" x2="${w}" y1="${y(l.v)}" y2="${y(l.v)}" stroke="${l.c}" stroke-dasharray="6 5" stroke-width="1.2"/>
+    <text x="${w - 4}" y="${+y(l.v) - 4}" text-anchor="end" fill="${l.c}" font-size="13">${esc(l.t)} ${num(l.v)}</text>`).join("");
+  for (let i = 0; i < n; i++) {
+    const o = ch.o[i], c = ch.c[i], up = c >= o, col = up ? "#22c55e" : "#ef4444", cx = (i + .5) * step;
+    s += `<line x1="${cx}" x2="${cx}" y1="${y(ch.h[i])}" y2="${y(ch.l[i])}" stroke="${col}" stroke-width="1"/>
+      <rect x="${cx - bw / 2}" y="${y(Math.max(o, c))}" width="${bw}" height="${Math.max(1, Math.abs(y(o) - y(c)))}" fill="${col}"/>`;
+  }
+  const path = arr => arr.map((v, i) => v == null ? null : `${((i + .5) * step).toFixed(1)},${y(v)}`).filter(Boolean).join(" ");
+  s += `<polyline fill="none" stroke="#8b7cf6" stroke-width="1.6" points="${path(ch.ema)}"/>`;
+  if (ch.sma.some(v => v != null)) s += `<polyline fill="none" stroke="#f59e0b" stroke-width="1.4" points="${path(ch.sma)}"/>`;
+  return `<svg viewBox="0 0 ${w} ${h}" style="width:100%;height:auto;display:block">${s}</svg>`;
+}
+function donut(parts) {
+  const tot = parts.reduce((t, p) => t + p.v, 0) || 1, cols = ["#8b7cf6", "#22c55e", "#f59e0b", "#3b82f6", "#ef4444", "#14b8a6", "#ec4899", "#a3a3a3", "#84cc16", "#f97316"];
+  let off = 25, s = "";
+  parts.forEach((p, i) => { p.c = cols[i % cols.length]; const len = p.v / tot * 100;
+    s += `<circle cx="21" cy="21" r="15.9" fill="none" stroke="${p.c}" stroke-width="6" stroke-dasharray="${len} ${100 - len}" stroke-dashoffset="${off}"/>`; off -= len; });
+  return `<svg viewBox="0 0 42 42" width="120" height="120">${s}</svg>`;
+}
+
+// ---------- state
+let D = null, PW = null, TAB = "home", BROKER = "All", SORT = {k: "pnl_pct", dir: -1}, Q = "", RANGE = "1M";
+const TABS = [["home", "Home"], ["holdings", "Holdings"], ["signals", "Signals"], ["health", "Health"], ["market", "Market"]];
+
+function combined() { // positions merged across brokers, for weights and concentration
+  const m = {};
+  D.holdings.forEach(h => { const x = m[h.symbol] ||= {symbol: h.symbol, value: 0, invested: 0, sector: h.sector, group: h.group};
+    x.value += h.value; x.invested += h.invested; });
+  return Object.values(m);
+}
+function attention() {
+  const A = [], tv = D.summary.value;
+  D.holdings.forEach(h => {
+    const tag = `<b>${esc(h.symbol)}</b>${D.holdings.filter(x => x.symbol === h.symbol).length > 1 ? ` <span class="tag">${h.broker}</span>` : ""}`;
+    if (h.sig === "exit") A.push({p: 0, c: "a-r", i: "⛔", t: `${tag} closed ${num(h.close)}, below exit ${num(h.stop_below)}`, s: h.symbol});
+    else if (h.sig === "add") A.push({p: 1, c: "a-g", i: "🎯", t: `${tag} closed above ${num(h.add_above)}: add zone`, s: h.symbol});
+    else {
+      if (h.add_above && h.close < h.add_above && (h.add_above / h.close - 1) * 100 <= 2)
+        A.push({p: 2, c: "a-b", i: "↗", t: `${tag} is ${pc((h.add_above / h.close - 1) * 100, 1).slice(1)} from add level ${num(h.add_above)}`, s: h.symbol});
+      if (h.stop_below && (h.close / h.stop_below - 1) * 100 <= 2)
+        A.push({p: 1, c: "a-r", i: "⚠", t: `${tag} is ${pc((h.close / h.stop_below - 1) * 100, 1).slice(1)} above exit ${num(h.stop_below)}`, s: h.symbol});
+    }
+    if (Math.abs(h.day_pct) >= 3) A.push({p: 3, c: "a-a", i: h.day_pct > 0 ? "▲" : "▼", t: `${tag} ${pc(h.day_pct, 1)} today · big move`, s: h.symbol});
+  });
+  combined().forEach(x => { if (x.value / tv > .10 && x.group !== "Gold / Silver") A.push({p: 4, c: "a-a", i: "◔", t: `<b>${esc(x.symbol)}</b> is ${(x.value / tv * 100).toFixed(1)}% of your portfolio (limit 10%)`}); });
+  const sec = {}; combined().forEach(x => sec[x.sector] = (sec[x.sector] || 0) + x.value);
+  Object.entries(sec).forEach(([s, v]) => {
+    const p = v / tv * 100;
+    if (s === "Gold and silver" && p > 15) A.push({p: 4, c: "a-a", i: "◔", t: `Gold and silver is ${p.toFixed(1)}% of your portfolio (limit 15%)`});
+    else if (s !== "Gold and silver" && s !== "Other" && p > 25) A.push({p: 4, c: "a-a", i: "◔", t: `${esc(s)} is ${p.toFixed(1)}% of your portfolio (limit 25%)`});
+  });
+  return A.sort((a, b) => a.p - b.p);
+}
+
+// ---------- tabs
+function renderHome() {
+  const s = D.summary, hr = new Date().getHours();
+  const greet = hr < 12 ? "Good morning" : hr < 17 ? "Good afternoon" : "Good evening";
+  const H = D.history || [], days = {"1W": 7, "1M": 31, "3M": 93, "1Y": 366, "All": 1e5}[RANGE];
+  const cut = new Date(Date.now() - days * 864e5).toISOString().slice(0, 10);
+  const hv = H.filter(x => x.d >= cut);
+  const first = hv[0], chg = first && hv.length > 1 ? s.value - first.v - (s.invested - first.i) : null;
+  const A = attention();
+  const byDay = [...D.holdings].sort((a, b) => b.day_pct - a.day_pct);
+  const mv = (h) => `<div class="row click" data-s="${esc(h.symbol)}"><span>${esc(h.symbol)}</span><span class="${cls(h.day_pct)}">${pc(h.day_pct)}</span></div>`;
+  $("tab-home").innerHTML = `
+  <div class="mute" style="margin:-4px 2px 10px">${greet} · prices as of ${esc(D.price_date)}</div>
+  <div class="card">
+    <div class="mute">Total value · all accounts</div>
+    <div class="big">${inr(s.value)}</div>
+    <div style="display:flex;gap:16px;flex-wrap:wrap;margin-top:4px;font-size:13px">
+      <span class="${cls(s.day)}">Today ${inr(s.day, 1)} (${pc(s.day_pct)})</span>
+      <span class="${cls(s.pnl)}">Overall ${inr(s.pnl, 1)} (${pc(s.pnl_pct)})</span></div>
+    <div style="margin-top:12px">${line(hv.map(x => x.v), {h: 70, fill: true})}</div>
+    <div class="seg" id="range">${["1W", "1M", "3M", "1Y", "All"].map(r => `<button class="${r === RANGE ? "on" : ""}" data-r="${r}">${r}</button>`).join("")}</div>
+    ${chg != null ? `<div class="faint" style="margin-top:4px">P&amp;L change over ${RANGE === "All" ? "all tracked days" : RANGE}: <span class="${cls(chg)}">${inr(chg, 1)}</span></div>` : `<div class="faint">Your value chart builds up from today, one point per trading day.</div>`}
+  </div>
+  <div class="g2">${Object.entries(D.brokers).map(([b, x]) => `<div class="mini click" data-b="${b}"><span class="mute">${b}</span><b>${inr(x.value)}</b>
+    <div class="${cls(x.pnl)}" style="font-size:12px">${pc(x.pnl_pct, 1)} · ${inr(x.pnl, 1)}</div><div class="${cls(x.day)}" style="font-size:12px">Today ${inr(x.day, 1)}</div></div>`).join("")}</div>
+  <h2>Needs your attention · ${A.length}</h2>
+  ${A.length ? A.slice(0, 8).map(a => `<div class="alert ${a.c} ${a.s ? "click" : ""}" ${a.s ? `data-s="${esc(a.s)}"` : ""}><span>${a.i}</span><div>${a.t}</div></div>`).join("") + (A.length > 8 ? `<div class="faint">+${A.length - 8} more in Signals</div>` : "") : `<div class="alert a-n">Nothing needs action today.</div>`}
+  <div class="g2" style="margin-top:14px">
+    <div class="card" style="margin:0"><div class="mute">Top gainers today</div>${byDay.slice(0, 3).map(mv).join("")}</div>
+    <div class="card" style="margin:0"><div class="mute">Top losers today</div>${byDay.slice(-3).reverse().map(mv).join("")}</div></div>`;
+  $("range").onclick = e => { if (e.target.dataset.r) { RANGE = e.target.dataset.r; renderHome(); } };
+  $("tab-home").querySelectorAll("[data-b]").forEach(el => el.onclick = () => { BROKER = el.dataset.b; go("holdings"); });
+}
+
+const SORTS = [["pnl_pct", "P&L %", -1], ["pnl", "P&L ₹", -1], ["day_pct", "Day %", -1], ["value", "Value", -1],
+  ["w", "Weight", -1], ["breakeven_pct", "Break-even", 1], ["sig", "Signal", 1], ["symbol", "Name", 1]];
+function renderHoldings() {
+  const tv = D.summary.value, brokers = ["All", ...Object.keys(D.brokers)];
+  let L = D.holdings.map(h => ({...h, w: h.value / tv * 100}))
+    .filter(h => (BROKER === "All" || h.broker === BROKER) && (!Q || h.symbol.toLowerCase().includes(Q.toLowerCase()) || (h.fund?.name || "").toLowerCase().includes(Q.toLowerCase())));
+  const k = SORT.k, d = SORT.dir;
+  L.sort((a, b) => k === "symbol" ? d * a.symbol.localeCompare(b.symbol) : k === "sig" ? d * (SIG_ORDER[a.sig] - SIG_ORDER[b.sig]) : d * (a[k] - b[k]));
+  const inv = L.reduce((t, h) => t + h.invested, 0), val = L.reduce((t, h) => t + h.value, 0), day = L.reduce((t, h) => t + h.day_pnl, 0);
+  const sub = h => k === "w" ? `${h.w.toFixed(1)}% of portfolio` : k === "breakeven_pct" ? (h.breakeven_pct > 0 ? `needs ${pc(h.breakeven_pct, 1)} to break even` : "in profit")
+    : k === "value" ? `value ${inr(h.value)}` : k === "day_pct" ? `today ${inr(h.day_pnl, 1)}` : `${h.qty} @ ${num(h.avg)} · LTP ${num(h.close)}`;
+  $("tab-holdings").innerHTML = `
+  <div class="card" style="padding:10px 14px"><div class="g2" style="gap:6px">
+    <div><span class="mute">Invested</span><div>${inr(inv)}</div></div><div class="r"><span class="mute">Current</span><div>${inr(val)}</div></div>
+    <div><span class="mute">P&amp;L</span><div class="${cls(val - inv)}">${inr(val - inv, 1)} (${pc(inv ? (val / inv - 1) * 100 : 0)})</div></div>
+    <div class="r"><span class="mute">Today</span><div class="${cls(day)}">${inr(day, 1)}</div></div></div></div>
+  <div class="chips" id="bchips">${brokers.map(b => `<button class="chip ${b === BROKER ? "on" : ""}" data-b="${b}">${b}</button>`).join("")}</div>
+  <div style="margin:8px 0"><input type="search" id="q" placeholder="Search stock" value="${esc(Q)}"></div>
+  <div class="chips" id="schips">${SORTS.map(([key, lab]) => `<button class="chip ${key === k ? "on" : ""}" data-k="${key}">${lab}${key === k ? (d === 1 ? " ↑" : " ↓") : ""}</button>`).join("")}</div>
+  <div class="card" style="padding:4px 12px;margin-top:8px">${L.map(h => `<div class="row click" data-s="${esc(h.symbol)}">
+    <div style="min-width:0"><div><span class="sym">${esc(h.symbol)}</span><span class="tag">${h.broker}</span></div>
+      <div class="faint" style="margin-top:2px">${sub(h)}</div><div style="margin-top:4px">${badge(h)}</div></div>
+    <div class="r"><div class="${cls(h.pnl)}">${inr(h.pnl, 1)}</div><div class="${cls(h.pnl)}" style="font-size:12px">${pc(h.pnl_pct)}</div>
+      <div class="${cls(h.day_pct)}" style="font-size:11px;margin-top:2px">day ${pc(h.day_pct)}</div></div></div>`).join("") || `<div class="mute" style="padding:12px">No holdings match.</div>`}</div>`;
+  $("bchips").onclick = e => { if (e.target.dataset.b) { BROKER = e.target.dataset.b; renderHoldings(); } };
+  $("schips").onclick = e => { const key = e.target.dataset.k; if (!key) return;
+    SORT = key === SORT.k ? {k: key, dir: -SORT.dir} : {k: key, dir: SORTS.find(s => s[0] === key)[2]}; renderHoldings(); };
+  $("q").oninput = e => { Q = e.target.value; const pos = e.target.selectionStart; renderHoldings(); const q = $("q"); q.focus(); q.setSelectionRange(pos, pos); };
+}
+
+function renderSignals() {
+  const cnt = {add: 0, hold: 0, wait: 0, noadd: 0, exit: 0}; D.holdings.forEach(h => cnt[h.sig]++);
+  const lbl = {add: "Add", hold: "Hold", wait: "Wait", noadd: "No add", exit: "Exit"};
+  const item = (h, right) => `<div class="row click" data-s="${esc(h.symbol)}"><div><span class="sym">${esc(h.symbol)}</span><span class="tag">${h.broker}</span>
+    <div class="faint" style="margin-top:2px">${esc(h.note || "")}</div></div><div class="r" style="white-space:nowrap">${right}</div></div>`;
+  const near = D.holdings.filter(h => h.add_above && h.close < h.add_above).map(h => ({h, d: (h.add_above / h.close - 1) * 100})).sort((a, b) => a.d - b.d).slice(0, 8);
+  const nearStop = D.holdings.filter(h => h.stop_below && h.close >= h.stop_below).map(h => ({h, d: (h.close / h.stop_below - 1) * 100})).filter(x => x.d <= 5).sort((a, b) => a.d - b.d);
+  const price = Object.fromEntries(D.holdings.map(h => [h.symbol, h.close]));
+  const group = sig => D.holdings.filter(h => h.sig === sig);
+  $("tab-signals").innerHTML = `
+  <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:6px">${["add", "hold", "wait", "noadd", "exit"].map(k =>
+    `<a href="#sig-${k}" class="badge b-${k}" style="display:block;text-align:center;padding:8px 0;border-radius:10px;text-decoration:none"><div style="font-size:18px">${cnt[k]}</div>${lbl[k]}</a>`).join("")}</div>
+  ${cnt.exit ? `<h2 id="sig-exit">Exit alerts</h2><div class="card" style="padding:4px 12px">${group("exit").map(h => item(h, `<span class="neg">${num(h.close)}</span><div class="faint">exit ${num(h.stop_below)}</div>`)).join("")}</div>` : ""}
+  ${cnt.add ? `<h2 id="sig-add">Add zone</h2><div class="card" style="padding:4px 12px">${group("add").map(h => item(h, `<span class="pos">${num(h.close)}</span><div class="faint">above ${num(h.add_above)}</div>`)).join("")}</div>` : ""}
+  <h2>Closest to add trigger</h2><div class="card" style="padding:4px 12px">${near.map(({h, d}) => item(h, `${num(h.close)} → ${num(h.add_above)}<div class="faint">${d.toFixed(1)}% away</div>`)).join("") || `<div class="mute" style="padding:10px 0">None</div>`}</div>
+  ${nearStop.length ? `<h2>Close to exit level (within 5%)</h2><div class="card" style="padding:4px 12px">${nearStop.map(({h, d}) => item(h, `${num(h.close)} → ${num(h.stop_below)}<div class="faint">${d.toFixed(1)}% above</div>`)).join("")}</div>` : ""}
+  <h2>Recently changed</h2><div class="card" style="padding:4px 12px">${(D.events || []).slice(0, 15).map(e => { const now = price[e.symbol], ch = now ? (now / e.price - 1) * 100 : null;
+    return `<div class="row click" data-s="${esc(e.symbol)}"><div><span class="sym">${esc(e.symbol)}</span><span class="tag">${e.broker}</span>
+      <div class="faint">${esc(lbl[e.from] || e.from)} → <b>${esc(lbl[e.to] || e.to)}</b> · ${esc(e.date)} at ${num(e.price)}</div></div>
+      <div class="r ${cls(ch)}">${ch == null ? "" : pc(ch, 1) + "<div class='faint'>since</div>"}</div></div>`; }).join("") || `<div class="mute" style="padding:10px 0">Signal changes are recorded from now on. Check back after a few days.</div>`}</div>
+  ${["hold", "wait", "noadd"].map(k => cnt[k] ? `<h2 id="sig-${k}">${({hold: "Hold · uptrend", wait: "Wait", noadd: "Don't add · downtrend"})[k]}</h2><div class="card" style="padding:4px 12px">${group(k).map(h => item(h, `${num(h.close)}<div class="${cls(h.pnl_pct)} faint">${pc(h.pnl_pct, 1)}</div>`)).join("")}</div>` : "").join("")}`;
+}
+
+function renderHealth() {
+  const tv = D.summary.value, C = combined();
+  const sec = {}; C.forEach(x => sec[x.sector] = (sec[x.sector] || 0) + x.value);
+  let parts = Object.entries(sec).map(([k, v]) => ({k, v})).sort((a, b) => b.v - a.v);
+  if (parts.length > 7) { const rest = parts.slice(6).reduce((t, p) => t + p.v, 0); parts = [...parts.slice(0, 6), {k: "Others", v: rest}]; }
+  const caps = {Large: 0, Mid: 0, Small: 0, "Gold/silver": 0, Unknown: 0};
+  D.holdings.forEach(h => caps[h.group === "Gold / Silver" ? "Gold/silver" : h.cap || "Unknown"] += h.value);
+  const above = D.holdings.filter(h => h.sma200 && h.close > h.sma200).length, withSma = D.holdings.filter(h => h.sma200).length;
+  const H = D.history || [], peak = Math.max(...H.map(x => x.v - x.i), -Infinity), cur = D.summary.pnl;
+  const top = [...C].sort((a, b) => b.value - a.value).slice(0, 5);
+  const warn = attention().filter(a => a.i === "◔");
+  if (C.length > 25) warn.push({t: `You hold ${C.length} different stocks. Over 25 is hard to track; consider trimming the smallest.`});
+  const small = C.filter(x => x.value / tv < .01);
+  $("tab-health").innerHTML = `
+  <div class="card"><div class="mute">Sector allocation</div>
+    <div style="display:flex;gap:16px;align-items:center;margin-top:8px">${donut(parts)}
+    <div style="font-size:12.5px;line-height:1.9">${parts.map(p => `<div><span style="color:${p.c}">●</span> ${esc(p.k)} <b>${(p.v / tv * 100).toFixed(1)}%</b></div>`).join("")}</div></div></div>
+  <h2>Warnings</h2>${warn.length ? warn.map(a => `<div class="alert a-a"><span>◔</span><div>${a.t}</div></div>`).join("") : `<div class="alert a-g">No concentration problems.</div>`}
+  ${small.length ? `<div class="alert a-n"><span>·</span><div>${small.length} positions are under 1% of your portfolio each: ${small.map(x => esc(x.symbol)).join(", ")}</div></div>` : ""}
+  <h2>Market-cap mix (approx.)</h2><div class="card">
+    <div class="bar">${Object.entries(caps).filter(([, v]) => v).map(([k, v], i) => `<div style="width:${v / tv * 100}%;background:${["#3b82f6", "#8b7cf6", "#f59e0b", "#eab308", "#525866"][Object.keys(caps).indexOf(k)]}"></div>`).join("")}</div>
+    <div style="display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:12px">${Object.entries(caps).filter(([, v]) => v).map(([k, v]) => `<span>${k} <b>${(v / tv * 100).toFixed(0)}%</b></span>`).join("")}</div>
+    <div class="faint" style="margin-top:6px">Large ≥ ₹1 lakh cr, Mid ≥ ₹33,000 cr market cap.</div></div>
+  <h2>Trend health</h2><div class="card" style="padding:4px 14px">
+    <div class="row"><span>Holdings above 200-day average</span><b>${above} of ${withSma}</b></div>
+    <div class="row"><span>In an uptrend (Supertrend)</span><b>${D.holdings.filter(h => h.st_dir === 1).length} of ${D.holdings.length}</b></div>
+    <div class="row"><span>In profit</span><b>${D.holdings.filter(h => h.pnl > 0).length} of ${D.holdings.length}</b></div>
+    <div class="row"><span>Drop from best P&amp;L since tracking began</span><b class="${cls(cur - peak)}">${H.length > 1 ? inr(cur - peak, 1) : "–"}</b></div></div>
+  <h2>Largest positions</h2><div class="card" style="padding:4px 14px">${top.map(x => `<div class="row click" data-s="${esc(x.symbol)}"><span class="sym">${esc(x.symbol)}</span><span>${(x.value / tv * 100).toFixed(1)}% · ${inr(x.value)}</span></div>`).join("")}</div>`;
+}
+
+function renderMarket() {
+  const M = D.market || [], by = k => M.filter(m => m.kind === k);
+  const card = m => `<div class="mini"><span class="mute">${esc(m.name)}</span><b>${num(m.close)} <span class="${cls(m.day_pct)}" style="font-size:12px">${pc(m.day_pct)}</span></b>
+    ${line(m.spark || [], {h: 30})}${(m.levels || []).map(l => `<div class="faint">${esc(l.label)} ${num(l.value, 0)} ${m.close >= l.value ? "✅" : "⚠️"}</div>`).join("")}</div>`;
+  const b = D.breadth, mv = D.movers;
+  const mrow = x => `<div class="row"><span>${esc(x.symbol)}</span><span>${num(x.close)} <span class="${cls(x.chg)}">${pc(x.chg)}</span></span></div>`;
+  $("tab-market").innerHTML = `
+  <div class="g2">${[...by("index"), ...by("fx")].map(card).join("")}</div>
+  ${b ? `<h2>NSE breadth</h2><div class="card"><div class="bar"><div style="width:${b.up / (b.up + b.down + b.flat) * 100}%;background:#22c55e"></div><div style="width:${b.down / (b.up + b.down + b.flat) * 100}%;background:#ef4444"></div></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px" class="mute"><span class="pos">${b.up.toLocaleString("en-IN")} up</span><span>${b.flat} flat</span><span class="neg">${b.down.toLocaleString("en-IN")} down</span></div></div>` : ""}
+  ${mv ? `<div class="g2"><div class="card" style="margin:0"><div class="mute">NSE top gainers</div>${mv.gainers.map(mrow).join("")}</div>
+    <div class="card" style="margin:0"><div class="mute">NSE top losers</div>${mv.losers.map(mrow).join("")}</div></div>
+    <div class="faint" style="margin-top:4px">Stocks above ₹20 with turnover above ₹10 crore.</div>` : ""}
+  <h2>Sectors today</h2><div class="card" style="padding:4px 14px">${by("sector").sort((a, b) => b.day_pct - a.day_pct).map(m => `<div class="row"><span>${esc(m.name)}</span><span class="${cls(m.day_pct)}">${pc(m.day_pct)}</span></div>`).join("")}</div>
+  <h2>Gold and silver</h2><div class="g2">${by("metal").map(card).join("")}</div>`;
+}
+
+// ---------- detail
+function openDetail(sym) {
+  const P = D.holdings.filter(h => h.symbol === sym); if (!P.length) return;
+  const h = P[0], ch = D.charts[sym], f = h.fund || {};
+  const qty = P.reduce((t, x) => t + x.qty, 0), inv = P.reduce((t, x) => t + x.invested, 0), val = P.reduce((t, x) => t + x.value, 0);
+  const avg = inv / qty, be = (avg / h.close - 1) * 100;
+  const levels = []; if (h.add_above) levels.push({v: h.add_above, c: "#22c55e", t: "Add"}); if (h.stop_below) levels.push({v: h.stop_below, c: "#ef4444", t: "Exit"});
+  const since = D.since?.[`${h.broker}:${sym}`];
+  const stat = (k, v, c = "") => `<div class="mini"><span class="mute">${k}</span><b class="${c}">${v}</b></div>`;
+  $("detailBody").innerHTML = `
+  <div class="top"><button class="btn2" id="back">← Back</button>${badge(h)}</div>
+  <div style="font-size:20px;font-weight:700">${esc(sym)}</div>
+  <div class="mute">${esc(f.name || "")}${f.industry ? " · " + esc(f.industry) : ""}</div>
+  <div class="faint">${P.map(x => `${x.broker} ${x.qty}`).join(" + ")} · price from ${h.source} · ${esc(h.date)}</div>
+  <div style="margin:10px 0 4px"><span class="big">${num(h.close)}</span> <span class="${cls(h.day_pct)}">${pc(h.day_pct)} today</span></div>
+  <div class="card" style="padding:8px">${ch ? candles(ch, levels) : ""}
+    <div class="faint" style="display:flex;gap:12px;padding:4px"><span style="color:#8b7cf6">— 50-EMA ${num(h.ema50)}</span><span style="color:#f59e0b">— 200-SMA ${num(h.sma200)}</span><span>last ${ch ? ch.c.length : 0} days</span></div></div>
+  <div class="alert a-b"><span>💡</span><div>${esc(h.note || "")}${since ? ` <span class="faint">(signal since ${esc(since)})</span>` : ""}</div></div>
+  <div class="g2" style="margin-top:8px">
+    ${stat("Your P&L", `${inr(val - inv, 1)} (${pc((val / inv - 1) * 100, 1)})`, cls(val - inv))}
+    ${stat("Today", inr(P.reduce((t, x) => t + x.day_pnl, 0), 1), cls(h.day_pct))}
+    ${stat("Quantity · avg", `${qty} · ${num(avg)}`)}${stat("Break-even needs", be > 0 ? pc(be, 1) : "In profit")}
+    ${stat("Invested", inr(inv))}${stat("Current value", inr(val))}
+    ${stat("52-week range", `${num(h.low52, 0)} – ${num(h.high52, 0)}`)}${stat("From 52w high", pc((h.close / h.high52 - 1) * 100, 1), "neg")}
+    ${stat("RSI · ADX", `${num(h.rsi, 1)} · ${num(h.adx, 1)}`)}${stat("Supertrend", h.st_dir === 1 ? `▲ ${num(h.st_level)}` : h.st_dir === -1 ? `▼ ${num(h.st_level)}` : "–")}
+  </div>
+  ${h.group !== "Gold / Silver" ? `<h2>Fundamentals</h2><div class="card" style="padding:4px 14px">
+    <div class="row"><span>Market cap</span><b>${f.mcap_cr ? "₹" + Math.round(f.mcap_cr).toLocaleString("en-IN") + " cr" : "–"} ${h.cap ? `<span class="tag">${h.cap}</span>` : ""}</b></div>
+    <div class="row"><span>P/E</span><b>${num(f.pe, 1)}</b></div><div class="row"><span>P/B</span><b>${num(f.pb, 1)}</b></div>
+    <div class="row"><span>ROE</span><b>${f.roe == null ? "–" : num(f.roe, 1) + "%"}</b></div>
+    <div class="row"><span>Debt / equity</span><b>${num(f.de, 2)}</b></div>
+    <div class="row"><span>Dividend yield</span><b>${f.div == null ? "–" : num(f.div, 2) + "%"}</b></div>
+    <div class="row"><span>Sector</span><b>${esc(h.sector)}</b></div></div>
+    <div class="faint">Fundamentals from Yahoo Finance, refreshed weekly.</div>` : ""}`;
+  $("detail").style.display = "block"; $("detail").scrollTop = 0;
+  $("back").onclick = () => history.back();
+  history.pushState({d: 1}, "");
+}
+window.onpopstate = () => { $("detail").style.display = "none"; $("import").style.display = "none"; };
+
+// ---------- import
+function repoInfo() {
+  const saved = store.get("dash_repo"); if (saved) return saved;
+  const owner = location.hostname.split(".")[0], repo = location.pathname.split("/").filter(Boolean)[0];
+  return location.hostname.endsWith("github.io") && repo ? `${owner}/${repo}` : "";
+}
+async function loadXLSX() { if (window.XLSX) return; await new Promise((ok, bad) => { const s = document.createElement("script");
+  s.src = "https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"; s.onload = ok; s.onerror = () => bad(new Error("Couldn't load the Excel reader")); document.head.appendChild(s); }); }
+async function parseFile(file) {
+  let rows;
+  if (/\.csv$/i.test(file.name)) {
+    const text = await file.text();
+    rows = text.split(/\r?\n/).map(l => { const out = []; let cur = "", q = false;
+      for (const ch of l) { if (ch === '"') q = !q; else if (ch === "," && !q) { out.push(cur); cur = ""; } else cur += ch; } out.push(cur); return out.map(c => c.trim()); });
+  } else { await loadXLSX(); const wb = XLSX.read(await file.arrayBuffer()); rows = XLSX.utils.sheet_to_json(wb.Sheets[wb.SheetNames[0]], {header: 1, raw: true, defval: ""}); }
+  const norm = s => String(s).toLowerCase().replace(/[^a-z]/g, "");
+  const hi = rows.findIndex(r => r.some(c => /qty|quantity/.test(norm(c))) && r.some(c => /avg|average/.test(norm(c))));
+  if (hi < 0) throw new Error("Couldn't find the holdings table. Upload the holdings file exported from Kite or Groww.");
+  const H = rows[hi].map(norm), col = res => { for (const re of res) { const i = H.findIndex(h => re.test(h)); if (i >= 0) return i; } return -1; };
+  const cSym = col([/^(symbol|instrument|tradingsymbol|scrip|scripcode)$/, /symbol|instrument/]);
+  const cName = col([/stockname|companyname|^name$|securityname/]), cIsin = col([/^isin/]);
+  const cQty = col([/^(qty|quantity|quantityavailable|totalquantity|netqty)$/, /qty|quantity/]);
+  const cAvg = col([/^(avgcost|averageprice|avgprice|averagebuyprice|averagecost|buyavg)$/, /avg|average/]);
+  let map = {}; try { map = await (await fetch("isin.json?" + Date.now())).json(); } catch {}
+  const out = [];
+  for (const r of rows.slice(hi + 1)) {
+    const qty = parseFloat(String(r[cQty]).replace(/,/g, "")), avg = parseFloat(String(r[cAvg]).replace(/,/g, ""));
+    let sym = cSym >= 0 ? String(r[cSym]).trim().toUpperCase().replace(/[-#*].*$/, "") : "";
+    const isin = cIsin >= 0 ? String(r[cIsin]).trim() : "", name = cName >= 0 ? String(r[cName]).trim() : "";
+    if (!sym && isin) sym = map[isin] || "";
+    if (!(qty > 0) || !(avg > 0) || (!sym && !isin)) continue;
+    out.push({symbol: sym || null, isin: isin || undefined, name, qty, avg: Math.round(avg * 100) / 100});
+  }
+  if (!out.length) throw new Error("No holdings rows found in that file.");
+  return out;
+}
+async function gh(path, opts = {}) {
+  const r = await fetch(`https://api.github.com/repos/${repoInfo()}/${path}`, {...opts, headers: {Authorization: `Bearer ${store.get("dash_token")}`,
+    Accept: "application/vnd.github+json", ...(opts.headers || {})}});
+  if (!r.ok) throw new Error(`GitHub said ${r.status}. ${r.status === 401 || r.status === 403 || r.status === 404 ? "Check your token and its repository access." : ""}`);
+  return r.json();
+}
+let PARSED = null;
+function renderImport(msg = "") {
+  const tok = store.get("dash_token");
+  $("importBody").innerHTML = `
+  <div class="top"><button class="btn2" id="iback">← Back</button><b>Import holdings</b><span></span></div>
+  <div class="card"><div class="mute" style="margin-bottom:8px">1 · Which account is this file from?</div>
+    <div class="chips" id="ibroker">${Object.keys(D.brokers).concat(["New account"]).map(b => `<button class="chip" data-b="${b}">${b}</button>`).join("")}</div>
+    <input type="text" id="inew" placeholder="Account name" class="hidden" style="margin-top:8px">
+    <div class="mute" style="margin:14px 0 8px">2 · Choose the holdings file (.csv or .xlsx)</div>
+    <input type="file" id="ifile" accept=".csv,.xlsx,.xls">
+    <div class="faint" style="margin-top:8px">Kite: Holdings → ⋯ → Download. Groww: Stocks → Holdings → Download holdings statement.</div></div>
+  <div id="iprev"></div>
+  <div class="card"><div class="mute" style="margin-bottom:6px">GitHub access ${tok ? "✅ saved on this device" : "(one-time setup)"}</div>
+    <div class="faint" style="margin-bottom:8px">Saving needs a fine-grained GitHub token with <b>Contents: Read and write</b> on <b>${esc(repoInfo() || "your repo")}</b> only.</div>
+    <input type="password" id="itok" placeholder="${tok ? "Token saved · paste to replace" : "github_pat_…"}">
+    <div style="display:flex;gap:8px;margin-top:8px"><button class="btn2" id="isavetok">Save token</button>${tok ? `<button class="btn2" id="idel">Remove token</button>` : ""}</div></div>
+  <div class="mute" id="imsg">${msg}</div>`;
+  let broker = null;
+  $("iback").onclick = () => history.back();
+  $("ibroker").onclick = e => { const b = e.target.dataset.b; if (!b) return; broker = b;
+    $("ibroker").querySelectorAll(".chip").forEach(c => c.classList.toggle("on", c.dataset.b === b)); $("inew").classList.toggle("hidden", b !== "New account");
+    $("ifile").value = ""; $("iprev").innerHTML = ""; PARSED = null; };
+  $("isavetok").onclick = () => { const v = $("itok").value.trim(); if (!v) return; store.set("dash_token", v); renderImport("Token saved on this device."); };
+  if ($("idel")) $("idel").onclick = () => { store.del("dash_token"); renderImport("Token removed."); };
+  $("ifile").onchange = async e => {
+    const f = e.target.files[0]; if (!f) return;
+    if (!broker) { e.target.value = ""; $("imsg").innerHTML = `<span class="err">Pick which account this file is from first (step 1).</span>`; return; }
+    $("imsg").textContent = "Reading file…";
+    try { PARSED = await parseFile(f); } catch (err) { $("iprev").innerHTML = ""; $("imsg").innerHTML = `<span class="err">${esc(err.message)}</span>`; return; }
+    const b = broker === "New account" ? ($("inew").value.trim() || "Other") : broker;
+    const old = Object.fromEntries(D.holdings.filter(h => h.broker === b).map(h => [h.symbol, h]));
+    const now = new Set(PARSED.map(p => p.symbol));
+    const gone = Object.keys(old).filter(s => !now.has(s));
+    $("iprev").innerHTML = `<div class="card"><div class="mute">3 · Check and save · ${PARSED.length} holdings for <b>${esc(b)}</b></div>
+      <div class="alert a-a" style="margin-top:8px"><span>⚠</span><div>This replaces all your <b>${esc(b)}</b> holdings on the dashboard. Other accounts aren't touched.</div></div>
+      <table class="t" style="margin-top:6px"><tr class="faint"><td>Stock</td><td class="r">Qty</td><td class="r">Avg</td><td class="r">Change</td></tr>
+      ${PARSED.map(p => { const o = old[p.symbol]; const c = !o ? `<span class="pos">new</span>` : (o.qty !== p.qty || Math.abs(o.avg - p.avg) > .01) ? `<span style="color:var(--amber)">was ${o.qty} @ ${num(o.avg)}</span>` : `<span class="faint">same</span>`;
+        return `<tr><td>${esc(p.symbol || p.name || p.isin)}${p.symbol ? "" : ` <span class="err">(symbol found on next update)</span>`}</td><td class="r">${p.qty}</td><td class="r">${num(p.avg)}</td><td class="r">${c}</td></tr>`; }).join("")}
+      ${gone.map(s => `<tr><td>${esc(s)}</td><td class="r">–</td><td class="r">–</td><td class="r neg">removed</td></tr>`).join("")}</table>
+      <button class="btn" id="isave" style="margin-top:12px">Save ${esc(b)} holdings</button></div>`;
+    $("imsg").textContent = "";
+    $("isave").onclick = async () => {
+      if (!store.get("dash_token")) { $("imsg").innerHTML = `<span class="err">Add your GitHub token below first.</span>`; return; }
+      try {
+        $("isave").disabled = true; $("imsg").textContent = "Saving…";
+        const file = await gh("contents/holdings.enc.json");
+        const cfg = await decrypt(JSON.parse(atob(file.content.replace(/\n/g, ""))), PW);
+        const keep = cfg.holdings.filter(h => (h.broker || "Kite") !== b);
+        const prevB = Object.fromEntries(cfg.holdings.filter(h => (h.broker || "Kite") === b && h.symbol).map(h => [h.symbol, h]));
+        const fresh = PARSED.map(p => { const o = prevB[p.symbol] || {}; const n = {...o, qty: p.qty, avg: p.avg, broker: b};
+          if (p.symbol) n.symbol = p.symbol; else { delete n.symbol; n.isin = p.isin; } if (p.isin) n.isin = p.isin; delete n.yahoo; return n; });
+        cfg.holdings = [...keep, ...fresh];
+        const blob = await encrypt(cfg, PW);
+        await gh("contents/holdings.enc.json", {method: "PUT", body: JSON.stringify({message: `Import ${b} holdings`, sha: file.sha,
+          content: btoa(JSON.stringify(blob))})});
+        $("iprev").innerHTML = ""; PARSED = null;
+        $("imsg").innerHTML = `<div class="alert a-g"><span>✅</span><div>Saved. The dashboard refreshes with the new holdings in about 2 minutes. Pull down or reopen to see it.</div></div>`;
+      } catch (err) { $("isave").disabled = false; $("imsg").innerHTML = `<span class="err">${esc(err.message)}</span>`; }
+    };
+  };
+}
+function openImport() { renderImport(); $("import").style.display = "block"; history.pushState({i: 1}, ""); }
+
+// ---------- shell
+function go(tab) {
+  TAB = tab; TABS.forEach(([k, l]) => $("tab-" + k).classList.toggle("hidden", k !== tab));
+  $("title").textContent = TABS.find(t => t[0] === tab)[1];
+  $("nav").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
+  ({home: renderHome, holdings: renderHoldings, signals: renderSignals, health: renderHealth, market: renderMarket})[tab]();
+  window.scrollTo(0, 0);
+}
+function start(d) {
+  D = d; D.holdings.forEach(h => h.broker ||= "Kite");
+  $("lockwrap").classList.add("hidden"); $("app").classList.remove("hidden");
+  $("upd").textContent = `Updated ${d.updated} · NSE file ${d.sources?.NSE || "not available"}`;
+  $("nav").innerHTML = TABS.map(([k, l]) => `<button data-t="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">${ICONS[k]}</svg>${l}</button>`).join("");
+  $("nav").onclick = e => { const b = e.target.closest("button"); if (b) go(b.dataset.t); };
+  document.body.addEventListener("click", e => { const el = e.target.closest("[data-s]"); if (el && !$("app").classList.contains("hidden")) openDetail(el.dataset.s); });
+  $("importBtn").onclick = openImport;
+  if (d.errors?.length) $("err").textContent = "Couldn't fetch: " + d.errors.join("; ");
+  go("home");
 }
 let BLOB = null;
-const store = { get: () => { try { return localStorage.getItem("dash_pw"); } catch { return null; } },
-  set: v => { try { localStorage.setItem("dash_pw", v); } catch {} } };
 async function unlock(pw, remember) {
-  try {
-    const d = await decrypt(BLOB, pw);
-    if (remember) store.set(pw);
-    document.getElementById("lock").style.display = "none";
-    document.getElementById("app").style.display = "block";
-    render(d);
-  } catch { document.getElementById("lockmsg").textContent = "Wrong password."; }
+  try { const d = await decrypt(BLOB, pw); PW = pw; if (remember) store.set("dash_pw", pw); start(d); }
+  catch { $("lockmsg").textContent = "Wrong password."; store.del("dash_pw"); }
 }
-document.getElementById("lock").addEventListener("submit", e => { e.preventDefault();
-  unlock(document.getElementById("pw").value, document.getElementById("rem").checked); });
+$("lock").addEventListener("submit", e => { e.preventDefault(); $("lockmsg").textContent = "Unlocking…"; unlock($("pw").value, $("rem").checked); });
 fetch("data.enc.json?" + Date.now()).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(b => {
-  BLOB = b; document.getElementById("upd").textContent = "Locked";
-  const saved = store.get(); if (saved) unlock(saved, false);
-}).catch(e => { document.getElementById("upd").textContent = "No data yet — run the 'Update dashboard' workflow once. (" + e + ")"; });
-
-function render(d) {
-  const s = d.summary;
-  const src = d.sources || {};
-  document.getElementById("upd").textContent = "Last updated: " + d.updated + " · prices as of " + (d.holdings[0]?.date || "–") +
-    " · NSE file: " + (src.NSE || "not available") + (src.NSE ? "" : " · BSE file: " + (src.BSE || "not available"));
-  document.getElementById("summary").innerHTML = [
-    ["Invested", inr(s.invested), ""], ["Current value", inr(s.value), ""],
-    ["Total P&L", inr(s.pnl) + " (" + pc(s.pnl_pct) + ")", cls(s.pnl)],
-    ["Day change", inr(s.day), cls(s.day)],
-    ["Gold+Silver weight", num(s.metals_pct, 1) + "%", s.metals_pct > 30 ? "neg" : ""],
-  ].map(([k, v, c]) => `<div class="card"><div class="k">${k}</div><div class="v ${c}">${v}</div></div>`).join("");
-
-  document.getElementById("macro").innerHTML = d.macro.map(m => {
-    const ch = m.prev_close ? (m.close / m.prev_close - 1) * 100 : 0;
-    return `<div class="card"><div class="k">${m.name}</div><div class="v">${num(m.close)} <span class="${cls(ch)}" style="font-size:13px">${pc(ch)}</span></div>
-      <div class="lvl">${m.levels.map(l => `<span class="pill">${l.label}: ${num(l.value, 0)} ${m.close >= l.value ? "✅" : "⚠️"}</span>`).join("")}
-      <span class="pill">Trend: ${m.st_dir === 1 ? "▲ up" : "▼ down"}</span></div></div>`;
-  }).join("");
-
-  document.getElementById("brokers").innerHTML = Object.entries(d.brokers || {}).map(([b, x]) =>
-    `<div class="card"><div class="k">${b}</div><div class="v ${cls(x.pnl)}" style="font-size:18px">${inr(x.pnl)} (${pc(x.pnl_pct)})</div>
-     <div class="row"><span>Invested</span><span>${inr(x.invested)}</span></div><div class="row"><span>Value</span><span>${inr(x.value)}</span></div>
-     <div class="row"><span>Day</span><span class="${cls(x.day)}">${inr(x.day)}</span></div></div>`).join("");
-  const names = ["All", ...Object.keys(d.brokers || {})];
-  const fdiv = document.getElementById("filters");
-  fdiv.innerHTML = names.map(n => `<button class="fbtn${n === "All" ? " on" : ""}" data-b="${n}">${n}</button>`).join("");
-  fdiv.onclick = e => { const b = e.target.dataset.b; if (!b) return;
-    fdiv.querySelectorAll(".fbtn").forEach(x => x.classList.toggle("on", x.dataset.b === b)); cards(d, b); };
-  cards(d, "All");
-  if (d.errors?.length) document.getElementById("err").textContent = "Could not fetch: " + d.errors.join("; ");
-}
-
-function cards(d, broker) {
-  const list = d.holdings.filter(h => broker === "All" || (h.broker || "Kite") === broker)
-    .sort((a, b) => a.pnl_pct - b.pnl_pct);
-  const groups = [...new Set(list.map(h => h.group))];
-  document.getElementById("groups").innerHTML = groups.map(g => `<h2>${g}</h2><div class="stocks">` +
-    list.filter(h => h.group === g).map(h => {
-      const ch = h.prev_close ? (h.close / h.prev_close - 1) * 100 : 0;
-      return `<div class="card">
-        <div class="top"><div><div class="sym">${h.symbol}</div><div class="grp">${h.broker || "Kite"} · ${h.qty} @ ${num(h.avg)}</div></div>
-          <span class="badge b-${h.color}">${h.signal}</span></div>
-        ${spark(h.spark, [h.add_above, h.stop_below])}
-        <div class="row"><span>Close <span style="font-size:10px;border:1px solid var(--line);border-radius:4px;padding:0 4px;color:${h.source === "Yahoo" ? "#f59e0b" : "#86efac"}">${h.source || ""}</span></span><span>${num(h.close)} <span class="${cls(ch)}">${pc(ch)}</span></span></div>
-        <div class="row"><span>P&L</span><span class="${cls(h.pnl)}">${inr(h.pnl)} (${pc(h.pnl_pct)})</span></div>
-        <div class="row"><span>Rise needed to break even</span><span>${h.breakeven_pct > 0 ? "+" + num(h.breakeven_pct, 1) + "%" : "In profit"}</span></div>
-        <div class="row"><span>50-EMA / 200-SMA</span><span>${num(h.ema50)} / ${num(h.sma200)}</span></div>
-        <div class="row"><span>Supertrend</span><span>${h.st_dir === 0 ? "–" : (h.st_dir === 1 ? "▲ up, support " : "▼ down, flips at ") + num(h.st_level)}</span></div>
-        <div class="row"><span>RSI / ADX</span><span>${num(h.rsi, 1)} / ${num(h.adx, 1)}</span></div>
-        <div class="lvl">${h.add_above ? `<span class="pill" style="color:#86efac">Add above ${num(h.add_above)}</span>` : ""}
-          ${h.stop_below ? `<span class="pill" style="color:#fca5a5">Exit below ${num(h.stop_below)}</span>` : ""}</div>
-        <div class="note">${h.auto ? "🤖 Auto levels · " : ""}${h.note}</div></div>`;
-    }).join("") + `</div>`).join("");
-}
+  BLOB = b; $("lockmsg").textContent = ""; const s = store.get("dash_pw"); if (s) unlock(s, false);
+}).catch(e => { $("lockmsg").textContent = "No data yet: run the 'Update dashboard' workflow once. (" + e.message + ")"; });
 </script>
 </body>
 </html>
