@@ -138,12 +138,13 @@ def indicators(df, chart_days=100):
     out = {"close": float(c.iloc[-1]), "prev_close": float(c.iloc[-2]) if len(c) > 1 else None,
            "date": df.index[-1].strftime("%Y-%m-%d"),
            "high52": r2(df["High"].tail(250).max()), "low52": r2(df["Low"].tail(250).min()),
-           "ema50": None, "sma200": None, "rsi": None, "adx": None, "st_dir": 0, "st_level": None}
+           "ema50": None, "sma200": None, "rsi": None, "adx": None, "st_dir": 0, "st_level": None, "atr": None}
     out["day_pct"] = (out["close"] / out["prev_close"] - 1) * 100 if out["prev_close"] else 0.0
     ema = c.ewm(span=50, adjust=False).mean()
     sma = c.rolling(200).mean()
     if len(c) >= 15:
         d, lvl = supertrend(df)
+        out["atr"] = r2(atr(df, 14).iloc[-1])
         out.update({"ema50": r2(ema.iloc[-1]), "sma200": r2(sma.iloc[-1]) if len(c) >= 200 else None,
                     "rsi": r2(rsi(c).iloc[-1]), "adx": r2(adx(df).iloc[-1]), "st_dir": d, "st_level": r2(lvl)})
     t = df.tail(chart_days)
@@ -235,7 +236,8 @@ def fetch_bhavcopy(exchange, max_back=7):
         df["_rank"] = df["SctySrs"].map(lambda s: SERIES_PREF.index(s) if s in SERIES_PREF else 99)
         best = df.sort_values("_rank").drop_duplicates("TckrSymb")
         rows = {r_.TckrSymb: {"open": float(r_.OpnPric), "high": float(r_.HghPric), "low": float(r_.LwPric),
-                              "close": float(r_.ClsPric), "prev": float(r_.PrvsClsgPric)}
+                              "close": float(r_.ClsPric), "prev": float(r_.PrvsClsgPric),
+                              "vol": float(getattr(r_, "TtlTradgVol", 0) or 0)}
                 for r_ in best.itertuples()}
         isin = {str(r_.ISIN).strip(): r_.TckrSymb for r_ in best.itertuples() if isinstance(r_.ISIN, str)}
         print(f"{exchange} bhavcopy {day}: {len(rows)} symbols")
@@ -376,12 +378,17 @@ def main():
         print(f"{h['symbol']:<11} {ind['date']} close={ind['close']:.2f} prev={ind['prev_close']} [{source}] {sig}")
 
         key = f"{h.get('broker', 'Kite')}:{h['symbol']}"
+        fs = state.setdefault("first_seen", {})
+        fs.setdefault(key, {"date": ind["date"]})  # first day this holding appeared (kept while you hold it)
+        rows[-1]["first_seen"] = fs[key]["date"]
         old = state["signals"].get(key)
         if old and old["sig"] != sig:
             state["events"].insert(0, {"date": ind["date"], "symbol": h["symbol"], "broker": h.get("broker", "Kite"),
                                        "from": old["sig"], "to": sig, "price": ind["close"]})
         state["signals"][key] = {"sig": sig, "since": old["since"] if old and old["sig"] == sig else ind["date"]}
     state["events"] = state["events"][:60]
+    held = {f"{r.get('broker', 'Kite')}:{r['symbol']}" for r in rows}
+    state["first_seen"] = {k: v for k, v in state.get("first_seen", {}).items() if k in held}
 
     # market
     market = []
@@ -420,7 +427,14 @@ def main():
                  **{b: round(x["value"]) for b, x in brokers.items()}})
     state["history"] = sorted(hist, key=lambda x: x["d"])[-1500:]
 
-    out = {"updated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "price_date": price_date,
+    try:
+        import scanner
+        scan = scanner.run(ROOT, state, bhav["NSE"] if bhav["NSE"][0] is not None else None)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        scan = {"error": f"Scanner failed today: {e}"}
+
+    out = {"updated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "price_date": price_date, "scanner": scan,
            "sources": {ex: (bhav[ex][0].strftime("%Y-%m-%d") if bhav[ex][0] is not None else None) for ex in bhav},
            "summary": summary, "brokers": brokers, "holdings": rows, "charts": charts,
            "market": market, "breadth": breadth, "movers": movers,
