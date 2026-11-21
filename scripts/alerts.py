@@ -27,6 +27,7 @@ SENT = []  # for tests
 # ------------------------------------------------------------------ telegram
 def send(text):
     """Send one message (split if over Telegram's 4096-character limit)."""
+    text = text.replace("</pre>\n\n", "</pre>\n")  # a table already ends its own line
     SENT.append(text)
     if not TOKEN or not CHAT:
         print("Telegram not configured (TELEGRAM_TOKEN / TELEGRAM_CHAT_ID). Message would be:\n" + text)
@@ -48,7 +49,30 @@ def send(text):
 
 
 def footer():
-    return f'\n<a href="{e(URL)}">Open dashboard</a>' if URL else ""
+    return f'\n\n🔗 <a href="{e(URL)}">Open dashboard</a>' if URL else ""
+
+
+def nice_date(iso):
+    try:
+        return date.fromisoformat(iso).strftime("%a, %d %b %Y")
+    except Exception:
+        return iso
+
+
+def head(emoji, title, sub):
+    return f"{emoji} <b>{title}</b>\n<i>{e(sub)}</i>"
+
+
+def table(rows, header=None):
+    """Monospaced, aligned table (Telegram <pre>). First column left, others right-aligned."""
+    allr = ([header] if header else []) + rows
+    w = [max(len(str(r[i])) for r in allr) for i in range(len(allr[0]))]
+    fmt = lambda r: "  ".join(str(c).ljust(w[i]) if i == 0 else str(c).rjust(w[i]) for i, c in enumerate(r)).rstrip()
+    return "<pre>" + "\n".join(e(fmt(r)) for r in allr) + "</pre>"
+
+
+def section(emoji, title):
+    return f"\n\n{emoji} <b>{title}</b>"
 
 
 # ------------------------------------------------------------------ holding actions (mirror of the page)
@@ -59,85 +83,108 @@ def busdays(a, b):
         return 0
 
 
+GROUPS = [("exit", "🔴", "Exit"), ("sw_exit", "🔴", "Swing: exit (stop hit)"), ("book", "🎯", "Swing: book profit"),
+          ("time", "⏱", "Swing: time's up"), ("be", "🔵", "Swing: move stop to your cost"), ("add", "🟢", "Add zone"),
+          ("near_exit", "⚠️", "Close to exit level"), ("near_add", "↗️", "Close to add level")]
+
+
 def action(h):
-    """Returns (status, text) or (None, None). Swing-tagged holdings use the swing rules."""
+    """Returns (status, detail) or (None, None). Swing-tagged holdings use the swing rules."""
     c = h["close"]
     if h.get("swing"):
         atr = h.get("atr") or 0.02 * h["avg"]
         risk = min(max(2 * atr / h["avg"], 0.02), 0.10)
         stop, target, be = h["avg"] * (1 - risk), h["avg"] * 1.075, h["avg"] * 1.04
         days = busdays(h.get("first_seen", h["date"]), h["date"])
-        if c >= target: return "book", f"🎯 <b>{e(h['symbol'])}</b> swing: book profit, +7.5% target reached ({pc(h['pnl_pct'])})"
-        if c <= stop: return "sw_exit", f"🔴 <b>{e(h['symbol'])}</b> swing: exit, stop hit ({pc(h['pnl_pct'])})"
-        if days >= 15 and h["pnl_pct"] < 4: return "time", f"⏱ <b>{e(h['symbol'])}</b> swing: time's up, {days} trading days ({pc(h['pnl_pct'])})"
-        if c >= be: return "be", f"🔵 <b>{e(h['symbol'])}</b> swing: move stop to your cost (+{(c / h['avg'] - 1) * 100:.1f}%)"
+        if c >= target: return "book", f"+7.5% target reached · now {pc(h['pnl_pct'])}"
+        if c <= stop: return "sw_exit", f"stop hit · now {pc(h['pnl_pct'])}"
+        if days >= 15 and h["pnl_pct"] < 4: return "time", f"{days} trading days without a move · now {pc(h['pnl_pct'])}"
+        if c >= be: return "be", f"up {pc((c / h['avg'] - 1) * 100)}: protect it, move stop to your cost"
         return None, None
-    if h.get("sig") == "exit": return "exit", f"🔴 <b>{e(h['symbol'])}</b>: closed below its exit level ({pc((c / h['stop_below'] - 1) * 100)})"
-    if h.get("sig") == "add": return "add", f"🟢 <b>{e(h['symbol'])}</b>: closed above its add level ({pc((c / h['add_above'] - 1) * 100)})"
+    if h.get("sig") == "exit": return "exit", f"closed {abs((c / h['stop_below'] - 1) * 100):.1f}% below its exit level"
+    if h.get("sig") == "add": return "add", f"closed {(c / h['add_above'] - 1) * 100:.1f}% above its add level"
     if h.get("add_above") and c < h["add_above"] and (h["add_above"] / c - 1) * 100 <= 2:
-        return "near_add", f"↗ <b>{e(h['symbol'])}</b>: {(h['add_above'] / c - 1) * 100:.1f}% below its add level"
+        return "near_add", f"{(h['add_above'] / c - 1) * 100:.1f}% below its add level"
     if h.get("stop_below") and c >= h["stop_below"] and (c / h["stop_below"] - 1) * 100 <= 2:
-        return "near_exit", f"⚠ <b>{e(h['symbol'])}</b>: only {(c / h['stop_below'] - 1) * 100:.1f}% above its exit level"
+        return "near_exit", f"only {(c / h['stop_below'] - 1) * 100:.1f}% above its exit level"
     return None, None
+
+
+def setup_lines(items):
+    out = []
+    for r in items:
+        res = f"\n   ⚠️ results in {r['res']} days" if r.get("res") is not None and 0 <= r["res"] <= 20 else ""
+        out.append(f"\n• <b>{e(r['symbol'])}</b> · {e(r['setup'])}{' · ' + e(r['cap']) + ' cap' if r.get('cap') else ''}{' · score ' + str(r['score']) if r.get('score') is not None else ''}"
+                   f"\n   Buy above <b>{r['trigger']:,.2f}</b> · stop −{r['risk_pct']:.1f}% · target +7.5%{res}")
+    return "".join(out)
 
 
 # ------------------------------------------------------------------ messages
 def evening(d, st, cfg):
     mem = st.setdefault("alerts", {})
     swing = {f"{h.get('broker', 'Kite')}:{h['symbol']}" for h in cfg.get("holdings", []) if h.get("swing")}
-    acts = []
+    found = {}
     for h in d["holdings"]:
         key = f"{h.get('broker', 'Kite')}:{h['symbol']}"
         h = {**h, "swing": key in swing}
-        status, text = action(h)
+        status, detail = action(h)
         if status and mem.get(key) != status:
-            acts.append(text + (f" · {e(h.get('broker'))}" if sum(x["symbol"] == h["symbol"] for x in d["holdings"]) > 1 else ""))
+            dup = sum(x["symbol"] == h["symbol"] for x in d["holdings"]) > 1
+            found.setdefault(status, []).append(f"• <b>{e(h['symbol'])}</b>{' (' + e(h.get('broker', 'Kite')) + ')' if dup else ''}: {e(detail)}")
         mem[key] = status
-    for k in [k for k in mem if k not in {f"{h.get('broker', 'Kite')}:{h['symbol']}" for h in d["holdings"]}]:
+    held = {f"{h.get('broker', 'Kite')}:{h['symbol']}" for h in d["holdings"]}
+    for k in [k for k in mem if k not in held]:
         del mem[k]
-    if acts:
-        send(f"⚡ <b>Action alerts · {e(d['price_date'])}</b>\n" + "\n".join(acts) + footer())
+    if found:
+        msg = head("⚡", "Action alerts", f"{nice_date(d['price_date'])} · after market close")
+        for status, emo, title in GROUPS:
+            if status in found:
+                msg += section(emo, title) + "\n" + "\n".join(found[status])
+        send(msg + footer())
 
     if st.get("summary_sent") == d["price_date"]:
         return  # summary already sent for this trading day (e.g. a re-run after an import)
     s = d["summary"]
-    L = [f"📊 <b>Portfolio · {e(d['price_date'])}</b>", f"Today {pc(s['day_pct'], 2)} · Overall {pc(s['pnl_pct'])}"]
-    L += [f"{e(b)}: today {pc(x['day_pct'], 2)} · overall {pc(x['pnl_pct'])}" for b, x in d.get("brokers", {}).items()]
-    hs = sorted(d["holdings"], key=lambda h: -h["day_pct"])
+    msg = head("📊", "Daily summary", nice_date(d["price_date"]))
+    rows = [("All", pc(s["day_pct"], 2), pc(s["pnl_pct"]))] + [(b, pc(x["day_pct"], 2), pc(x["pnl_pct"])) for b, x in d.get("brokers", {}).items()]
+    msg += section("💼", "Portfolio") + "\n" + table(rows, ("", "Today", "Overall"))
+    best = {}
+    for h in d["holdings"]:
+        best[h["symbol"]] = h["day_pct"]
+    hs = sorted(best.items(), key=lambda x: -x[1])
     if hs:
-        L.append("🏆 " + ", ".join(f"{e(h['symbol'])} {pc(h['day_pct'])}" for h in hs[:3]))
-        L.append("📉 " + ", ".join(f"{e(h['symbol'])} {pc(h['day_pct'])}" for h in hs[-3:][::-1]))
+        msg += section("📈", "Top gainers today") + "\n" + table([(s_, pc(x)) for s_, x in hs[:3]])
+        msg += section("📉", "Top losers today") + "\n" + table([(s_, pc(x)) for s_, x in hs[-3:][::-1]])
     sc = d.get("scanner") or {}
     if sc.get("mood"):
         m = sc["mood"]; prev = st.get("mood")
-        L.append(f"\n🧭 Market: <b>{e(m['state'].lower())}</b>" + (f" (was {e(prev.lower())})" if prev and prev != m["state"] else "")
-                 + f" · {m['pct_above_ema50']}% of stocks above 50-day avg")
+        tip = {"Uptrend": "Good conditions for new swing trades.", "Choppy": "Breakouts fail more often: be selective and size smaller.",
+               "Downtrend": "Most setups fail now: consider no new trades."}[m["state"]]
+        msg += section("🧭", f"Market mood: {m['state']}" + (f" (was {prev})" if prev and prev != m["state"] else ""))
+        msg += f"\n{m['pct_above_ema50']:.0f}% of stocks above their 50-day average.\n<i>{tip}</i>"
         st["mood"] = m["state"]
         setups = sorted([r for r in sc.get("rows", []) if r.get("setup") and not r.get("avoid")], key=lambda r: -r["score"])
         if setups:
-            L.append(f"🔎 <b>New swing setups ({len(setups)})</b> · buy only if tomorrow trades above the level")
-            for r in setups[:8]:
-                p = r["plan"]
-                L.append(f"• {e(r['symbol'])} ({e(r['cap'])}) {e(r['setup'])} · score {r['score']} · above {p['trigger']:,.2f}, "
-                         f"stop −{p['risk_pct']:.1f}%, target +7.5%" + (f" ⚠ results in {r['results_days']}d" if r.get("results_days") is not None and 0 <= r["results_days"] <= 20 else ""))
-            if m["state"] == "Downtrend":
-                L.append("⚠ Market in a downtrend: most setups fail now.")
+            msg += section("🔎", f"New swing setups ({len(setups)})") + "\n<i>Buy only if the price trades above the level tomorrow.</i>"
+            msg += setup_lines([{**r, **r["plan"], "res": r.get("results_days")} for r in setups[:6]])
+            if len(setups) > 6:
+                msg += f"\n<i>+{len(setups) - 6} more on the dashboard</i>"
         else:
-            L.append("🔎 No new swing setups today.")
-    L += metals_changes(d, st)
+            msg += section("🔎", "New swing setups") + "\nNone today. That's normal: good setups are rare."
+    msg += metals_block(d, st)
     if d.get("errors"):
-        L.append(f"\nℹ Some data unavailable today: {e(', '.join(x.split(':')[0] for x in d['errors'][:6]))}")
-    L.append("\n<i>Percentages only. Not financial advice.</i>" + footer())
-    send("\n".join(L))
+        msg += f"\n\nℹ️ <i>Data unavailable today: {e(', '.join(x.split(':')[0] for x in d['errors'][:6]))}</i>"
+    msg += "\n\n<i>Percentages only · not financial advice</i>" + footer()
+    send(msg)
     st["summary_sent"] = d["price_date"]
     reminder(d, st, cfg)
 
 
-def metals_changes(d, st):
+def metals_block(d, st):
     X = d.get("metals") or {}
     if X.get("error") or "gold" not in X:
-        return []
-    old, new, L = st.get("metal_outlook", {}), {}, []
+        return ""
+    old, new, changes = st.get("metal_outlook", {}), {}, []
     for m in ("gold", "silver"):
         for h in X[m]["horizons"][:2]:
             k = f"{m}:{h['horizon']}"; new[k] = h["label"]
@@ -145,18 +192,22 @@ def metals_changes(d, st):
                 hurt = [x["name"] for x in X[m]["drivers"] if x["effect"] == "hurt"][:3]
                 helps = [x["name"] for x in X[m]["drivers"] if x["effect"] == "help"][:3]
                 why = ("hurting: " + ", ".join(hurt)) if h["label"] == "Negative" else ("helping: " + ", ".join(helps)) if h["label"] == "Positive" else "drivers mixed"
-                L.append(f"🪙 {m.title()} {e(h['horizon'])} signal: {e(old[k])} → <b>{e(h['label'])}</b> ({e(why)})")
+                changes.append(f"• {m.title()} {e(h['horizon'])}: {e(old[k])} → <b>{e(h['label'])}</b>\n   <i>{e(why)}</i>")
     st["metal_outlook"] = new
     lv, prev = {}, st.get("metal_levels", {})
     for mk in d.get("market", []):
         for l in mk.get("levels", []):
             k = f"{mk['name']}:{l['value']}"; above = mk["close"] >= l["value"]; lv[k] = above
             if k in prev and prev[k] != above:
-                L.append(f"🪙 {e(mk['name'].split(' ')[0])} crossed {'above' if above else 'below'} {l['value']:,} ({e(l['label'].lower())}), {pc(mk['day_pct'])} today")
+                changes.append(f"• {e(mk['name'].split(' ')[0])} crossed <b>{'above' if above else 'below'} {l['value']:,}</b> ({e(l['label'].lower())})")
     st["metal_levels"] = lv
     g, s = X["gold"], X["silver"]
-    L.insert(0, f"\n🪙 Gold {pc(g['day_pct'])} · 1–3m signal <b>{e(g['horizons'][0]['label'])}</b> | Silver {pc(s['day_pct'])} · <b>{e(s['horizons'][0]['label'])}</b>")
-    return L
+    out = section("🪙", "Gold & silver") + "\n" + table([("Gold", pc(g["day_pct"]), g["horizons"][0]["label"], g["horizons"][1]["label"]),
+                                                         ("Silver", pc(s["day_pct"]), s["horizons"][0]["label"], s["horizons"][1]["label"])],
+                                                        ("", "Today", "1–3m", "6–12m"))
+    if changes:
+        out += "\n🔔 <b>Changed today</b>\n" + "\n".join(changes)
+    return out
 
 
 def reminder(d, st, cfg):
@@ -168,8 +219,9 @@ def reminder(d, st, cfg):
     tag = f"{today.year}-{today.month}"
     if last >= f"{today.year}-{today.month:02d}-01" or st.get("cb_reminded") == tag:
         return
-    send("🗓 <b>Quarterly reminder</b>\nThe World Gold Council's Gold Demand Trends report for last quarter should be out. "
-         "Enter the central bank buying figure on the dashboard (Market → Gold &amp; silver → Central bank buying)." + footer())
+    send(head("🗓", "Quarterly reminder", "Central bank gold buying")
+         + "\n\nThe World Gold Council's <b>Gold Demand Trends</b> report for last quarter should be out now."
+         + "\n\nEnter the figure on the dashboard:\n<i>Market → Gold &amp; silver → Central bank buying</i>" + footer())
     st["cb_reminded"] = tag
 
 
@@ -191,72 +243,88 @@ def overnight():
 
 
 def morning(d, st, cfg):
-    L = [f"🌅 <b>Morning brief · {datetime.now(IST).strftime('%a %d %b')}</b>"]
+    msg = head("🌅", "Morning brief", f"{datetime.now(IST).strftime('%a, %d %b %Y')} · market opens 9:15 AM")
     ov = overnight()
     if ov:
-        L.append("Overnight: " + " · ".join(f"{e(n)} {pc(x)}" for n, x in ov))
+        msg += section("🌍", "Overnight") + "\n" + table([(n, pc(x)) for n, x in ov])
     sc = d.get("scanner") or {}
-    pend = [t for t in (sc.get("tracker") or {}).get("pending", [])]
+    pend = sorted((sc.get("tracker") or {}).get("pending", []), key=lambda t: -t.get("score", 0))
     rows = {r["symbol"]: r for r in sc.get("rows", [])}
+    quiet = True
     if pend:
-        L.append(f"\n🔎 <b>Swing setups to watch today</b> (buy only if price trades above)")
-        for t in sorted(pend, key=lambda t: -t.get("score", 0))[:8]:
-            L.append(f"• {e(t['symbol'])} {e(t['setup'])}: above {t['trigger']:,.2f} · stop −{t['risk_pct']:.1f}% · target +7.5%")
+        quiet = False
+        msg += section("🔎", f"Swing setups to watch ({len(pend)})") + "\n<i>Buy only if the price trades above the level today.</i>"
+        msg += setup_lines([{**t, "cap": rows.get(t["symbol"], {}).get("cap"), "res": rows.get(t["symbol"], {}).get("results_days")} for t in pend[:6]])
         if sc.get("mood", {}).get("state") == "Downtrend":
-            L.append("⚠ Market in a downtrend: consider skipping new trades.")
+            msg += "\n\n⚠️ <i>Market is in a downtrend: consider skipping new trades.</i>"
     swing = {f"{h.get('broker', 'Kite')}:{h['symbol']}" for h in cfg.get("holdings", []) if h.get("swing")}
     near, sw = [], []
     for h in d["holdings"]:
         key = f"{h.get('broker', 'Kite')}:{h['symbol']}"
+        dup = sum(x["symbol"] == h["symbol"] for x in d["holdings"]) > 1
+        name = h["symbol"] + (f" ({h.get('broker', 'Kite')})" if dup else "")
         if key in swing:
-            dup = sum(x["symbol"] == h["symbol"] for x in d["holdings"]) > 1
-            sw.append(f"{e(h['symbol'])}{' (' + e(h.get('broker', 'Kite')) + ')' if dup else ''} {pc(h['pnl_pct'])}")
+            sw.append((name, pc(h["pnl_pct"])))
             continue
         if h.get("add_above") and h["close"] < h["add_above"] and (h["add_above"] / h["close"] - 1) * 100 <= 3:
-            near.append(f"{e(h['symbol'])} {(h['add_above'] / h['close'] - 1) * 100:.1f}% below add")
+            near.append(f"• <b>{e(name)}</b>: {(h['add_above'] / h['close'] - 1) * 100:.1f}% below its add level")
         if h.get("stop_below") and h["close"] >= h["stop_below"] and (h["close"] / h["stop_below"] - 1) * 100 <= 3:
-            near.append(f"{e(h['symbol'])} {(h['close'] / h['stop_below'] - 1) * 100:.1f}% above exit")
-    if sw: L.append("\n⇄ Swing trades: " + ", ".join(sw))
-    if near: L.append("👀 Near levels: " + ", ".join(near))
+            near.append(f"• <b>{e(name)}</b>: {(h['close'] / h['stop_below'] - 1) * 100:.1f}% above its exit level")
+    if sw:
+        quiet = False
+        msg += section("⇄", "Your swing trades") + "\n" + table(sw)
+    if near:
+        quiet = False
+        msg += section("👀", "Holdings near their levels") + "\n" + "\n".join(near)
     held = {h["symbol"] for h in d["holdings"]}
     res = sorted([(r["results_days"], s) for s, r in rows.items() if s in held and r.get("results_days") is not None and 0 <= r["results_days"] <= 7])
     if res:
-        L.append("📅 Results this week: " + ", ".join(f"{e(s)} in {n}d" for n, s in res))
-    if len(L) == 1 + bool(ov):
-        L.append("Nothing needs attention before the open.")
-    send("\n".join(L) + footer())
+        quiet = False
+        msg += section("📅", "Results this week") + "\n" + "\n".join(f"• <b>{e(s)}</b> in {n} day{'s' if n != 1 else ''}" for n, s in res)
+    if quiet:
+        msg += "\n\n✅ Nothing needs your attention before the open."
+    send(msg + footer())
 
 
 def weekly(d, st, cfg):
+    msg = head("📅", "Weekly review", f"Week to {nice_date(d['price_date'])}")
     H = d.get("history", [])
-    L = [f"📅 <b>Weekly review · week to {e(d['price_date'])}</b>"]
+    rows = []
     if len(H) >= 2:
         cut = (date.fromisoformat(d["price_date"]) - timedelta(days=7)).isoformat()
         base = [x for x in H if x["d"] <= cut] or H[:1]
         a, b = base[-1], H[-1]
-        wk = ((b["v"] - b["i"]) - (a["v"] - a["i"])) / a["v"] * 100 if a["v"] else 0
-        L.append(f"Portfolio this week: {pc(wk, 2)} · overall {pc(d['summary']['pnl_pct'])}")
+        rows.append(("This week", pc(((b["v"] - b["i"]) - (a["v"] - a["i"])) / a["v"] * 100 if a["v"] else 0, 2)))
+    rows.append(("Overall", pc(d["summary"]["pnl_pct"])))
+    msg += section("💼", "Portfolio") + "\n" + table(rows)
     ch, moves = d.get("charts", {}), {}
     for h in d["holdings"]:
         c = (ch.get(h["symbol"]) or {}).get("c") or []
         if len(c) >= 6 and c[-6] and c[-1]:
             moves[h["symbol"]] = (c[-1] / c[-6] - 1) * 100  # last 5 trading days
     if moves:
-        wkchg = sorted(moves.items(), key=lambda x: -x[1])
-        L.append("🏆 " + ", ".join(f"{e(s)} {pc(x)}" for s, x in wkchg[:3]) + "\n📉 " + ", ".join(f"{e(s)} {pc(x)}" for s, x in wkchg[-3:][::-1]))
+        wk = sorted(moves.items(), key=lambda x: -x[1])
+        msg += section("📈", "Best this week") + "\n" + table([(s_, pc(x)) for s_, x in wk[:3]])
+        msg += section("📉", "Worst this week") + "\n" + table([(s_, pc(x)) for s_, x in wk[-3:][::-1]])
     T = ((d.get("scanner") or {}).get("tracker") or {})
     o = T.get("overall") or {}
+    msg += section("🔎", "Scanner track record")
     if o.get("trades"):
-        L.append(f"\n🔎 Scanner track record since {e(T.get('since'))}: {o['trades']} closed · win {o['win_pct']}% · avg {o['avg_r']:+.2f}R per trade")
-        L.append("   " + " · ".join(f"{e(k)} {v['avg_r']:+.2f}R ({v['trades']})" for k, v in T.get("by_setup", {}).items() if v.get("trades")))
+        msg += f"\n<i>Since {e(nice_date(T.get('since')))}</i>\n" + table(
+            [(k, str(v["trades"]), f"{v['win_pct']:.0f}%", f"{v['avg_r']:+.2f}R") for k, v in T.get("by_setup", {}).items() if v.get("trades")]
+            + [("All setups", str(o["trades"]), f"{o['win_pct']:.0f}%", f"{o['avg_r']:+.2f}R")], ("", "Trades", "Win", "Avg"))
+        msg += "\n<i>R = your risk per trade. Judge after 30–40 closed trades.</i>"
     else:
-        L.append(f"\n🔎 Scanner: {T.get('signals', 0)} signals tracked so far, none closed yet.")
+        msg += f"\n{T.get('signals', 0)} signals tracked so far, none closed yet."
     X = d.get("metals") or {}
     if "gold" in X:
+        short = {"1–3 months": "1–3m", "6–12 months": "6–12m", "1–2 years": "1–2y", "3–5 years": "3–5y"}
+        msg += section("🪙", "Gold & silver")
         for m in ("gold", "silver"):
-            L.append(f"🪙 {m.title()} {pc(X[m]['chg_1m'])} 1 month · signals: " + ", ".join(f"{e(h['horizon'])} {e(h['label'])}" for h in X[m]["horizons"]))
-    L.append("\n<i>Percentages only. Not financial advice.</i>" + footer())
-    send("\n".join(L))
+            hz = [f"{short[h['horizon']]} {e(h['label'])}" for h in X[m]["horizons"]]
+            msg += f"\n<b>{m.title()}</b> {pc(X[m]['chg_1m'])} this month\n   " + " · ".join(hz[:2]) + "\n   " + " · ".join(hz[2:])
+    msg += "\n\n<i>Percentages only · not financial advice</i>" + footer()
+    send(msg)
 
 
 def chatid():
@@ -277,10 +345,13 @@ def main():
     if mode == "chatid":
         return chatid()
     if mode == "test":
-        ok = send("✅ <b>Dashboard alerts are connected.</b>\nYou'll get the morning brief at 8:45 AM, action alerts and the daily summary after 4:45 PM, and a weekly review on Saturdays." + footer())
+        ok = send(head("✅", "Dashboard alerts are connected", "You're all set")
+                  + "\n\n<b>What you'll get</b>\n• 🌅 Morning brief · 8:45 AM, Mon–Fri\n• ⚡ Action alerts · after 4:45 PM, only when something changes"
+                  + "\n• 📊 Daily summary · after 4:45 PM\n• 📅 Weekly review · Saturday 9 AM" + footer())
         sys.exit(0 if ok else 1)
     if mode == "failure":
-        send("❗ <b>Dashboard update failed today.</b>\nNumbers on the dashboard may be out of date. Check the latest run under Actions on GitHub." + footer())
+        send(head("❗", "Dashboard update failed", datetime.now(IST).strftime("%a, %d %b %Y"))
+             + "\n\nNumbers on the dashboard may be out of date.\nCheck the latest run under <b>Actions</b> on GitHub." + footer())
         return
     pw = os.environ.get("DASHBOARD_PASSWORD")
     d, st, cfg = read_enc("data.enc.json", pw), read_enc("state.enc.json", pw, {}) or {}, read_enc("holdings.enc.json", pw, {}) or {}
