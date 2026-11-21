@@ -666,7 +666,7 @@ function openDetail(sym, push = true) {
     <div class="faint" style="display:flex;gap:12px;padding:4px"><span style="color:#8b7cf6">— 50-EMA ${num(h.ema50)}</span><span style="color:#f59e0b">— 200-SMA ${num(h.sma200)}</span><span>last ${ch ? ch.c.length : 0} days</span></div></div>
   <div class="card">${P.map(x => `<label style="display:flex;gap:8px;align-items:center;padding:3px 0"><input type="checkbox" class="swtog" data-k="${esc(skey(x))}" ${isSwing(x) ? "checked" : ""}>
       <span><b>Swing trade</b>${P.length > 1 ? ` (${x.broker})` : ""}: exit at +7.5%, stop ${num(swingPlan(x).stop)} (2× daily range), stop to cost at +4%, 15-day limit</span></label>`).join("")}
-    <div class="faint">Untick for long-term holdings. Saved on this device.</div></div>
+    <div class="faint">Untick for long-term holdings.</div><div id="swmsg" class="faint" style="margin-top:4px"></div></div>
   <div class="card"><div style="font-weight:600;margin-bottom:6px">Average-down calculator</div>
     <label class="mute" for="amt">Amount to add (₹)</label>
     <input type="text" inputmode="numeric" id="amt" value="10000" style="margin:4px 0 10px">
@@ -698,8 +698,17 @@ function openDetail(sym, push = true) {
       + (nw > 10 ? `<div class="err" style="grid-column:1/-1">This would make ${esc(sym)} over 10% of your portfolio.</div>` : ""); };
   $("amt").oninput = calc; calc();
   if ($("metlink")) $("metlink").onclick = () => { MET = /SILVER/.test(sym) ? "silver" : "gold"; renderMetals(); $("detail").scrollTop = 0; };
-  $("detailBody").querySelectorAll(".swtog").forEach(el => el.onchange = () => { el.checked ? SWING.add(el.dataset.k) : SWING.delete(el.dataset.k);
-    store.set("dash_swing", JSON.stringify([...SWING])); const y = $("detail").scrollTop; go(TAB); openDetail(sym, false); $("detail").scrollTop = y; });
+  $("detailBody").querySelectorAll(".swtog").forEach(el => el.onchange = async () => { const k = el.dataset.k, on = el.checked;
+    on ? SWING.add(k) : SWING.delete(k); store.set("dash_swing", JSON.stringify([...SWING]));
+    const y = $("detail").scrollTop; go(TAB); openDetail(sym, false); $("detail").scrollTop = y;
+    const msg = $("swmsg");
+    if (!store.get("dash_token")) { msg.innerHTML = `<span class="err">Saved on this device only. Add your GitHub token (Import, top right) to get Telegram alerts for swing trades.</span>`; return; }
+    try { msg.textContent = "Saving for Telegram alerts…";
+      const file = await gh("contents/holdings.enc.json"), cfg = await decrypt(JSON.parse(atob(file.content.replace(/\n/g, ""))), PW);
+      cfg.holdings.forEach(h => { if (`${h.broker || "Kite"}:${h.symbol}` === k) { if (on) h.swing = true; else delete h.swing; } });
+      await gh("contents/holdings.enc.json", {method: "PUT", body: JSON.stringify({message: `${on ? "Tag" : "Untag"} swing trade`, sha: file.sha, content: btoa(JSON.stringify(await encrypt(cfg, PW)))})});
+      msg.innerHTML = `<span class="pos">Saved. Telegram alerts will include this ${on ? "swing trade" : "change"}.</span>`;
+    } catch (err) { msg.innerHTML = `<span class="err">Saved on this device, but not to GitHub: ${esc(err.message)}</span>`; } });
   $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden";
   $("back").onclick = () => history.back();
   if (push) history.pushState({d: 1}, "");
@@ -821,6 +830,7 @@ function go(tab) {
 }
 function start(d) {
   D = d; D.holdings.forEach(h => h.broker ||= "Kite");
+  D.holdings.forEach(h => { if (h.swing) SWING.add(`${h.broker}:${h.symbol}`); });
   $("lockwrap").classList.add("hidden"); $("app").classList.remove("hidden");
   $("upd").textContent = `Updated ${d.updated} · NSE file ${d.sources?.NSE || "not available"}`;
   $("nav").innerHTML = TABS.map(([k, l]) => `<button data-t="${k}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round" stroke-linecap="round">${ICONS[k]}</svg>${l}</button>`).join("");
