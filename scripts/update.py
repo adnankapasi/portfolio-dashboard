@@ -323,6 +323,13 @@ def main():
         h.setdefault("group", "Gold / Silver" if any(k in h["symbol"] for k in ("GOLD", "SILVER")) else "Stock")
         holdings.append(h)
 
+    # one plan per stock: hand-set levels on any account apply to the same stock on every account
+    custom = {h["symbol"]: h for h in holdings if h.get("add_above") is not None or h.get("stop_below") is not None}
+    for h in holdings:
+        c = custom.get(h["symbol"])
+        if c is not None and c is not h and h.get("add_above") is None and h.get("stop_below") is None:
+            h.update(add_above=c.get("add_above"), stop_below=c.get("stop_below"), note=c.get("note", ""), group=c.get("group", h["group"]))
+
     tickers = sorted({h["yahoo"] for h in holdings} | {m[1] for m in MARKET})
     try:
         data = fetch(tickers)
