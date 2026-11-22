@@ -441,7 +441,14 @@ def main():
         import traceback; traceback.print_exc()
         met = {"error": f"Gold and silver data failed today: {e}"}
 
-    out = {"updated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "price_date": price_date, "scanner": scan, "metals": met,
+    try:
+        import etfs
+        etf = etfs.run(state, bhav["NSE"] if bhav["NSE"][0] is not None else None, met, rows)
+    except Exception as e:
+        import traceback; traceback.print_exc()
+        etf = {"error": f"ETF data failed today: {e}"}
+
+    out = {"updated": datetime.now(IST).strftime("%d %b %Y, %I:%M %p IST"), "price_date": price_date, "scanner": scan, "metals": met, "etfs": etf,
            "sources": {ex: (bhav[ex][0].strftime("%Y-%m-%d") if bhav[ex][0] is not None else None) for ex in bhav},
            "summary": summary, "brokers": brokers, "holdings": rows, "charts": charts,
            "market": market, "breadth": breadth, "movers": movers,

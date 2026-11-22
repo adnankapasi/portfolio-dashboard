@@ -207,8 +207,8 @@ def scan(F, nifty, uni, delivery, results, today):
 
 
 # ------------------------------------------------------------------ live tracking (forward test)
-def track(state, F, rows, date):
-    log = state.setdefault("scan_log", [])
+def track(state, F, rows, date, key="scan_log", target=TARGET, be_at=BE_AT, max_days=MAX_DAYS):
+    log = state.setdefault(key, [])
     C, O, H, L = F["Close"], F["Open"], F["High"], F["Low"]
     dates = C.index
     for t in log:
@@ -226,7 +226,7 @@ def track(state, F, rows, date):
                 if h >= t["trigger"]:
                     t.update(status="open", entry=r2(max(o, t["trigger"])), entry_date=t["checked"], days=0,
                              cur_stop=r2(max(o, t["trigger"]) * (1 - t["risk_pct"] / 100)))
-                    t["target"] = r2(t["entry"] * (1 + TARGET))
+                    t["target"] = r2(t["entry"] * (1 + target))
                 else:
                     t["status"] = "expired"; break
             t["days"] += 1
@@ -238,14 +238,14 @@ def track(state, F, rows, date):
                 out = (t["cur_stop"], "stop" if t["cur_stop"] < t["entry"] else "breakeven")
             elif h >= t["target"]:
                 out = (o if not first and o > t["target"] else t["target"], "target")
-            elif t["days"] >= MAX_DAYS:
+            elif t["days"] >= max_days:
                 out = (c, "time")
             if out:
                 ret = out[0] / t["entry"] - 1 - COST
                 t.update(status="closed", exit=r2(out[0]), exit_date=t["checked"], how=out[1], ret_pct=r2(ret * 100),
                          r=r2(ret / (t["risk_pct"] / 100)))
                 break
-            if h >= t["entry"] * (1 + BE_AT):
+            if h >= t["entry"] * (1 + be_at):
                 t["cur_stop"] = max(t["cur_stop"], t["entry"])
             t["last"] = r2(c)
     active = {t["symbol"] for t in log if t["status"] in ("pending", "open")}
@@ -255,7 +255,7 @@ def track(state, F, rows, date):
             if r["setup"] and not r["avoid"] and r["plan"] and r["symbol"] not in active:
                 log.append({"date": ds, "checked": ds, "symbol": r["symbol"], "cap": r["cap"], "setup": r["setup"], "score": r["score"],
                             "trigger": r["plan"]["trigger"], "risk_pct": r["plan"]["risk_pct"], "status": "pending"})
-    state["scan_log"] = log[-600:]
+    state[key] = log[-600:]
     closed = [t for t in log if t["status"] == "closed"]
 
     def st(ts):

@@ -60,7 +60,7 @@ def nice_date(iso):
 
 
 def head(emoji, title, sub):
-    return f"{emoji} <b>{title}</b>\n<i>{e(sub)}</i>"
+    return f"{emoji} <b>{e(title)}</b>\n<i>{e(sub)}</i>"
 
 
 def table(rows, header=None):
@@ -72,7 +72,7 @@ def table(rows, header=None):
 
 
 def section(emoji, title):
-    return f"\n\n{emoji} <b>{title}</b>"
+    return f"\n\n{emoji} <b>{e(title)}</b>"
 
 
 # ------------------------------------------------------------------ holding actions (mirror of the page)
@@ -110,12 +110,12 @@ def action(h):
     return None, None
 
 
-def setup_lines(items):
+def setup_lines(items, target=7.5):
     out = []
     for r in items:
         res = f"\n   ⚠️ results in {r['res']} days" if r.get("res") is not None and 0 <= r["res"] <= 20 else ""
         out.append(f"\n• <b>{e(r['symbol'])}</b> · {e(r['setup'])}{' · ' + e(r['cap']) + ' cap' if r.get('cap') else ''}{' · score ' + str(r['score']) if r.get('score') is not None else ''}"
-                   f"\n   Buy above <b>{r['trigger']:,.2f}</b> · stop −{r['risk_pct']:.1f}% · target +7.5%{res}")
+                   f"\n   Buy above <b>{r['trigger']:,.2f}</b> · stop −{r['risk_pct']:.1f}% · target +{target:g}%{res}")
     return "".join(out)
 
 
@@ -171,6 +171,7 @@ def evening(d, st, cfg):
                 msg += f"\n<i>+{len(setups) - 6} more on the dashboard</i>"
         else:
             msg += section("🔎", "New swing setups") + "\nNone today. That's normal: good setups are rare."
+    msg += etf_block(d, st)
     msg += metals_block(d, st)
     if d.get("errors"):
         msg += f"\n\nℹ️ <i>Data unavailable today: {e(', '.join(x.split(':')[0] for x in d['errors'][:6]))}</i>"
@@ -178,6 +179,27 @@ def evening(d, st, cfg):
     send(msg)
     st["summary_sent"] = d["price_date"]
     reminder(d, st, cfg)
+
+
+def etf_block(d, st):
+    E = d.get("etfs") or {}
+    if E.get("error") or not E.get("themes"):
+        return ""
+    out = section("🧺", "ETF themes") + f"\nLeading: {e(', '.join(E['leading']))}\nLagging: {e(', '.join(E['lagging']))}"
+    old, new, ch = st.get("etf_sig", {}), {}, []
+    for t in E["themes"]:
+        new[t["name"]] = t["s612"]
+        if old.get(t["name"]) and old[t["name"]] != t["s612"]:
+            ch.append(f"• {e(t['name'])}: {e(old[t['name']])} → <b>{e(t['s612'])}</b>")
+    st["etf_sig"] = new
+    if ch:
+        out += "\n🔔 <b>6–12 month signal changed</b>\n" + "\n".join(ch)
+    ok = sorted([r for r in E.get("swing", []) if not r["avoid"]], key=lambda r: -r["score"])
+    R = E.get("rules", {})
+    if ok:
+        out += f"\n\n<b>ETF swing setups ({len(ok)})</b>" + setup_lines(
+            [{"symbol": r["symbol"], "setup": r["setup"], "cap": None, "score": r["score"], **r["plan"]} for r in ok[:4]], R.get("target_pct", 5))
+    return out
 
 
 def metals_block(d, st):
@@ -257,6 +279,12 @@ def morning(d, st, cfg):
         msg += setup_lines([{**t, "cap": rows.get(t["symbol"], {}).get("cap"), "res": rows.get(t["symbol"], {}).get("results_days")} for t in pend[:6]])
         if sc.get("mood", {}).get("state") == "Downtrend":
             msg += "\n\n⚠️ <i>Market is in a downtrend: consider skipping new trades.</i>"
+    E = d.get("etfs") or {}
+    ep = sorted(((E.get("tracker") or {}).get("pending") or []), key=lambda t: -t.get("score", 0))
+    if ep:
+        quiet = False
+        msg += section("🧺", f"ETF setups to watch ({len(ep)})") + "\n<i>Same rule: buy only above the level.</i>"
+        msg += setup_lines([{**t, "cap": None, "res": None} for t in ep[:4]], (E.get("rules") or {}).get("target_pct", 5))
     swing = {f"{h.get('broker', 'Kite')}:{h['symbol']}" for h in cfg.get("holdings", []) if h.get("swing")}
     near, sw = [], []
     for h in d["holdings"]:
