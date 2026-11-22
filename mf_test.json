@@ -1,0 +1,341 @@
+{
+ "generated": "2026-11-22",
+ "monthly": 10000,
+ "liquid_rate": 0.06,
+ "funds": [
+  {
+   "name": "ICICI Large & Midcap",
+   "scheme": "ICICI Prudential Large & Mid Cap Fund - Direct Plan - Growth",
+   "code": 120596,
+   "from": "2013-01-02",
+   "years": 13.9,
+   "daily_vol_pct": 0.96,
+   "pct_months_with_dip": 52,
+   "results": [
+    {
+     "xirr": 0.15762134887201873,
+     "value": 5474094.493263203,
+     "invested": 1670000,
+     "idle_pct": 0.0,
+     "label": "Plain SIP (around the 5th)",
+     "gap_pct": 0.0
+    },
+    {
+     "xirr": 0.1575141472395033,
+     "value": 5469442.025217298,
+     "invested": 1670000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 optimistic",
+     "gap_pct": -0.01
+    },
+    {
+     "xirr": 0.15744274653065726,
+     "value": 5466345.590162461,
+     "invested": 1670000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 realistic",
+     "gap_pct": -0.02
+    },
+    {
+     "xirr": 0.1572015244421231,
+     "value": 5455898.099098445,
+     "invested": 1670000,
+     "idle_pct": 3.4563554401278105,
+     "label": "Flexible + big-dip extra \u00b7 optimistic",
+     "gap_pct": -0.04
+    },
+    {
+     "xirr": 0.15708698767557172,
+     "value": 5450944.768731645,
+     "invested": 1670000,
+     "idle_pct": 3.4563554401278105,
+     "label": "Flexible + big-dip extra \u00b7 realistic",
+     "gap_pct": -0.05
+    },
+    {
+     "xirr": 0.1566749456032469,
+     "value": 5433164.3049372835,
+     "invested": 1670000,
+     "idle_pct": 3.3546738053143836,
+     "label": "Wait for dips \u00b7 optimistic",
+     "gap_pct": -0.09
+    },
+    {
+     "xirr": 0.15643035398126937,
+     "value": 5422638.46008837,
+     "invested": 1670000,
+     "idle_pct": 3.3546738053143836,
+     "label": "Wait for dips \u00b7 realistic",
+     "gap_pct": -0.12
+    }
+   ],
+   "windows_5y": {
+    "Flexible date \u00b7 optimistic": {
+     "n": 18,
+     "beat_pct": 44,
+     "avg_gap_pct": -0.03
+    },
+    "Flexible date \u00b7 realistic": {
+     "n": 18,
+     "beat_pct": 39,
+     "avg_gap_pct": -0.05
+    },
+    "Flexible + big-dip extra \u00b7 optimistic": {
+     "n": 18,
+     "beat_pct": 39,
+     "avg_gap_pct": -0.3
+    },
+    "Flexible + big-dip extra \u00b7 realistic": {
+     "n": 18,
+     "beat_pct": 44,
+     "avg_gap_pct": -0.31
+    },
+    "Wait for dips \u00b7 optimistic": {
+     "n": 18,
+     "beat_pct": 56,
+     "avg_gap_pct": -0.11
+    },
+    "Wait for dips \u00b7 realistic": {
+     "n": 18,
+     "beat_pct": 33,
+     "avg_gap_pct": -0.26
+    }
+   }
+  },
+  {
+   "name": "Nippon Multi Asset",
+   "scheme": "Nippon India Multi Asset Allocation Fund - Direct Plan - Growth Option",
+   "code": 148457,
+   "from": "2020-08-31",
+   "years": 6.2,
+   "daily_vol_pct": 0.6,
+   "pct_months_with_dip": 35,
+   "results": [
+    {
+     "xirr": 0.15640543217885228,
+     "value": 1248555.0998376105,
+     "invested": 760000,
+     "idle_pct": 0.0,
+     "label": "Plain SIP (around the 5th)",
+     "gap_pct": 0.0
+    },
+    {
+     "xirr": 0.15585593607482806,
+     "value": 1246389.418754113,
+     "invested": 760000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 optimistic",
+     "gap_pct": -0.05
+    },
+    {
+     "xirr": 0.15585455366671142,
+     "value": 1246383.9749676671,
+     "invested": 760000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 realistic",
+     "gap_pct": -0.06
+    },
+    {
+     "xirr": 0.1371204135613967,
+     "value": 1174685.1323537421,
+     "invested": 760000,
+     "idle_pct": 24.099633917334568,
+     "label": "Flexible + big-dip extra \u00b7 optimistic",
+     "gap_pct": -1.93
+    },
+    {
+     "xirr": 0.13615006741990088,
+     "value": 1171082.4790407717,
+     "invested": 760000,
+     "idle_pct": 24.099633917334568,
+     "label": "Flexible + big-dip extra \u00b7 realistic",
+     "gap_pct": -2.03
+    },
+    {
+     "xirr": 0.1378945133740842,
+     "value": 1177566.8882290793,
+     "invested": 760000,
+     "idle_pct": 27.227384835089865,
+     "label": "Wait for dips \u00b7 optimistic",
+     "gap_pct": -1.85
+    },
+    {
+     "xirr": 0.13673370128702478,
+     "value": 1173248.077753054,
+     "invested": 760000,
+     "idle_pct": 27.227384835089865,
+     "label": "Wait for dips \u00b7 realistic",
+     "gap_pct": -1.97
+    }
+   ],
+   "windows_5y": {}
+  },
+  {
+   "name": "Nippon Multi Asset Omni",
+   "scheme": "Nippon India Multi - Asset Omni FoF - Direct Plan - Growth Option",
+   "code": 148666,
+   "from": "2021-02-09",
+   "years": 5.8,
+   "daily_vol_pct": 0.6,
+   "pct_months_with_dip": 25,
+   "results": [
+    {
+     "xirr": 0.14263147772783757,
+     "value": 1060323.5632203391,
+     "invested": 700000,
+     "idle_pct": 0.0,
+     "label": "Plain SIP (around the 5th)",
+     "gap_pct": 0.0
+    },
+    {
+     "xirr": 0.14222543599186477,
+     "value": 1059080.6532638876,
+     "invested": 700000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 optimistic",
+     "gap_pct": -0.04
+    },
+    {
+     "xirr": 0.14150568423415189,
+     "value": 1056880.8635279736,
+     "invested": 700000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 realistic",
+     "gap_pct": -0.11
+    },
+    {
+     "xirr": 0.12668082576585593,
+     "value": 1012526.1629556147,
+     "invested": 700000,
+     "idle_pct": 23.67586114161494,
+     "label": "Flexible + big-dip extra \u00b7 optimistic",
+     "gap_pct": -1.6
+    },
+    {
+     "xirr": 0.12469082784809771,
+     "value": 1006709.0055548357,
+     "invested": 700000,
+     "idle_pct": 23.67586114161494,
+     "label": "Flexible + big-dip extra \u00b7 realistic",
+     "gap_pct": -1.79
+    },
+    {
+     "xirr": 0.11943754142144758,
+     "value": 991505.4328548794,
+     "invested": 700000,
+     "idle_pct": 34.77288360498131,
+     "label": "Wait for dips \u00b7 optimistic",
+     "gap_pct": -2.32
+    },
+    {
+     "xirr": 0.11722755903712623,
+     "value": 985175.2581426468,
+     "invested": 700000,
+     "idle_pct": 34.77288360498131,
+     "label": "Wait for dips \u00b7 realistic",
+     "gap_pct": -2.54
+    }
+   ],
+   "windows_5y": {}
+  },
+  {
+   "name": "ICICI Income Plus Arbitrage Omni",
+   "scheme": "ICICI Prudential Income plus Arbitrage Omni FOF - Direct Plan - Growth",
+   "code": 120313,
+   "from": "2013-04-08",
+   "years": 13.6,
+   "daily_vol_pct": 0.36,
+   "pct_months_with_dip": 9,
+   "results": [
+    {
+     "xirr": 0.09453095003760958,
+     "value": 3239664.6102641253,
+     "invested": 1640000,
+     "idle_pct": 0.0,
+     "label": "Plain SIP (around the 5th)",
+     "gap_pct": 0.0
+    },
+    {
+     "xirr": 0.09393365778661733,
+     "value": 3225178.650180689,
+     "invested": 1640000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 optimistic",
+     "gap_pct": -0.06
+    },
+    {
+     "xirr": 0.0939079127994461,
+     "value": 3224555.857371662,
+     "invested": 1640000,
+     "idle_pct": 0.0,
+     "label": "Flexible date \u00b7 realistic",
+     "gap_pct": -0.06
+    },
+    {
+     "xirr": 0.09372586028332563,
+     "value": 3220155.603512941,
+     "invested": 1640000,
+     "idle_pct": 17.947699178298823,
+     "label": "Flexible + big-dip extra \u00b7 optimistic",
+     "gap_pct": -0.08
+    },
+    {
+     "xirr": 0.09337929165259984,
+     "value": 3211797.0834031,
+     "invested": 1640000,
+     "idle_pct": 17.947699178298823,
+     "label": "Flexible + big-dip extra \u00b7 realistic",
+     "gap_pct": -0.12
+    },
+    {
+     "xirr": 0.09103426067156628,
+     "value": 3155859.5013712742,
+     "invested": 1640000,
+     "idle_pct": 31.50900441240207,
+     "label": "Wait for dips \u00b7 optimistic",
+     "gap_pct": -0.35
+    },
+    {
+     "xirr": 0.09093816269738275,
+     "value": 3153590.071304927,
+     "invested": 1640000,
+     "idle_pct": 31.50900441240207,
+     "label": "Wait for dips \u00b7 realistic",
+     "gap_pct": -0.36
+    }
+   ],
+   "windows_5y": {
+    "Flexible date \u00b7 optimistic": {
+     "n": 18,
+     "beat_pct": 0,
+     "avg_gap_pct": -0.18
+    },
+    "Flexible date \u00b7 realistic": {
+     "n": 18,
+     "beat_pct": 0,
+     "avg_gap_pct": -0.19
+    },
+    "Flexible + big-dip extra \u00b7 optimistic": {
+     "n": 18,
+     "beat_pct": 39,
+     "avg_gap_pct": -0.37
+    },
+    "Flexible + big-dip extra \u00b7 realistic": {
+     "n": 18,
+     "beat_pct": 33,
+     "avg_gap_pct": -0.43
+    },
+    "Wait for dips \u00b7 optimistic": {
+     "n": 18,
+     "beat_pct": 33,
+     "avg_gap_pct": -1.35
+    },
+    "Wait for dips \u00b7 realistic": {
+     "n": 18,
+     "beat_pct": 33,
+     "avg_gap_pct": -1.37
+    }
+   }
+  }
+ ]
+}
