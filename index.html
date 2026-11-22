@@ -422,13 +422,14 @@ function renderHealth() {
 }
 
 function renderMarket() {
-  setTimeout(() => $("tab-market").querySelectorAll("[data-metal]").forEach(el => el.onclick = () => openMetals(el.dataset.metal)), 0);
+  setTimeout(() => { $("tab-market").querySelectorAll("[data-metal]").forEach(el => el.onclick = () => openMetals(el.dataset.metal));
+    if ($("etfcard")) $("etfcard").onclick = openEtfs; }, 0);
   const M = D.market || [], by = k => M.filter(m => m.kind === k);
   const card = m => `<div class="mini"><span class="mute">${esc(m.name)}</span><b>${num(m.close)} <span class="${cls(m.day_pct)}" style="font-size:12px">${pc(m.day_pct)}</span></b>
     ${line(m.spark || [], {h: 30})}${(m.levels || []).map(l => `<div class="faint">${esc(l.label)} ${num(l.value, 0)} ${m.close >= l.value ? "✅" : "⚠️"}</div>`).join("")}</div>`;
   const b = D.breadth, mv = D.movers;
   const mrow = x => `<div class="row"><span>${esc(x.symbol)}</span><span>${num(x.close)} <span class="${cls(x.chg)}">${pc(x.chg)}</span></span></div>`;
-  $("tab-market").innerHTML = `${metalsCard()}
+  $("tab-market").innerHTML = `${metalsCard()}${etfCard()}
   <h2>Indices</h2><div class="g2">${[...by("index"), ...by("fx")].map(card).join("")}</div>
   ${b ? `<h2>NSE breadth</h2><div class="card"><div class="bar"><div style="width:${b.up / (b.up + b.down + b.flat) * 100}%;background:var(--up)"></div><div style="width:${b.down / (b.up + b.down + b.flat) * 100}%;background:var(--dn)"></div></div>
     <div style="display:flex;justify-content:space-between;margin-top:6px" class="mute"><span class="pos">${b.up.toLocaleString("en-IN")} up</span><span>${b.flat} flat</span><span class="neg">${b.down.toLocaleString("en-IN")} down</span></div></div>` : ""}
@@ -645,6 +646,98 @@ function renderMetals() {
       $("cb_msg").innerHTML = `<span class="pos">Saved. The outlook updates in about 2 minutes.</span>`;
     } catch (err) { $("cb_msg").innerHTML = `<span class="err">${esc(err.message)}</span>`; }
   };
+}
+
+// ---------- ETFs
+let EMODE = "invest", ECAT = "All", ETHEME = null;
+const SIGB = {Positive: "b-add", Negative: "b-exit", Neutral: "b-noadd", "No data": "b-noadd"};
+function etfCard() {
+  const E = D.etfs;
+  if (!E || E.error) return `<div class="alert a-a"><span>⚠</span><div>${esc(E?.error || "ETF signals appear after the next daily update.")}</div></div>`;
+  const setups = (E.swing || []).filter(r => !r.avoid.length).length;
+  return `<h2>ETF themes <span class="faint">· tap for details</span></h2><div class="card click" id="etfcard">
+    <div style="font-size:13px"><b>Leading:</b> ${E.leading.map(esc).join(", ")}<br><b>Lagging:</b> ${E.lagging.map(esc).join(", ")}</div>
+    <div class="faint" style="margin-top:6px">${E.themes.length} themes · ${setups} ETF swing setup${setups === 1 ? "" : "s"} today</div></div>`;
+}
+function openEtfs() { ETHEME = null; renderEtfs(); $("detail").style.display = "block"; $("detail").scrollTop = 0; document.body.style.overflow = "hidden"; history.pushState({d: 1}, ""); }
+function renderEtfs() {
+  const E = D.etfs, el = $("detailBody");
+  if (ETHEME) return renderTheme(ETHEME);
+  const cats = ["All", ...new Set(E.themes.map(t => t.cat))];
+  let body = "";
+  if (EMODE === "invest") {
+    const L = E.themes.filter(t => ECAT === "All" || t.cat === ECAT);
+    const H = E.history || {}, h612 = H["6–12 months"], rot = H.rotation;
+    const box = (k, lab) => { const v = h612?.[k]; return `<div class="alert ${{Positive: "a-g", Negative: "a-r"}[k] || "a-n"}" style="display:block;text-align:center;margin:0;padding:8px 4px"><div style="font-size:11px">${lab}</div><b>${v?.avg_pct != null ? pc(v.avg_pct, 1) : "–"}</b><div style="font-size:10.5px">up ${v?.up_pct ?? "–"}%</div></div>`; };
+    body = `<div class="alert a-b"><span>↻</span><div><b>Rotation</b> · Leading: ${E.leading.map(esc).join(", ")}<br>Lagging: ${E.lagging.map(esc).join(", ")}</div></div>
+    <div class="chips" id="ecat">${cats.map(c => `<button class="chip ${c === ECAT ? "on" : ""}" data-c="${esc(c)}">${esc(c)}</button>`).join("")}</div>
+    <div class="tw" style="margin-top:8px"><table class="ht"><thead><tr><th>Theme</th><th>Rank</th><th class="l">1–3 m</th><th class="l">6–12 m</th><th>1 m</th><th>3 m</th><th>1 y</th><th class="l">Best ETF</th></tr></thead><tbody>
+    ${L.map(t => `<tr data-th="${esc(t.name)}"><td><div class="sym">${esc(t.name)}</div><div class="faint">${esc(t.cat)}</div></td><td>${t.rank ? "#" + t.rank : "–"}</td>
+      <td class="l"><span class="badge ${SIGB[t.s13]}">${esc(t.s13)}</span></td><td class="l"><span class="badge ${SIGB[t.s612]}">${esc(t.s612)}</span></td>
+      <td class="${cls(t.m1)}">${pc(t.m1, 1)}</td><td class="${cls(t.m3)}">${pc(t.m3, 1)}</td><td class="${cls(t.y1)}">${pc(t.y1, 1)}</td>
+      <td class="l">${t.etf ? esc(t.etf.symbol) : "–"}${t.premium != null && t.premium > 2 ? ` <span class="badge b-exit">+${t.premium}% premium</span>` : ""}</td></tr>`).join("")}</tbody></table></div>
+    <div class="faint" style="margin:6px 2px">Rank = strength vs the other themes over 3 and 6 months. Tap a theme for details. Swipe for more columns.</div>
+    ${(E.held || []).length ? `<h2>Your ETFs</h2><div class="card" style="padding:4px 14px">${E.held.map(h => `<div class="row click" data-th="${esc(h.theme)}"><div><b>${esc(h.symbol)}</b> <span class="faint">→ ${esc(h.theme)}</span>
+      <div class="faint">${pc(h.pnl_pct, 1)} · 6–12 m ${esc(h.s612)}</div></div><span class="badge ${h.s612 === "Negative" ? "b-wait" : h.s612 === "Positive" ? "b-add" : "b-noadd"}">${h.s612 === "Negative" ? "Don't add" : h.s612 === "Positive" ? "OK to add gradually" : "Hold"}</span></div>`).join("")}</div>` : ""}
+    <h2>Did the signals work? ${h612 ? `(${h612.from}–${h612.to})` : ""}</h2><div class="card">
+    ${h612 ? `<div class="mute" style="margin-bottom:6px">Average return of themes over the next 12 months, by their 6–12 m signal</div>
+      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${box("Positive", "After Positive")}${box("Neutral", "After Neutral")}${box("Negative", "After Negative")}
+      <div class="alert a-b" style="display:block;text-align:center;margin:0;padding:8px 4px"><div style="font-size:11px">All</div><b>${pc(h612.all.avg_pct, 1)}</b></div></div>` : `<div class="mute">Not enough history.</div>`}
+    ${rot ? `<div class="mute" style="margin:12px 0 6px">Rotation test: hold the 3 strongest themes, switch monthly (${rot.from} onwards, after costs)</div>
+      <div class="g2" style="grid-template-columns:repeat(3,1fr)"><div class="mini"><span class="mute">Top 3 rotation</span><b class="${cls(rot.cagr_pct - rot.nifty_cagr_pct)}">${pc(rot.cagr_pct, 1)}/yr</b></div>
+      <div class="mini"><span class="mute">Nifty 50</span><b>${pc(rot.nifty_cagr_pct, 1)}/yr</b></div><div class="mini"><span class="mute">Worst fall</span><b class="neg">${pc(rot.max_dd_pct, 1)}</b></div></div>
+      <div class="faint" style="margin-top:4px">Beat the Nifty in ${rot.beat_pct}% of months. Worst single month ${pc(rot.worst_month_pct, 1)}.</div>` : ""}
+    <div class="faint" style="margin-top:6px">Useful only if "After Positive" is clearly above "After Negative". Themes overlap and months overlap, so small gaps can be luck.</div></div>`;
+  } else {
+    const c = SET(), S = E.swing || [], ok = S.filter(r => !r.avoid.length), bad = S.filter(r => r.avoid.length), T = E.tracker || {}, o = T.overall || {}, R = E.rules;
+    body = `<div class="g2" style="grid-template-columns:repeat(3,1fr);margin-bottom:10px"><div class="mini"><span class="mute">Risk / trade</span><b>${inr(c.capital * c.risk / 100)}</b></div>
+      <div class="mini"><span class="mute">Target</span><b class="pos">+${R.target_pct}%</b></div><div class="mini"><span class="mute">Stop</span><b class="neg">−${R.stop_pct}%</b></div></div>
+    <div class="tw"><table class="ht"><thead><tr><th>ETF</th><th class="l">Setup</th><th>Score</th><th>Buy above</th><th>Stop</th><th>Target</th><th>Qty</th><th class="l">Theme</th></tr></thead><tbody>
+    ${ok.map(r => { const z = sizing(r.plan), t = E.themes.find(x => x.name === r.theme);
+      return `<tr data-th="${esc(r.theme)}"><td><div class="sym">${esc(r.symbol)}</div><div class="faint">${esc(r.theme)}</div></td><td class="l"><span class="badge ${SETC(r.setup)}" style="border-radius:7px">${esc(r.setup)}</span></td>
+      <td><b>${r.score}</b></td><td>${num(r.plan.trigger)}</td><td class="neg">${num(r.plan.stop)}</td><td class="pos">${num(r.plan.target)}</td><td>${z.qty}</td>
+      <td class="l"><span class="badge ${SIGB[t?.s612 || "No data"]}">6–12 m ${esc(t?.s612 || "–")}</span></td></tr>`; }).join("")
+      || `<tr><td colspan="8" class="mute" style="text-align:left">No ETF setups today.</td></tr>`}</tbody></table></div>
+    <div class="faint" style="margin:6px 2px">Buy only if tomorrow's price trades above "Buy above". Qty sized for your ${c.risk}% risk with a ${R.stop_pct}% stop (max 25% of capital). Stop to cost at +${R.be_at_pct}%, exit after ${R.max_days} trading days.</div>
+    <h2>Avoided today</h2><div class="card" style="padding:4px 14px">${bad.map(r => `<div class="row"><div><b>${esc(r.symbol)}</b> <span class="faint">${esc(r.setup)}</span></div><span class="neg" style="font-size:12px;text-align:right">${r.avoid.map(esc).join("<br>")}</span></div>`).join("") || `<div class="mute" style="padding:10px 0">None</div>`}</div>
+    <h2>ETF swing track record</h2><div class="card"><div class="g2" style="grid-template-columns:repeat(3,1fr)"><div class="mini"><span class="mute">Closed</span><b>${o.trades || 0}</b></div>
+      <div class="mini"><span class="mute">Win rate</span><b>${o.trades ? o.win_pct + "%" : "–"}</b></div><div class="mini"><span class="mute">Avg</span><b class="${cls(o.avg_r)}">${o.trades ? (o.avg_r > 0 ? "+" : "") + o.avg_r + "R" : "–"}</b></div></div>
+      <div class="faint" style="margin-top:6px">Every ETF setup is tracked from the day it appears. ${(T.open || []).length} open, ${(T.pending || []).length} waiting for confirmation.</div>
+      ${(T.recent || []).slice(0, 8).map(t => `<div class="row"><div><b>${esc(t.symbol)}</b> <span class="faint">${esc(t.entry_date)} → ${esc(t.exit_date)} · ${esc(t.how)}</span></div><span class="${cls(t.ret_pct)}">${pc(t.ret_pct, 1)}</span></div>`).join("")}</div>`;
+  }
+  el.innerHTML = `<div class="top"><button class="btn2" id="back">← Back</button><span class="faint">${esc(E.date)} close</span></div>
+    <div style="font-size:20px;font-weight:700;margin-bottom:8px">ETFs</div>
+    <div class="seg" id="emode" style="margin-bottom:10px">${[["invest", "Invest"], ["swing", "Swing"]].map(([k, l]) => `<button class="${k === EMODE ? "on" : ""}" data-m="${k}">${l}</button>`).join("")}</div>
+    ${body}<div class="faint" style="margin-top:10px">Signals combine trend, momentum, strength vs other themes and each theme's driver (rupee, crude, copper, VIX). News is shown for context only. Not financial advice.</div>`;
+  $("back").onclick = () => history.back();
+  $("emode").onclick = e => { const m = e.target.dataset.m; if (m) { EMODE = m; renderEtfs(); } };
+  if ($("ecat")) $("ecat").onclick = e => { const c = e.target.dataset.c; if (c) { ECAT = c; renderEtfs(); } };
+  el.querySelectorAll("[data-th]").forEach(r => r.onclick = () => { ETHEME = r.dataset.th; renderEtfs(); $("detail").scrollTop = 0; });
+}
+function renderTheme(name) {
+  const E = D.etfs, t = E.themes.find(x => x.name === name), el = $("detailBody");
+  if (!t) { ETHEME = null; return renderEtfs(); }
+  const EFF2 = {help: ["Helping", "b-add"], hurt: ["Hurting", "b-exit"], neutral: ["Neutral", "b-noadd"]};
+  const sw = (E.swing || []).find(r => r.theme === name);
+  const advice = t.s612 === "Positive" && t.s13 !== "Negative" ? "Positive for 6–12 months: suitable for gradual investing (small monthly amounts). For a swing trade, wait for a setup in the Swing view."
+    : t.s612 === "Negative" ? "Negative for 6–12 months: avoid new money for now." : "Mixed signals: hold if you own it; add only gradually.";
+  el.innerHTML = `<div class="top"><button class="btn2" id="eback">← ETFs</button><span class="badge ${SIGB[t.s612]}">6–12 m ${esc(t.s612)}</span></div>
+  <div style="font-size:20px;font-weight:700">${esc(t.name)}</div><div class="mute">${esc(t.cat)} · rank #${t.rank ?? "–"} · ${pc(t.m1, 1)} 1 m · ${pc(t.m3, 1)} 3 m · ${pc(t.y1, 1)} 1 y</div>
+  <div class="g2" style="margin-top:10px"><div class="alert ${{Positive: "a-g", Negative: "a-r"}[t.s13] || "a-n"}" style="display:block;margin:0"><div style="font-size:11.5px">1–3 months</div><b style="font-size:16px">${esc(t.s13)}</b></div>
+    <div class="alert ${{Positive: "a-g", Negative: "a-r"}[t.s612] || "a-n"}" style="display:block;margin:0"><div style="font-size:11.5px">6–12 months</div><b style="font-size:16px">${esc(t.s612)}</b></div></div>
+  ${t.cat === "Gold & silver" ? `<button class="btn2" id="metgo" style="width:100%;margin-top:8px">See the full ${t.name.toLowerCase()} outlook →</button>` : ""}
+  <h2>Drivers</h2><div class="card" style="padding:4px 14px">${t.drivers.map(d => `<div class="row"><div><b>${esc(d.name)}</b>${d.value ? `<div class="faint">${esc(d.value)}</div>` : ""}</div><span class="badge ${EFF2[d.effect][1]}">${EFF2[d.effect][0]}</span></div>`).join("")}</div>
+  <h2>Best ETF for this theme</h2><div class="card">${t.etf ? `<div class="row"><div><b>${esc(t.etf.symbol)}</b><div class="faint">${esc(t.etf.name || "")}</div><div class="faint">Most traded: ₹${num(t.etf.turnover_cr, 1)} cr today · ${num(t.etf.close)}</div></div>
+    <span class="badge ${t.premium != null && t.premium > 2 ? "b-exit" : "b-add"}">${t.premium == null ? "Premium n/a" : t.premium > 2 ? "+" + t.premium + "% premium" : "Fair price"}</span></div>
+    ${t.premium != null && t.premium > 2 ? `<div class="alert a-r" style="margin-top:6px"><span>⚠</span><div>Trades about ${t.premium}% above its usual level vs the index (estimated). Buying now means overpaying; an index mutual fund may be better.</div></div>` : ""}
+    ${t.alts.length ? `<div class="faint" style="margin-top:6px">Alternatives: ${t.alts.map(a => `${esc(a.symbol)} (₹${num(a.turnover_cr, 1)} cr)`).join(", ")}</div>` : ""}` : `<div class="mute">No liquid ETF found on NSE today.</div>`}</div>
+  ${sw ? `<h2>Swing setup today</h2><div class="card"><div class="row"><div><b>${esc(sw.symbol)}</b> <span class="badge ${SETC(sw.setup)}">${esc(sw.setup)}</span><div class="faint">Buy above ${num(sw.plan.trigger)} · stop ${num(sw.plan.stop)} · target ${num(sw.plan.target)}</div></div></div>
+    ${sw.avoid.length ? `<div class="alert a-r" style="margin-top:6px"><span>⚠</span><div>${sw.avoid.map(esc).join("<br>")}</div></div>` : ""}</div>` : ""}
+  ${t.news.length ? `<h2>News</h2><div class="card" style="padding:4px 14px">${t.news.map(n => `<div class="row" style="display:block"><a href="${esc(n.link)}" target="_blank" rel="noopener" style="color:var(--text);text-decoration:none">${esc(n.title)}</a> <span class="faint">· ${esc(n.date)}</span></div>`).join("")}</div>` : ""}
+  <h2>For you</h2><div class="alert a-b"><span>💡</span><div>${esc(advice)}</div></div>
+  <div class="faint">Prices from ${esc(t.source || "")}${t.cat === "International" || t.cat === "Gold & silver" ? " converted to rupees" : ""}.</div>`;
+  $("eback").onclick = () => { ETHEME = null; renderEtfs(); $("detail").scrollTop = 0; };
+  if ($("metgo")) $("metgo").onclick = () => { MET = t.name === "Silver" ? "silver" : "gold"; renderMetals(); $("detail").scrollTop = 0; };
 }
 
 // ---------- detail
