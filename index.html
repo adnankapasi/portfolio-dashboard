@@ -918,7 +918,8 @@ function go(tab) {
   TAB = tab; TABS.forEach(([k, l]) => $("tab-" + k).classList.toggle("hidden", k !== tab));
   $("title").textContent = TABS.find(t => t[0] === tab)[1];
   $("nav").querySelectorAll("button").forEach(b => b.classList.toggle("on", b.dataset.t === tab));
-  ({home: renderHome, holdings: renderHoldings, scanner: renderScanner, signals: renderSignals, health: renderHealth, market: renderMarket})[tab]();
+  try { ({home: renderHome, holdings: renderHoldings, scanner: renderScanner, signals: renderSignals, health: renderHealth, market: renderMarket})[tab](); }
+  catch (err) { console.error(err); $("tab-" + tab).innerHTML = `<div class="alert a-r"><span>⚠</span><div>This screen couldn't load: <b>${esc(err.message)}</b>. Other tabs still work. Send this message to get it fixed.</div></div>`; }
   window.scrollTo(0, 0);
 }
 function start(d) {
@@ -941,8 +942,16 @@ function start(d) {
 }
 let BLOB = null;
 async function unlock(pw, remember) {
-  try { const d = await decrypt(BLOB, pw); PW = pw; if (remember) store.set("dash_pw", pw); start(d); }
-  catch { $("lockmsg").textContent = "Wrong password."; store.del("dash_pw"); }
+  let d;
+  try { d = await decrypt(BLOB, pw); }
+  catch { $("lockmsg").textContent = "Wrong password."; store.del("dash_pw"); return; }
+  PW = pw; if (remember) store.set("dash_pw", pw);
+  try { start(d); }
+  catch (err) {
+    console.error(err);
+    $("lockwrap").classList.remove("hidden"); $("app").classList.add("hidden");
+    $("lockmsg").innerHTML = `Password is correct, but today's data couldn't be shown: <b>${esc(err.message)}</b>. Send this message to get it fixed.`;
+  }
 }
 $("lock").addEventListener("submit", e => { e.preventDefault(); $("lockmsg").textContent = "Unlocking…"; unlock($("pw").value, $("rem").checked); });
 fetch("data.enc.json?" + Date.now()).then(r => { if (!r.ok) throw new Error(r.status); return r.json(); }).then(b => {
