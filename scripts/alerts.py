@@ -381,6 +381,14 @@ def main():
         send(head("❗", "Dashboard update failed", datetime.now(IST).strftime("%a, %d %b %Y"))
              + "\n\nNumbers on the dashboard may be out of date.\nCheck the latest run under <b>Actions</b> on GitHub." + footer())
         return
+    # GitHub can delay scheduled runs by hours: never send a stale brief (manual runs always send)
+    now = datetime.now(IST)
+    scheduled = os.environ.get("GITHUB_EVENT_NAME") == "schedule"
+    late = {"morning": not (now.weekday() < 5 and 6 <= now.hour and (now.hour, now.minute) <= (9, 20)),
+            "weekly": not (now.weekday() == 5 and 6 <= now.hour < 14)}.get(mode, False)
+    if scheduled and late:
+        print(f"Skipped: GitHub started this {mode} run late ({now.strftime('%a %H:%M IST')}), so the message would be stale.")
+        return
     pw = os.environ.get("DASHBOARD_PASSWORD")
     d, st, cfg = read_enc("data.enc.json", pw), read_enc("state.enc.json", pw, {}) or {}, read_enc("holdings.enc.json", pw, {}) or {}
     if d is None:
