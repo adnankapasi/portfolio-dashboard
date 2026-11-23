@@ -2,8 +2,9 @@ name: Telegram alerts
 
 on:
   schedule:
-    - cron: "15 3 * * 1-5"   # 8:45 AM IST, Monday-Friday: morning brief
-    - cron: "30 3 * * 6"     # 9:00 AM IST, Saturday: weekly review
+    # GitHub may start scheduled runs late; the script skips briefs that would arrive stale
+    - cron: "37 2 * * 1-5"   # 8:07 AM IST, Monday-Friday: morning brief
+    - cron: "53 2 * * 6"     # 8:23 AM IST, Saturday: weekly review
   workflow_dispatch:
     inputs:
       mode:
@@ -29,7 +30,7 @@ jobs:
         run: |
           MODE="${{ github.event.inputs.mode }}"
           if [ -z "$MODE" ]; then
-            if [ "${{ github.event.schedule }}" = "30 3 * * 6" ]; then MODE=weekly; else MODE=morning; fi
+            if [ "${{ github.event.schedule }}" = "53 2 * * 6" ]; then MODE=weekly; else MODE=morning; fi
           fi
           python scripts/alerts.py "$MODE"
         env:
