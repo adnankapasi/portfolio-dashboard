@@ -1,19 +1,19 @@
 name: Telegram alerts
 
 on:
-  # Started on time by cron-job.org (morning 8:07 AM Mon-Fri, weekly 8:23 AM Sat).
+  # Started on time by cron-job.org (morning 8:07 AM Mon-Fri, IPO check 3:03 PM Mon-Fri, weekly 8:23 AM Sat).
   # GitHub's own timer was removed: it delayed the morning brief by hours.
   workflow_dispatch:
     inputs:
       mode:
-        description: "test = send a test message · chatid = show your chat ID in the log · morning · weekly"
+        description: "test = send a test message · chatid = show your chat ID in the log · morning · weekly · ipo = IPOs closing today"
         required: true
         default: test
         type: choice
-        options: [test, chatid, morning, weekly]
+        options: [test, chatid, morning, weekly, ipo]
 
 permissions:
-  contents: read
+  contents: write   # the ipo check saves its track record
 
 jobs:
   alert:
@@ -33,3 +33,12 @@ jobs:
           TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           TELEGRAM_CHAT_ID: ${{ secrets.TELEGRAM_CHAT_ID }}
           DASHBOARD_URL: https://${{ github.repository_owner }}.github.io/${{ github.event.repository.name }}/
+      - name: Save IPO track record
+        if: github.event.inputs.mode == 'ipo'
+        run: |
+          git config user.name "github-actions"; git config user.email "github-actions@users.noreply.github.com"
+          git add state.enc.json
+          git diff --cached --quiet && exit 0
+          git commit -m "IPO check $(date +%F)"
+          for i in 1 2 3; do git pull --rebase -q && git push -q && exit 0; sleep 5; done
+          exit 1
