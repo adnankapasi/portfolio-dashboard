@@ -154,6 +154,19 @@ def market_mood():
         print(f"market mood: {ex}"); return None
 
 
+# ------------------------------------------------------------------ listing range from history
+# 99 mainboard IPOs (Oct–Dec of 2023, 2024, 2025 and Sep–Nov 2026), final QIB subscription vs listing-day open.
+# (min QIB, label, median %, middle-half low %, high %, share that opened above issue price %)
+HISTORY = [(200, "200× or more", 62, 30, 76, 100), (100, "100–200×", 37, 9, 58, 92), (50, "50–100×", 29, 20, 36, 88),
+           (25, "25–50×", 8, 1, 15, 73), (5, "5–25×", 2, -1, 11, 58), (0, "below 5×", 0, -2, 6, 48)]
+
+
+def history_range(qib):
+    if qib is None:
+        return None
+    return next(h for h in HISTORY if qib >= h[0])
+
+
 # ------------------------------------------------------------------ verdict
 def verdict(c, mood):
     q, h = c.get("qib"), c.get("hni")
@@ -214,6 +227,12 @@ def run(st, send, head, section, table, e, footer, pc):
                    f"Bidding closes today · figures as of {datetime.now(IST).strftime('%I:%M %p').lstrip('0')}")
         msg += section("📊", "Subscription") + "\n" + table(rows)
         msg += "\n<i>Institutions often add a lot in the last 2 hours, so the final QIB number can be much higher.</i>"
+        hr = history_range(c.get("qib"))
+        if hr:
+            msg += section("🔎", f"Past IPOs with QIB {hr[1]}")
+            msg += f"\nTypical listing: <b>{pc(hr[2], 0)}</b> (most between {pc(hr[3], 0)} and {pc(hr[4], 0)})"
+            msg += f"\n{hr[5]}% opened above issue price"
+            msg += "\n<i>A range, not a forecast. Based on final QIB; today's number is still rising.</i>"
         msg += section("🌡", "Market")
         if mood:
             msg += f"\nNifty {pc(mood['d5'])} this week, {pc(mood['d20'])} this month · {e(mood['mood'])}"
