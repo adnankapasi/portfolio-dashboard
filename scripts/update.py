@@ -226,10 +226,18 @@ def fetch_bhavcopy(exchange, max_back=7):
             print(f"{exchange} {day}: HTTP {r.status_code}")
             continue
         body = r.content
-        if body[:2] == b"PK":
-            with zipfile.ZipFile(io.BytesIO(body)) as z:
-                body = z.read(z.namelist()[0])
-        df = pd.read_csv(io.BytesIO(body))
+        try:
+            if body[:2] == b"PK":
+                with zipfile.ZipFile(io.BytesIO(body)) as z:
+                    body = z.read(z.namelist()[0])
+            if b"TckrSymb" not in body[:3000]:
+                # e.g. BSE answers "OK" with a web page on holidays instead of a price file
+                print(f"{exchange} {day}: not a price file (holiday or error page)")
+                continue
+            df = pd.read_csv(io.BytesIO(body))
+        except Exception as e:
+            print(f"{exchange} {day}: couldn't read file ({e})")
+            continue
         df.columns = [c.strip() for c in df.columns]
         df["TckrSymb"] = df["TckrSymb"].astype(str).str.strip()
         df["SctySrs"] = df["SctySrs"].astype(str).str.strip()
@@ -243,6 +251,20 @@ def fetch_bhavcopy(exchange, max_back=7):
         print(f"{exchange} bhavcopy {day}: {len(rows)} symbols")
         return pd.Timestamp(day), rows, isin, df
     return None, {}, {}, None
+
+
+def fetch_nse_holidays():
+    """NSE's official trading-holiday list (live). Returns a set of 'YYYY-MM-DD' or None if NSE can't be reached."""
+    import requests
+    try:
+        sess = requests.Session(); sess.headers.update({**HEADERS, "Referer": "https://www.nseindia.com/resources/exchange-communication-holidays"})
+        sess.get("https://www.nseindia.com/", timeout=15)
+        r = sess.get("https://www.nseindia.com/api/holiday-master?type=trading", timeout=20)
+        if r.status_code != 200:
+            print(f"NSE holidays: HTTP {r.status_code}"); return None
+        return {datetime.strptime(x["tradingDate"], "%d-%b-%Y").strftime("%Y-%m-%d") for x in r.json().get("CM", [])}
+    except Exception as e:
+        print(f"NSE holidays: {e}"); return None
 
 
 def merge_official(hist, date, row):
@@ -309,6 +331,15 @@ def main():
     state.setdefault("events", []); state.setdefault("fund", {})
 
     bhav = {ex: fetch_bhavcopy(ex) for ex in ("NSE", "BSE")}
+
+    # Market holiday or weekend: NSE has no new trading day since the last update, so there is nothing new
+    # to compute. Finish successfully without touching anything (imports, which arrive as a push, still run).
+    prev = read_enc("data.enc.json", password)
+    new_day = bhav["NSE"][0].strftime("%Y-%m-%d") if bhav["NSE"][0] is not None else None
+    if os.environ.get("GITHUB_EVENT_NAME") != "push" and prev and new_day and new_day == prev.get("price_date") \
+            and not os.environ.get("FORCE_UPDATE"):
+        print(f"No new trading day since {new_day} (market holiday or weekend). Dashboard left as it is.")
+        return
     isin_map = {**bhav["BSE"][2], **bhav["NSE"][2]}
     if bhav["NSE"][2]:
         (ROOT / "isin.json").write_text(json.dumps(bhav["NSE"][2], separators=(",", ":")))

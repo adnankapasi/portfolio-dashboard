@@ -386,6 +386,18 @@ def main():
     scheduled = os.environ.get("GITHUB_EVENT_NAME") == "schedule"
     late = {"morning": not (now.weekday() < 5 and 6 <= now.hour and (now.hour, now.minute) <= (9, 20)),
             "weekly": not (now.weekday() == 5 and 6 <= now.hour < 14)}.get(mode, False)
+    if mode == "morning":
+        from update import fetch_nse_holidays
+        today = now.strftime("%Y-%m-%d")
+        hol = fetch_nse_holidays()  # ask NSE directly every morning
+        if hol is None:  # NSE unreachable today: send the brief anyway rather than miss a trading day
+            print(f"Holiday check for {today}: NSE couldn't be reached, sending the brief anyway")
+            hol = set()
+        else:
+            print(f"Holiday check for {today}: checked with NSE")
+        if today in hol or now.weekday() >= 5:
+            print(f"Skipped: {now.strftime('%a %d %b')} is a market holiday, so no morning brief.")
+            return
     if scheduled and late:
         print(f"Skipped: GitHub started this {mode} run late ({now.strftime('%a %H:%M IST')}), so the message would be stale.")
         return
