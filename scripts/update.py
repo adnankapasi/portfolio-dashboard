@@ -350,7 +350,7 @@ def main():
         if not h.get("symbol") and h.get("isin") in isin_map:
             h["symbol"] = isin_map[h["isin"]]
         if not h.get("symbol"):
-            print(f"Could not resolve {h}")
+            print("Could not resolve one holding (details hidden: this log is public)")
             continue
         h.setdefault("yahoo", h["symbol"] + ".NS")
         h.setdefault("group", "Gold / Silver" if any(k in h["symbol"] for k in ("GOLD", "SILVER")) else "Stock")
@@ -406,7 +406,7 @@ def main():
                      "sig": sig, "signal": SIGNALS[sig], "sector": sector,
                      "cap": None if h["group"] == "Gold / Silver" else cap_bucket(f.get("mcap_cr")),
                      "fund": {k: v for k, v in f.items() if k != "t"}})
-        print(f"{h['symbol']:<11} {ind['date']} close={ind['close']:.2f} prev={ind['prev_close']} [{source}] {sig}")
+        pass  # no per-holding log lines: Actions logs are public on a public repo
 
         key = f"{h.get('broker', 'Kite')}:{h['symbol']}"
         fs = state.setdefault("first_seen", {})

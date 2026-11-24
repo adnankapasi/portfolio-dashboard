@@ -30,7 +30,7 @@ def send(text):
     text = text.replace("</pre>\n\n", "</pre>\n")  # a table already ends its own line
     SENT.append(text)
     if not TOKEN or not CHAT:
-        print("Telegram not configured (TELEGRAM_TOKEN / TELEGRAM_CHAT_ID). Message would be:\n" + text)
+        print("Telegram not configured (TELEGRAM_TOKEN / TELEGRAM_CHAT_ID). Message not printed: Actions logs are public.")
         return False
     import requests
     parts, cur = [], ""
@@ -365,7 +365,7 @@ def chatid():
     if not ids:
         print("No messages found. Open your bot in Telegram, send it 'hi', then run this again.")
     for i, n in ids.items():
-        print(f"Chat ID: {i}   (from {n})  -> save this as the TELEGRAM_CHAT_ID secret")
+        print(f"Chat ID: {i}  -> save this as the TELEGRAM_CHAT_ID secret, then delete this run's log (logs are public)")
 
 
 def main():
