@@ -1,6 +1,6 @@
 """Telegram alerts for the dashboard. Percentages only: no rupee amounts are ever sent.
 
-usage: python scripts/alerts.py evening | morning | weekly | ipo | failure | test | chatid
+usage: python scripts/alerts.py evening | morning | weekly | ipo | listing | failure | test | chatid
 Secrets: TELEGRAM_TOKEN, TELEGRAM_CHAT_ID, DASHBOARD_PASSWORD (and DASHBOARD_URL, optional).
 """
 import html
@@ -376,6 +376,7 @@ def main():
         ok = send(head("✅", "Dashboard alerts are connected", "You're all set")
                   + "\n\n<b>What you'll get</b>\n• 🌅 Morning brief · 8:45 AM, Mon–Fri\n• ⚡ Action alerts · after 4:45 PM, only when something changes"
                   + "\n• 🆕 IPO last-day check · 3 PM, only when an IPO closes that day"
+                  + "\n• 🔔 IPO listing · 10:07 AM on listing days, close at 4:45 PM"
                   + "\n• 📊 Daily summary · after 4:45 PM\n• 📅 Weekly review · Saturday 9 AM" + footer())
         sys.exit(0 if ok else 1)
     if mode == "failure":
@@ -387,6 +388,13 @@ def main():
         pw = os.environ.get("DASHBOARD_PASSWORD")
         st = read_enc("state.enc.json", pw, {}) or {}
         if ipo.run(st, send, head, section, table, e, footer, pc):
+            write_enc("state.enc.json", st, pw)
+        return
+    if mode == "listing":  # 10:07 AM: mainboard IPOs listing today
+        import ipo
+        pw = os.environ.get("DASHBOARD_PASSWORD")
+        st = read_enc("state.enc.json", pw, {}) or {}
+        if ipo.run_listing(st, send, head, section, table, e, footer, pc):
             write_enc("state.enc.json", st, pw)
         return
     # GitHub can delay scheduled runs by hours: never send a stale brief (manual runs always send)
@@ -414,6 +422,14 @@ def main():
     if d is None:
         print("No dashboard data yet."); return
     {"evening": evening, "morning": morning, "weekly": weekly}[mode](d, st, cfg)
+    if mode == "evening":
+        try:
+            import ipo
+            lines = ipo.evening_lines(st, pc, e)
+            if lines:
+                send(head("🔔", "IPO listing day close", now.strftime("%a, %d %b")) + "\n\n" + "\n".join(lines))
+        except Exception as ex:
+            print(f"IPO close: {ex}")
     if mode == "evening":  # only the evening run remembers what was sent (avoids repeat alerts)
         write_enc("state.enc.json", st, pw)
 

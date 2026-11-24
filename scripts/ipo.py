@@ -254,3 +254,83 @@ def run(st, send, head, section, table, e, footer, pc):
         changed = True
     st["ipo_log"] = log[-200:]
     return changed
+
+
+# ------------------------------------------------------------------ listing day (10:07 AM) and evening close
+def listings_today(s, today):
+    past = get_json(s, "/api/public-past-issues") or []
+    if isinstance(past, dict):
+        past = past.get("data") or []
+    out = []
+    for x in past:
+        if str(x.get("series") or x.get("securityType") or "").upper() in ("SME", "ST"):
+            continue
+        if pdate(x.get("listingDate")) == today:
+            out.append({"symbol": x.get("symbol"), "name": x.get("companyName") or x.get("symbol"),
+                        "price": price_band(x.get("issuePrice") or x.get("priceRange"))})
+    return out
+
+
+def quote(s, symbol):
+    q = get_json(s, f"/api/quote-equity?symbol={symbol}") or {}
+    p = q.get("priceInfo") or {}
+    o, l = num(p.get("open")), num(p.get("lastPrice"))
+    return (o if o and o == o else None), (l if l and l == l else None)
+
+
+def run_listing(st, send, head, section, table, e, footer, pc):
+    today = datetime.now(IST).date()
+    try:
+        s = nse_session()
+    except Exception as ex:
+        print(f"NSE unreachable: {ex}"); return False
+    items = listings_today(s, today)
+    if not items:
+        print(f"No mainboard IPO lists today ({today}). Nothing to send."); return False
+    log, lst = st.setdefault("ipo_log", []), st.setdefault("ipo_listings", [])
+    changed = False
+    for it in items:
+        if any(x["symbol"] == it["symbol"] and x["date"] == today.isoformat() for x in lst):
+            print(f"{it['symbol']}: already sent"); continue
+        o, last = quote(s, it["symbol"])
+        if not o or not it["price"]:
+            print(f"{it['symbol']}: no opening price yet"); continue
+        g = (o / it["price"] - 1) * 100
+        prev = next((x for x in reversed(log) if x["symbol"] == it["symbol"]), None)
+        c = (prev or {}).get("cat") or categories(get_json(s, f"/api/ipo-active-category?symbol={it['symbol']}") or {})
+        msg = head("🔔", f"Listing today: {it['name']}", datetime.now(IST).strftime("%a, %d %b · %I:%M %p"))
+        msg += f"\n\nOpened <b>{pc(g)}</b> vs issue price"
+        if last:
+            msg += f"\nSince open: {pc((last / o - 1) * 100)}"
+        hr = history_range(c.get("qib"))
+        if hr:
+            where = "✅ within range" if hr[3] <= g <= hr[4] else "⬆️ above range" if g > hr[4] else "⬇️ below range"
+            msg += f"\n\nExpected from QIB {fx(c.get('qib'))}: {pc(hr[3], 0)} to {pc(hr[4], 0)} · {where}"
+        if c:
+            msg += f"\nSubscription: QIB {fx(c.get('qib'))} · HNI {fx(c.get('hni'))} · Retail {fx(c.get('retail'))}"
+        msg += "\n\n<i>Facts only, not investment advice.</i>" + footer()
+        send(msg)
+        lst.append({"symbol": it["symbol"], "name": it["name"], "date": today.isoformat(), "price": it["price"],
+                    "open": round(g, 1), "close": None, "qib": c.get("qib")})
+        if prev is not None:
+            prev["listing"] = {"date": today.isoformat(), "open": round(g, 1), "close": None}
+        changed = True
+    st["ipo_listings"] = lst[-200:]
+    return changed
+
+
+def evening_lines(st, pc, e):
+    """Called by the 4:41 PM run: listing-day close for today's listings (Yahoo after the close)."""
+    today = datetime.now(IST).date().isoformat()
+    lines = []
+    for x in st.get("ipo_listings", []):
+        if x["date"] != today or x.get("close") is not None:
+            continue
+        g = listing_gain(x["symbol"], x["price"])
+        if g and g["date"] == today:
+            x["close"] = g["close"]
+            for y in st.get("ipo_log", []):
+                if y["symbol"] == x["symbol"] and y.get("listing"):
+                    y["listing"]["close"] = g["close"]
+            lines.append(f"• {e(x['name'])}: opened {pc(x['open'])}, closed <b>{pc(g['close'])}</b>")
+    return lines
