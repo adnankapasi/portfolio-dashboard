@@ -2,8 +2,9 @@ name: Update dashboard
 
 on:
   schedule:
-    # 11:11 UTC = 4:41 PM IST, Monday-Friday (after NSE close); odd minute = less GitHub queueing
-    - cron: "11 11 * * 1-5"
+    # Backup only (cron-job.org starts it on time at 6:45 PM IST). 13:17 UTC = 6:47 PM IST, Mon-Fri,
+    # after NSE has published the day's price file.
+    - cron: "17 13 * * 1-5"
   push:
     # runs right after you import new holdings from the dashboard
     paths: ["holdings.enc.json"]
