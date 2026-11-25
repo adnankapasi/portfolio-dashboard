@@ -143,6 +143,7 @@ def evening(d, st, cfg):
         send(msg + footer())
 
     if st.get("summary_sent") == d["price_date"]:
+        print(f"Daily summary for {d['price_date']} was already sent, and no new prices since. Nothing to send.")
         return  # summary already sent for this trading day (e.g. a re-run after an import)
     s = d["summary"]
     msg = head("📊", "Daily summary", nice_date(d["price_date"]))
@@ -374,10 +375,10 @@ def main():
         return chatid()
     if mode == "test":
         ok = send(head("✅", "Dashboard alerts are connected", "You're all set")
-                  + "\n\n<b>What you'll get</b>\n• 🌅 Morning brief · 8:45 AM, Mon–Fri\n• ⚡ Action alerts · after 4:45 PM, only when something changes"
+                  + "\n\n<b>What you'll get</b>\n• 🌅 Morning brief · 8:45 AM, Mon–Fri\n• ⚡ Action alerts · after 6:45 PM, only when something changes"
                   + "\n• 🆕 IPO last-day check · 3 PM, only when an IPO closes that day"
-                  + "\n• 🔔 IPO listing · 10:07 AM on listing days, close at 4:45 PM"
-                  + "\n• 📊 Daily summary · after 4:45 PM\n• 📅 Weekly review · Saturday 9 AM" + footer())
+                  + "\n• 🔔 IPO listing · 10:07 AM on listing days, close at 6:45 PM"
+                  + "\n• 📊 Daily summary · after 6:45 PM\n• 📅 Weekly review · Saturday 9 AM" + footer())
         sys.exit(0 if ok else 1)
     if mode == "failure":
         send(head("❗", "Dashboard update failed", datetime.now(IST).strftime("%a, %d %b %Y"))
