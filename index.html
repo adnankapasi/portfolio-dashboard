@@ -847,7 +847,11 @@ async function parseFile(file) {
 async function gh(path, opts = {}) {
   const r = await fetch(`https://api.github.com/repos/${repoInfo()}/${path}`, {...opts, headers: {Authorization: `Bearer ${store.get("dash_token")}`,
     Accept: "application/vnd.github+json", ...(opts.headers || {})}});
-  if (!r.ok) throw new Error(`GitHub said ${r.status}. ${r.status === 401 || r.status === 403 || r.status === 404 ? "Check your token and its repository access." : ""}`);
+  if (!r.ok) {
+    let why = ""; try { why = (await r.json()).message || ""; } catch (e) {}
+    const step = (opts.method || "GET") === "GET" ? "reading" : "saving";
+    throw new Error(`GitHub said ${r.status} while ${step} ${path.split("?")[0]}${why ? ": " + why : ""}. ${r.status === 401 || r.status === 403 || r.status === 404 ? "Check your token and its repository access." : ""}`);
+  }
   return r.json();
 }
 let PARSED = null;
